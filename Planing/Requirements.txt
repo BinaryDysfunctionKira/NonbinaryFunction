@@ -1,0 +1,44 @@
+NonbinaryFunction
+
+Assemblies = Groups
+
+Description:
+	The application at hand is made for organizing assemblies, the whole team, and specific functions.
+
+Dependencies:
+	Must-Haves:
+		- Accounts (Given username, Password, To-Do's, Administration, Connect to personal Google Drive/Calendar)
+		- Admin can see every 
+		- Assembly Vaults/Personal Vaults
+		- MS Teams like application
+		- Chats (Announcements, private chats)
+		- ENCRYPT DATA!!!
+		- Calendar
+		- Log out when application is closed
+		- Some Teams already added (Admin, Members, Crew, Security, create own Assemblies)
+		- For new Assemblies make request that must be approved by FA and requester becomes AA
+		- Documentation/Help
+		- Good UX-UI
+		- Registration for events/concerts (check in database and check tickets)
+		- Send tickets to devs for more functions
+
+	Nice-To-Haves:
+		- Automatic log-out after 10min when afk
+		- Direct connection to Google Drive via Application
+
+
+Abbreviations for Assemblies/LogIn:
+(Full Admin)
+- FA_KS
+- FA_KDS
+(Assembly Admin)
+- AA_LB
+- AA_BA
+(Band Member)
+- BM_TS
+- BM_JF
+- BM_LW
+- BM_EW
+(Band Crew)
+- BC_EH
+(Security Group)
