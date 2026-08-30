@@ -132,7 +132,7 @@ public class PasswordFrame {
                     JSONConfigurations.addAccount(usrName, Config.hashPassword(new String(pswd)));
                 } catch (IOException e1) {
                     // TODO Auto-generated catch block
-                    e1.printStackTrace();
+
                 }
             }
 
@@ -236,7 +236,6 @@ public class PasswordFrame {
                         } catch (IOException ex) {
                             System.getLogger(PasswordFrame.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
                             JOptionPane.showMessageDialog(null, "Fehler beim Löschen: " + ex.getMessage(), "Fehler", JOptionPane.ERROR_MESSAGE);
-                            ex.printStackTrace();
                             return; // don't continue as if setup succeeded
                         }
                         Main.isServerNew = true;
@@ -264,7 +263,6 @@ public class PasswordFrame {
                             } catch (IOException ex) {
                                 System.getLogger(PasswordFrame.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
                                 JOptionPane.showMessageDialog(null, "Fehler beim Löschen: " + ex.getMessage(), "Fehler", JOptionPane.ERROR_MESSAGE);
-                                ex.printStackTrace();
                                 return; // don't continue as if setup succeeded
                             }
                             Main.isServerNew = true;
