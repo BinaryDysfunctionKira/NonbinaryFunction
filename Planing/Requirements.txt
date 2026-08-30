@@ -42,3 +42,29 @@ Abbreviations for Assemblies/LogIn:
 (Band Crew)
 - BC_EH
 (Security Group)
+
+Tickets require full name
+
+Server-Structure:
+- Directory
+	- server-config.properties
+	- assemblies
+		- assembly1
+			- assembly-config.properties
+		- assembly2
+			- assembly-config.properties
+	- chats
+		- ID_ABC+ID_DEF(1).txt
+	- announcements
+		- announcement_29-08-2026.txt
+		- announcement_30-08-2026.txt
+	- concerts
+		- concert_31-08-2026.json
+	- users
+		- accounts.json
+		- ID_ABC
+			- details.dat
+			- personal-vault
+		- ID_DEF
+			- details.dat
+			- personal-vault
