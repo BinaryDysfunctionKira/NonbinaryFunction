@@ -75,7 +75,7 @@ public class Config {
         saveUsr();
     }
     public String loadServerPath() {
-        return usrProperties.getProperty(KEY_SERVER_DIR, null);
+        return usrProperties.getProperty(KEY_SERVER_DIR);
     }
 
     private void loadServerProperties() {

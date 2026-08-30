@@ -31,9 +31,17 @@ public class PasswordFrame {
     public static JFrame frame;
 
     private void start() {
-        Main.serverPath = Main.config.loadServerPath();
-        Main.ownerSet = Config.hasServerConfig(new File(Main.serverPath));
-        Main.isServerNew = !Config.hasServerConfig(new File(Main.serverPath));
+        System.out.println(Main.serverPath);
+        if (Config.hasServerConfig(new File(Main.serverPath))) {
+            Main.ownerSet = Config.hasServerConfig(new File(Main.serverPath));
+            Main.isServerNew = !Config.hasServerConfig(new File(Main.serverPath));
+            System.out.println("Server Connected");
+            File servername = new File(Main.serverPath);
+            Main.serverName = servername.getName();
+        } else {
+            Main.serverName = "";
+            System.out.println("No Server");
+        }
     }
 
     public void startup() {
@@ -68,6 +76,7 @@ public class PasswordFrame {
         ));
         userField.setBackground(Color.WHITE);
         userField.setForeground(Color.BLACK);
+        userField.setCaretColor(Color.BLACK);
 
         JLabel passwordText = new JLabel("Passwort");
         passwordText.setAlignmentX(Container.CENTER_ALIGNMENT);
@@ -86,6 +95,7 @@ public class PasswordFrame {
         ));
         passwordField.setBackground(Color.WHITE);
         passwordField.setForeground(Color.BLACK);
+        passwordField.setCaretColor(Color.BLACK);
 
         JLabel emptyLabel = new JLabel(" ");
         emptyLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 6, 0));
@@ -145,7 +155,7 @@ public class PasswordFrame {
             }
 
             try {
-                if (areAccountDetailsCorrect(usrName, pswd)) {
+                if (areAccountDetailsCorrect(usrName, pswd) && Config.hasServerConfig(new File(Main.serverPath))) {
                     // Log User in with Account Details
                     errorMessage.setVisible(false);
                     Main.loggedInAccount = JSONConfigurations.logInAccount(usrName, Config.hashPassword(Arrays.toString(pswd)));
@@ -210,8 +220,8 @@ public class PasswordFrame {
             directoryChooser.setDialogTitle("Server auswählen");
             int returnVal = directoryChooser.showOpenDialog(null);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-                Main.serverPath = directoryChooser.getSelectedFile().getPath();
-                File path = new File(Main.serverPath);
+                String directory = directoryChooser.getSelectedFile().getPath();
+                File path = new File(directory);
                 if (path.isDirectory() && path.list().length == 0 && Config.hasServerConfig(path) == false) {
                     int result = JOptionPane.showConfirmDialog(null, "Kein Server in dem ausgewähltem Ordner vorhanden. Einen neuen erstellen?", "Kein Server gefunden",
                         JOptionPane.YES_NO_OPTION, 
@@ -222,6 +232,7 @@ public class PasswordFrame {
                         System.out.println("Server wird erstellt.");
                         try {
                             Config.setupServer(path);
+                            Main.serverPath = directory;
                         } catch (IOException ex) {
                             System.getLogger(PasswordFrame.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
                             JOptionPane.showMessageDialog(null, "Fehler beim Löschen: " + ex.getMessage(), "Fehler", JOptionPane.ERROR_MESSAGE);
@@ -249,6 +260,7 @@ public class PasswordFrame {
                             System.out.println("Server wird erstellt.");
                             try {
                                 Config.setupServer(path);
+                                Main.serverPath = directory;
                             } catch (IOException ex) {
                                 System.getLogger(PasswordFrame.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
                                 JOptionPane.showMessageDialog(null, "Fehler beim Löschen: " + ex.getMessage(), "Fehler", JOptionPane.ERROR_MESSAGE);
@@ -264,8 +276,6 @@ public class PasswordFrame {
                         System.out.println("Server-Auswahl abgebrochen");
                         return;
                     }
-                } else if (Config.hasServerConfig(path)) {
-                    
                 }
 
                 Main.serverName = directoryChooser.getSelectedFile().getName();

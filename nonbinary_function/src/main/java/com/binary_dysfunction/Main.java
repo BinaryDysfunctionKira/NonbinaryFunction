@@ -31,5 +31,6 @@ public class Main {
         serverPath = config.loadServerPath();
         File serverDir = new File(serverPath);
         serverName = serverDir.getName();
+        System.out.println("User Config loaded.");
     }
 }

@@ -1,0 +1,63 @@
+package com.binary_dysfunction.components;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+import com.binary_dysfunction.Account;
+import com.binary_dysfunction.Main;
+
+public class TopBar extends JPanel {
+
+    public TopBar(JFrame currentFrame) {
+
+        JButton homeButton = new JButton(Component.geticon("home.png"));
+        homeButton.setPreferredSize(new Dimension(50, 50));
+        homeButton.setToolTipText("Home");
+        homeButton.setBackground(null);
+        homeButton.setBorder(null);
+        homeButton.setOpaque(true);
+
+        JButton accountButton = new JButton(Main.loggedInAccount.username, Component.scaleImage(Main.loggedInAccount.profilePicturePath, 40));
+        accountButton.setToolTipText("Account Details");
+        accountButton.setFont(new Font("Arial", Font.PLAIN, 13));
+        accountButton.setBackground(new Color(20, 20, 20));
+        accountButton.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 35));
+        
+
+        JButton logoutButton = new JButton(Component.geticon("logout.png"));
+        logoutButton.setToolTipText("Log out");
+        logoutButton.setPreferredSize(new Dimension(40, 40));
+        logoutButton.setBackground(new Color(128, 37, 37));
+        logoutButton.addActionListener(e -> {
+            Account.logOut(currentFrame);
+        });
+
+        JPanel accountPanel = new JPanel(new BorderLayout());
+        accountPanel.setBackground(new Color(20, 20, 20));
+        accountPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        accountPanel.add(accountButton, BorderLayout.WEST);
+        accountPanel.add(logoutButton, BorderLayout.EAST);
+
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.setBackground(new Color(10, 10, 10));
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        contentPanel.add(homeButton, BorderLayout.WEST);
+        contentPanel.add(accountPanel, BorderLayout.EAST);
+
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(10, 10, 10));
+        mainPanel.add(contentPanel);
+        
+
+        this.setLayout(new BorderLayout());
+        this.add(mainPanel);
+    }
+
+}

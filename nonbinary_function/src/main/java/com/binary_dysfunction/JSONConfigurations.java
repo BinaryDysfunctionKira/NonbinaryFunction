@@ -1,5 +1,6 @@
 package com.binary_dysfunction;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,6 +45,7 @@ public class JSONConfigurations {
         JSONObject newAccount = new JSONObject();
         newAccount.put("username", username);
         newAccount.put("passwordHash", passwordHash);
+        newAccount.put("fullName", username);
         newAccount.put("description", "");
         newAccount.put("profilePicturePath", "nonbinary_function\\src\\main\\resources\\BinaryDysfunctionLogo.png");
         String uid = Config.hashPassword(Integer.toString(accounts.length()));
@@ -52,6 +54,9 @@ public class JSONConfigurations {
         accounts.put(newAccount);
 
         Files.writeString(ACCOUNT_PATH, accounts.toString(4));
+
+        File privateVault = new File(Main.serverPath + "/users/" + username);
+        privateVault.mkdirs();
 
         if (Main.isServerNew && !Main.ownerSet) {
             Main.config.saveServerOwner(uid);
@@ -78,10 +83,11 @@ public class JSONConfigurations {
             if (acc.getString("username").equals(username)) {
                 System.out.println("Logged in: " + username);
                 
+                String fullName = acc.getString("fullName");
                 String description = acc.getString("description");
                 String profilePicturePath = acc.getString("profilePicturePath");
                 String uid = acc.getString("uid");
-                return new Account(username, passwordHash, description, profilePicturePath, uid);
+                return new Account(username, passwordHash, fullName, description, profilePicturePath, uid);
             }
         }
 
