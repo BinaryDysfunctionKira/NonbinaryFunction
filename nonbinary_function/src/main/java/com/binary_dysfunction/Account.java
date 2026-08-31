@@ -27,7 +27,12 @@ public class Account {
 
     @Override
     public String toString() {
-         return "\nUsername: " + username + ",\nPasswordHash: " + passwordHash + "\nFull Name: " + fullName + ",\nDescription: " + description + ",\nUID: " + uid;
+        String output = "\nUsername: " + username + ",\nPasswordHash: " + passwordHash + "\nFull Name: " + fullName + ",\nDescription: " + description + ",\nUID: " + uid + ", \nAssemblies: ";
+        for (Object assembly : assemblies) {
+            output += "\n-'" + assembly.toString() + "'";
+        }
+        output += "\n";
+        return output;
     }
 
     public static void logOut(JFrame currentFrame) {
