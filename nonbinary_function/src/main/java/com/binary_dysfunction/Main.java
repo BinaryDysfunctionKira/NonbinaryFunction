@@ -28,7 +28,11 @@ public class Main {
     }
 
     private static void loadSavedUsrConfig() {
-        serverPath = config.loadServerPath();
+        try {
+            serverPath = config.loadServerPath();
+        } catch (Exception e) {
+            config.saveServerPath(serverPath);
+        }
         File serverDir = new File(serverPath);
         serverName = serverDir.getName();
         System.out.println("User Config loaded.");

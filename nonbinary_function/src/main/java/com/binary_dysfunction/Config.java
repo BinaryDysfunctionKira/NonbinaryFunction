@@ -128,9 +128,12 @@ public class Config {
     }
 
     public static boolean hasServerConfig(final File dir) {
-        String[] files = dir.list();
-        for (String file : files) {
-            if (file.equals("server-config.properties")) return true;
+        if (!Main.serverPath.equals("")) {
+            String[] files = dir.list();
+            for (String file : files) {
+                if (file.equals("server-config.properties")) return true;
+            }
+            return false;
         }
         return false;
     }
