@@ -66,9 +66,7 @@ public class ProfilePanel extends JScrollPane {
                     pfp.setIcon(Component.scaleImage(Main.loggedInAccount.profilePicturePath, 200));
                     hf.topBar.accountButton.setIcon(Component.scaleImage(Main.loggedInAccount.profilePicturePath, 40));
 
-                } catch (IOException e1) {
-                    e1.printStackTrace(); // don't swallow this silently while debugging
-                }
+                } catch (IOException e1) {}
             }
         });
 
