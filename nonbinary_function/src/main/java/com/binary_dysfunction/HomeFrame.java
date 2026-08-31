@@ -11,6 +11,7 @@ import com.binary_dysfunction.components.TopBar;
 public class HomeFrame {
 
     public static JFrame frame;
+    public static JPanel contentPanel;
 
     public void startup() {
 
@@ -23,12 +24,13 @@ public class HomeFrame {
         TopBar topBar = new TopBar(frame);
         SideBar sideBar = new SideBar();
 
-        JPanel contentPanel = new JPanel();
+        contentPanel = new HomePanel(frame);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.add(contentPanel);
         mainPanel.add(topBar, BorderLayout.NORTH);
         mainPanel.add(sideBar, BorderLayout.WEST);
+        mainPanel.add(contentPanel);
 
         frame.getContentPane().add(mainPanel);
     }

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 
@@ -50,6 +51,12 @@ public class JSONConfigurations {
         newAccount.put("profilePicturePath", "nonbinary_function\\src\\main\\resources\\BinaryDysfunctionLogo.png");
         String uid = Config.hashPassword(Integer.toString(accounts.length()));
         newAccount.put("uid", uid);
+        JSONArray assembliesArray = new JSONArray();
+        if (Main.isServerNew && !Main.ownerSet) {
+            assembliesArray.put("Owner");
+            assembliesArray.put("Admin");
+        }
+        newAccount.put("assemblies", assembliesArray);
 
         accounts.put(newAccount);
 
@@ -87,7 +94,8 @@ public class JSONConfigurations {
                 String description = acc.getString("description");
                 String profilePicturePath = acc.getString("profilePicturePath");
                 String uid = acc.getString("uid");
-                return new Account(username, passwordHash, fullName, description, profilePicturePath, uid);
+                List<Object> assemblies = acc.getJSONArray("assemblies").toList();
+                return new Account(username, passwordHash, fullName, description, profilePicturePath, uid, assemblies);
             }
         }
 

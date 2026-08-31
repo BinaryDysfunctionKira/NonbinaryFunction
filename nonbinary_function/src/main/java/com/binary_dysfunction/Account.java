@@ -1,5 +1,7 @@
 package com.binary_dysfunction;
 
+import java.util.List;
+
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
@@ -11,14 +13,16 @@ public class Account {
     public String description;
     public String profilePicturePath;
     public final String uid;
+    public List<Object> assemblies;
 
-    public Account(String username, String passwordHash, String fullName, String description, String profilePicturePath, String uid) {
+    public Account(String username, String passwordHash, String fullName, String description, String profilePicturePath, String uid, List<Object> assemblies) {
         this.username = username;
         this.passwordHash = passwordHash;
         this.fullName = fullName;
         this.description = description;
         this.profilePicturePath = profilePicturePath;
         this.uid = uid;
+        this.assemblies = assemblies;
     }
 
     @Override
