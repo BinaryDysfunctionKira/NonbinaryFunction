@@ -12,10 +12,10 @@ public class ProfilePanel extends JPanel {
 
     public ProfilePanel() {
 
-        JLabel headerTitle = new JLabel("Startseite");
+        JLabel headerTitle = new JLabel("Profil");
         headerTitle.setFont(new Font("Arial", Font.BOLD, 32));
         headerTitle.setAlignmentX(CENTER_ALIGNMENT);
-        JLabel headerSubtitle = new JLabel("Guten Tag, " + Main.loggedInAccount.fullName + "!");
+        JLabel headerSubtitle = new JLabel("Profilinformationen ändern lassen");
         headerSubtitle.setFont(new Font("Arial", Font.BOLD, 16));
         headerSubtitle.setForeground(new Color(180, 180, 180));
         headerSubtitle.setAlignmentX(CENTER_ALIGNMENT);
