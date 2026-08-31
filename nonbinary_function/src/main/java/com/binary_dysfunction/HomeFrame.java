@@ -12,6 +12,7 @@ public class HomeFrame {
 
     public JFrame frame;
     public JPanel contentPanel = new JPanel(new BorderLayout());
+    public TopBar topBar;
 
     public void startup() {
 
@@ -21,7 +22,7 @@ public class HomeFrame {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
-        TopBar topBar = new TopBar(this);
+        topBar = new TopBar(this);
         SideBar sideBar = new SideBar();
 
         contentPanel.add(new HomePanel(this));
@@ -43,7 +44,7 @@ public class HomeFrame {
 
     public void setProfilePanel() {
         contentPanel.removeAll();
-        contentPanel.add(new ProfilePanel());
+        contentPanel.add(new ProfilePanel(this));
         contentPanel.revalidate();
         contentPanel.repaint();
     }

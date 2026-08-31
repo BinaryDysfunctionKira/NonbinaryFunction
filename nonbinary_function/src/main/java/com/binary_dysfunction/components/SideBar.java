@@ -9,6 +9,8 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import com.binary_dysfunction.Main;
+
 public class SideBar extends JPanel {
 
     public SideBar() {
@@ -59,10 +61,15 @@ public class SideBar extends JPanel {
         eventButton.setBackground(null);
         eventButton.setBorder(null);
 
+        JButton adminButton = new JButton(Component.geticon("admin.png"));
+        adminButton.setToolTipText("Admin Zone");
+        adminButton.setPreferredSize(new Dimension(40, 40));
+
         JPanel bottomButtons = new JPanel(new GridLayout(0, 1, 0, 10));
         bottomButtons.setBackground(new Color(19, 39, 29));
         bottomButtons.setBorder(BorderFactory.createEmptyBorder(50, 0, 0, 0));
         bottomButtons.add(eventButton);
+        if (Main.loggedInAccount.assemblies.contains("Admin") || Main.loggedInAccount.assemblies.contains("Owner")) bottomButtons.add(adminButton);
 
         JPanel fillPanel = new JPanel();
         fillPanel.setBackground(new Color(19, 39, 29));

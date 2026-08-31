@@ -15,6 +15,8 @@ import com.binary_dysfunction.Main;
 
 public class TopBar extends JPanel {
 
+    public JButton accountButton;
+
     public TopBar(HomeFrame currentFrame) {
 
         JButton homeButton = new JButton(Component.geticon("home.png"));
@@ -28,7 +30,7 @@ public class TopBar extends JPanel {
             System.out.println("Home-Panel loaded");
         });
 
-        JButton accountButton = new JButton(Main.loggedInAccount.username, Component.scaleImage(Main.loggedInAccount.profilePicturePath, 40));
+        accountButton = new JButton(Main.loggedInAccount.username, Component.scaleImage(Main.loggedInAccount.profilePicturePath, 40));
         accountButton.setToolTipText("Account Details");
         accountButton.setFont(new Font("Arial", Font.PLAIN, 13));
         accountButton.setBackground(new Color(20, 20, 20));

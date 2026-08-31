@@ -3,7 +3,6 @@ package com.binary_dysfunction;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -63,18 +62,46 @@ public class JSONConfigurations {
 
         Files.writeString(ACCOUNT_PATH, accounts.toString(4));
 
-        File privateVault = new File(Main.serverPath + "/users/." + username + "/.user-data");
+        File privateVault = new File(Main.serverPath + "/users/" + username + "/user-data/");
         privateVault.mkdirs();
-        Path path = Paths.get(Main.serverPath + "/users/." + username);
-        Files.setAttribute(path, "dos:hidden", Boolean.TRUE, LinkOption.NOFOLLOW_LINKS);
-        Path path2 = Paths.get(privateVault.getPath());
-        Files.setAttribute(path2, "dos:hidden", Boolean.TRUE, LinkOption.NOFOLLOW_LINKS);
+        // Path path = Paths.get(Main.serverPath + "/users/." + username);
+        // Files.setAttribute(path, "dos:hidden", Boolean.TRUE, LinkOption.NOFOLLOW_LINKS);
+        // Path path2 = Paths.get(privateVault.getPath());
+        // Files.setAttribute(path2, "dos:hidden", Boolean.TRUE, LinkOption.NOFOLLOW_LINKS);
         
 
         if (Main.isServerNew && !Main.ownerSet) {
             Main.config.saveServerOwner(uid);
             Main.ownerSet = true;
         }
+    }
+
+    public static void updateAccountField(String username, String fieldName, String newValue) throws IOException {
+
+        if (!Files.exists(ACCOUNT_PATH)) {
+            return; // nothing to update
+        }
+
+        String content = Files.readString(ACCOUNT_PATH);
+        JSONArray accounts = new JSONArray(content);
+
+        boolean found = false;
+
+        for (int i = 0; i < accounts.length(); i++) {
+            JSONObject acc = accounts.getJSONObject(i);
+            if (acc.getString("username").equals(username)) {
+                acc.put(fieldName, newValue); // overwrites the existing key, or adds it if missing
+                found = true;
+                break; // stop once found, assuming usernames are unique
+            }
+        }
+
+        if (!found) {
+            System.out.println("Account not found: " + username);
+            return;
+        }
+
+        Files.writeString(ACCOUNT_PATH, accounts.toString(4));
     }
 
     public static Account logInAccount(String username, String passwordHash) throws IOException {
