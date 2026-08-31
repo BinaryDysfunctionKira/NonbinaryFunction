@@ -8,18 +8,18 @@ import java.awt.Font;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import com.binary_dysfunction.Account;
+import com.binary_dysfunction.HomeFrame;
 import com.binary_dysfunction.Main;
 
 public class UserCard extends JPanel {
 
     private final Color backgroundColor = new Color(80, 80, 80);
 
-    public UserCard(JFrame currentFrame) {
+    public UserCard(HomeFrame currentFrame) {
 
         JLabel pfp = new JLabel(Component.scaleImage(Main.loggedInAccount.profilePicturePath, 40));
         pfp.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
@@ -47,6 +47,10 @@ public class UserCard extends JPanel {
         JButton profileButton = new JButton("Profil");
         profileButton.setBackground(new Color(51, 134, 55));
         profileButton.setPreferredSize(new Dimension(150, 40));
+        profileButton.addActionListener(e -> {
+            currentFrame.setProfilePanel();
+            System.out.println("Profile-Panel loaded");
+        });
 
         JPanel profileButtonPanel = new JPanel();
         profileButtonPanel.setBackground(backgroundColor);
@@ -57,7 +61,7 @@ public class UserCard extends JPanel {
         logoutButton.setPreferredSize(new Dimension(40, 40));
         logoutButton.setBackground(new Color(128, 37, 37));
         logoutButton.addActionListener(e -> {
-            Account.logOut(currentFrame);
+            Account.logOut(currentFrame.frame);
         });
 
         JPanel logoutButtonPanel = new JPanel();

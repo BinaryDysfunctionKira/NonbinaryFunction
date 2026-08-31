@@ -11,7 +11,7 @@ import com.binary_dysfunction.components.TopBar;
 public class HomeFrame {
 
     public JFrame frame;
-    public JPanel contentPanel;
+    public JPanel contentPanel = new JPanel(new BorderLayout());
 
     public void startup() {
 
@@ -24,14 +24,27 @@ public class HomeFrame {
         TopBar topBar = new TopBar(this);
         SideBar sideBar = new SideBar();
 
-        contentPanel = new HomePanel(frame);
-
+        contentPanel.add(new HomePanel(this));
+        
         JPanel mainPanel = new JPanel(new BorderLayout());
-        mainPanel.add(contentPanel);
         mainPanel.add(topBar, BorderLayout.NORTH);
         mainPanel.add(sideBar, BorderLayout.WEST);
         mainPanel.add(contentPanel);
 
         frame.getContentPane().add(mainPanel);
+    }
+
+    public void setHomePanel() {
+        contentPanel.removeAll();
+        contentPanel.add(new HomePanel(this));
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+    public void setProfilePanel() {
+        contentPanel.removeAll();
+        contentPanel.add(new ProfilePanel());
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
 }

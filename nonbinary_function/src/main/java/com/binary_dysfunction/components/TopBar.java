@@ -11,7 +11,6 @@ import javax.swing.JPanel;
 
 import com.binary_dysfunction.Account;
 import com.binary_dysfunction.HomeFrame;
-import com.binary_dysfunction.HomePanel;
 import com.binary_dysfunction.Main;
 
 public class TopBar extends JPanel {
@@ -25,7 +24,7 @@ public class TopBar extends JPanel {
         homeButton.setBorder(null);
         homeButton.setOpaque(true);
         homeButton.addActionListener(e -> {
-            currentFrame.contentPanel.add(new HomePanel(currentFrame.frame));
+            currentFrame.setHomePanel();
             System.out.println("Home-Panel loaded");
         });
 
@@ -34,6 +33,10 @@ public class TopBar extends JPanel {
         accountButton.setFont(new Font("Arial", Font.PLAIN, 13));
         accountButton.setBackground(new Color(20, 20, 20));
         accountButton.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 35));
+        accountButton.addActionListener(e -> {
+            currentFrame.setProfilePanel();
+            System.out.println("Profile-Panel loaded");
+        });
         
 
         JButton logoutButton = new JButton(Component.geticon("logout.png"));

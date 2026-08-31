@@ -27,7 +27,7 @@ public class Account {
 
     @Override
     public String toString() {
-        String output = "\nUsername: " + username + ",\nPasswordHash: " + passwordHash + "\nFull Name: " + fullName + ",\nDescription: " + description + ",\nUID: " + uid + ", \nAssemblies: ";
+        String output = "\nUsername: " + username + ",\nPasswordHash: " + passwordHash + "\nFull Name: " + fullName + "\nPFP_Path: " + profilePicturePath + ",\nDescription: " + description + ",\nUID: " + uid + ", \nAssemblies: ";
         for (Object assembly : assemblies) {
             output += "\n-'" + assembly.toString() + "'";
         }
