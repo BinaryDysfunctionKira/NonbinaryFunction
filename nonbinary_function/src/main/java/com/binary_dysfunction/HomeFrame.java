@@ -10,8 +10,8 @@ import com.binary_dysfunction.components.TopBar;
 
 public class HomeFrame {
 
-    public static JFrame frame;
-    public static JPanel contentPanel;
+    public JFrame frame;
+    public JPanel contentPanel;
 
     public void startup() {
 
@@ -21,7 +21,7 @@ public class HomeFrame {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
-        TopBar topBar = new TopBar(frame);
+        TopBar topBar = new TopBar(this);
         SideBar sideBar = new SideBar();
 
         contentPanel = new HomePanel(frame);

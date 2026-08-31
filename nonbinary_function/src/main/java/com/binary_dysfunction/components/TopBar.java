@@ -7,15 +7,16 @@ import java.awt.Font;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.binary_dysfunction.Account;
+import com.binary_dysfunction.HomeFrame;
+import com.binary_dysfunction.HomePanel;
 import com.binary_dysfunction.Main;
 
 public class TopBar extends JPanel {
 
-    public TopBar(JFrame currentFrame) {
+    public TopBar(HomeFrame currentFrame) {
 
         JButton homeButton = new JButton(Component.geticon("home.png"));
         homeButton.setPreferredSize(new Dimension(50, 50));
@@ -23,6 +24,10 @@ public class TopBar extends JPanel {
         homeButton.setBackground(null);
         homeButton.setBorder(null);
         homeButton.setOpaque(true);
+        homeButton.addActionListener(e -> {
+            currentFrame.contentPanel.add(new HomePanel(currentFrame.frame));
+            System.out.println("Home-Panel loaded");
+        });
 
         JButton accountButton = new JButton(Main.loggedInAccount.username, Component.scaleImage(Main.loggedInAccount.profilePicturePath, 40));
         accountButton.setToolTipText("Account Details");
@@ -36,7 +41,7 @@ public class TopBar extends JPanel {
         logoutButton.setPreferredSize(new Dimension(40, 40));
         logoutButton.setBackground(new Color(128, 37, 37));
         logoutButton.addActionListener(e -> {
-            Account.logOut(currentFrame);
+            Account.logOut(currentFrame.frame);
         });
 
         JPanel accountPanel = new JPanel(new BorderLayout());
