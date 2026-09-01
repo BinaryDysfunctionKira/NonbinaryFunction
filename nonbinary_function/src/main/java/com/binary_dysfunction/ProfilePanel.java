@@ -332,7 +332,7 @@ public class ProfilePanel extends JScrollPane {
         errorMessage.setAlignmentX(LEFT_ALIGNMENT);
         errorMessage.setFont(new Font("Arial", Font.BOLD, 14));
         errorMessage.setForeground(new Color(206, 0, 0));
-        errorMessage.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+        errorMessage.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
         errorMessage.setVisible(false);
 
         JButton passwordChangeButton = new JButton("Passwort ändern");
@@ -347,10 +347,20 @@ public class ProfilePanel extends JScrollPane {
                 try {
                     JSONConfigurations.updateAccountField(Main.loggedInAccount.username, "passwordHash", newHashedPassword);
                     System.out.println("Password changed");
+                    oldPasswordField.setText("");
+                    newPasswordField.setText("");
+                    newPasswordRepeatField.setText("");
+                    errorMessage.setVisible(false);
                 } catch (IOException e1) {
                     System.out.println("Failed changing PasswordHash");
+                    errorMessage.setText("ERROR at changing password!");
+                    errorMessage.setVisible(true);
                 }
-            } else { System.out.println("ERROR AT PASSWORD CHANGING");}
+            } else {
+                System.out.println("ERROR AT PASSWORD CHANGING");
+                errorMessage.setText("ERROR at changing password!");
+                errorMessage.setVisible(true);
+            }
         });
 
         JPanel passwordChangeButtonPanel = new JPanel();
