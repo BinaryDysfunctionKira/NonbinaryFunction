@@ -165,6 +165,7 @@ public class PasswordFrame {
                     return;
                 } else {
                     errorMessage.setText("Passwort oder Benutzername inkorrekt!");
+                    System.out.println(Config.hashPassword(Arrays.toString(pswd)));
                 }
             } catch (IOException ex) {
                 System.getLogger(PasswordFrame.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);

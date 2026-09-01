@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -22,6 +23,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -184,7 +186,7 @@ public class ProfilePanel extends JScrollPane {
         oldPasswordTitle.setAlignmentX(LEFT_ALIGNMENT);
         oldPasswordTitle.setFont(new Font("Arial", Font.BOLD, 12));
 
-        JTextField oldPasswordField = new JTextField("", JLabel.LEFT);
+        JPasswordField oldPasswordField = new JPasswordField("", JLabel.LEFT);
         oldPasswordField.setAlignmentX(LEFT_ALIGNMENT);
         oldPasswordField.setFont(new Font("Arial", Font.PLAIN, 13));
         oldPasswordField.setBackground(new Color(20, 20, 20));
@@ -337,6 +339,19 @@ public class ProfilePanel extends JScrollPane {
         passwordChangeButton.setAlignmentX(LEFT_ALIGNMENT);
         passwordChangeButton.setBackground(new Color(51, 134, 55));
         // Function of changing password
+        passwordChangeButton.addActionListener(e -> {
+            String oldPasswordHash = Config.hashPassword(Arrays.toString(oldPasswordField.getPassword()));
+            
+            if (oldPasswordHash.equals(Main.loggedInAccount.passwordHash) && newPasswordField.getText().equals(newPasswordRepeatField.getText())) {
+                String newHashedPassword = Config.hashPassword(newPasswordField.getText());
+                try {
+                    JSONConfigurations.updateAccountField(Main.loggedInAccount.username, "passwordHash", newHashedPassword);
+                    System.out.println("Password changed");
+                } catch (IOException e1) {
+                    System.out.println("Failed changing PasswordHash");
+                }
+            } else { System.out.println("ERROR AT PASSWORD CHANGING");}
+        });
 
         JPanel passwordChangeButtonPanel = new JPanel();
         passwordChangeButtonPanel.setLayout(new BoxLayout(passwordChangeButtonPanel, BoxLayout.Y_AXIS));
