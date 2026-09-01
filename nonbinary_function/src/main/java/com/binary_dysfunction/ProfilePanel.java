@@ -179,6 +179,183 @@ public class ProfilePanel extends JScrollPane {
         descriptionPanel.add(descriptionTitle);
         descriptionPanel.add(descriptionArea);
 
+
+        JLabel oldPasswordTitle = new JLabel("Altes Passwort", JLabel.LEFT);
+        oldPasswordTitle.setAlignmentX(LEFT_ALIGNMENT);
+        oldPasswordTitle.setFont(new Font("Arial", Font.BOLD, 12));
+
+        JTextField oldPasswordField = new JTextField("", JLabel.LEFT);
+        oldPasswordField.setAlignmentX(LEFT_ALIGNMENT);
+        oldPasswordField.setFont(new Font("Arial", Font.PLAIN, 13));
+        oldPasswordField.setBackground(new Color(20, 20, 20));
+        oldPasswordField.setForeground(new Color(200, 200, 200));
+        // descriptionArea.setBorder(BorderFactory.createCompoundBorder(
+        //     BorderFactory.createLineBorder(Color.BLACK),
+        //     BorderFactory.createEmptyBorder(5, 5, 2, 5)
+        // ));
+        oldPasswordField.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        oldPasswordField.setPreferredSize(new Dimension(Integer.MAX_VALUE, 36));
+        oldPasswordField.setMaximumSize(new Dimension(150, oldPasswordField.getPreferredSize().height));
+        oldPasswordField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                
+            }
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    oldPasswordField.setFocusable(false);
+                    oldPasswordField.setFocusable(true);
+                }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+        });
+
+        JPanel oldPasswordPanel = new JPanel();
+        oldPasswordPanel.setAlignmentX(LEFT_ALIGNMENT);
+        oldPasswordPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        oldPasswordPanel.setBackground(backgroundColor);
+        oldPasswordPanel.setLayout(new BoxLayout(oldPasswordPanel, BoxLayout.Y_AXIS));
+        oldPasswordPanel.add(oldPasswordTitle);
+        oldPasswordPanel.add(oldPasswordField);
+
+        JPanel passwordPanelRow1 = new JPanel();
+        passwordPanelRow1.setAlignmentX(LEFT_ALIGNMENT);
+        passwordPanelRow1.setBackground(backgroundColor);
+        passwordPanelRow1.setLayout(new BoxLayout(passwordPanelRow1, BoxLayout.X_AXIS));
+        passwordPanelRow1.add(oldPasswordPanel);
+
+
+        JLabel newPasswordTitle = new JLabel("Neues Passwort", JLabel.LEFT);
+        newPasswordTitle.setAlignmentX(LEFT_ALIGNMENT);
+        newPasswordTitle.setFont(new Font("Arial", Font.BOLD, 12));
+
+        JTextField newPasswordField = new JTextField("", JLabel.LEFT);
+        newPasswordField.setAlignmentX(LEFT_ALIGNMENT);
+        newPasswordField.setFont(new Font("Arial", Font.PLAIN, 13));
+        newPasswordField.setBackground(new Color(20, 20, 20));
+        newPasswordField.setForeground(new Color(200, 200, 200));
+        // descriptionArea.setBorder(BorderFactory.createCompoundBorder(
+        //     BorderFactory.createLineBorder(Color.BLACK),
+        //     BorderFactory.createEmptyBorder(5, 5, 2, 5)
+        // ));
+        newPasswordField.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        newPasswordField.setPreferredSize(new Dimension(Integer.MAX_VALUE, 36));
+        newPasswordField.setMaximumSize(new Dimension(150, newPasswordField.getPreferredSize().height));
+        newPasswordField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                
+            }
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    newPasswordField.setFocusable(false);
+                    newPasswordField.setFocusable(true);
+                }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+        });
+
+        JPanel newPasswordPanel = new JPanel();
+        newPasswordPanel.setAlignmentX(LEFT_ALIGNMENT);
+        newPasswordPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        newPasswordPanel.setBackground(backgroundColor);
+        newPasswordPanel.setLayout(new BoxLayout(newPasswordPanel, BoxLayout.Y_AXIS));
+        newPasswordPanel.add(newPasswordTitle);
+        newPasswordPanel.add(newPasswordField);
+
+
+        JLabel newPasswordRepeatTitle = new JLabel("Neues Passwort wiederholen", JLabel.LEFT);
+        newPasswordRepeatTitle.setAlignmentX(LEFT_ALIGNMENT);
+        newPasswordRepeatTitle.setFont(new Font("Arial", Font.BOLD, 12));
+
+        JTextField newPasswordRepeatField = new JTextField("", JLabel.LEFT);
+        newPasswordRepeatField.setAlignmentX(LEFT_ALIGNMENT);
+        newPasswordRepeatField.setFont(new Font("Arial", Font.PLAIN, 13));
+        newPasswordRepeatField.setBackground(new Color(20, 20, 20));
+        newPasswordRepeatField.setForeground(new Color(200, 200, 200));
+        // descriptionArea.setBorder(BorderFactory.createCompoundBorder(
+        //     BorderFactory.createLineBorder(Color.BLACK),
+        //     BorderFactory.createEmptyBorder(5, 5, 2, 5)
+        // ));
+        newPasswordRepeatField.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        newPasswordRepeatField.setPreferredSize(new Dimension(Integer.MAX_VALUE, 36));
+        newPasswordRepeatField.setMaximumSize(new Dimension(150, newPasswordRepeatField.getPreferredSize().height));
+        newPasswordRepeatField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                
+            }
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    newPasswordRepeatField.setFocusable(false);
+                    newPasswordRepeatField.setFocusable(true);
+                }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+        });
+
+        JPanel newPasswordRepeatPanel = new JPanel();
+        newPasswordRepeatPanel.setAlignmentX(LEFT_ALIGNMENT);
+        newPasswordRepeatPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 0, 0));
+        newPasswordRepeatPanel.setBackground(backgroundColor);
+        newPasswordRepeatPanel.setLayout(new BoxLayout(newPasswordRepeatPanel, BoxLayout.Y_AXIS));
+        newPasswordRepeatPanel.add(newPasswordRepeatTitle);
+        newPasswordRepeatPanel.add(newPasswordRepeatField);
+
+        JPanel passwordPanelRow2 = new JPanel();
+        passwordPanelRow2.setAlignmentX(LEFT_ALIGNMENT);
+        passwordPanelRow2.setBackground(backgroundColor);
+        passwordPanelRow2.setLayout(new BoxLayout(passwordPanelRow2, BoxLayout.X_AXIS));
+        passwordPanelRow2.add(newPasswordPanel);
+        passwordPanelRow2.add(newPasswordRepeatPanel);
+
+        JLabel passwordPanelTitle = new JLabel("Passwort");
+        passwordPanelTitle.setAlignmentX(LEFT_ALIGNMENT);
+        passwordPanelTitle.setFont(new Font("Arial", Font.BOLD, 20));
+        passwordPanelTitle.setForeground(new Color(160, 160, 160));
+
+        JLabel errorMessage = new JLabel("ERROR!"); // Needs to be implemented in check
+        errorMessage.setAlignmentX(LEFT_ALIGNMENT);
+        errorMessage.setFont(new Font("Arial", Font.BOLD, 14));
+        errorMessage.setForeground(new Color(206, 0, 0));
+        errorMessage.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+        errorMessage.setVisible(false);
+
+        JButton passwordChangeButton = new JButton("Passwort ändern");
+        passwordChangeButton.setAlignmentX(LEFT_ALIGNMENT);
+        passwordChangeButton.setBackground(new Color(51, 134, 55));
+        // Function of changing password
+
+        JPanel passwordChangeButtonPanel = new JPanel();
+        passwordChangeButtonPanel.setLayout(new BoxLayout(passwordChangeButtonPanel, BoxLayout.Y_AXIS));
+        passwordChangeButtonPanel.setAlignmentX(LEFT_ALIGNMENT);
+        passwordChangeButtonPanel.setBackground(backgroundColor);
+        passwordChangeButtonPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0 ,0));
+        passwordChangeButtonPanel.add(passwordChangeButton);
+
+        JPanel passwordPanel = new JPanel();
+        passwordPanel.setAlignmentX(LEFT_ALIGNMENT);
+        passwordPanel.setBackground(backgroundColor);
+        passwordPanel.setBorder(BorderFactory.createEmptyBorder(50, 0, 0, 0));
+        passwordPanel.setLayout(new BoxLayout(passwordPanel, BoxLayout.Y_AXIS));
+        passwordPanel.add(passwordPanelTitle);
+        passwordPanel.add(passwordPanelRow1);
+        passwordPanel.add(passwordPanelRow2);
+        passwordPanel.add(errorMessage);
+        passwordPanel.add(passwordChangeButtonPanel);
+
         JPanel rightSide = new JPanel();
         rightSide.setAlignmentX(LEFT_ALIGNMENT);
         rightSide.setLayout(new BoxLayout(rightSide, BoxLayout.Y_AXIS));
@@ -188,6 +365,7 @@ public class ProfilePanel extends JScrollPane {
         rightSide.add(username);
         rightSide.add(uid);
         rightSide.add(descriptionPanel);
+        rightSide.add(passwordPanel);
 
         JPanel contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBackground(backgroundColor);
