@@ -49,8 +49,12 @@ public class ProfilePanel extends JScrollPane {
             filechooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             filechooser.setDialogTitle("Profilbild auswählen");
             
-            FileNameExtensionFilter pngFilter = new FileNameExtensionFilter("PNG-Bilder (*.png)", "png");
-            filechooser.setFileFilter(pngFilter);
+            FileNameExtensionFilter imageFilter = new FileNameExtensionFilter("Bilder (*.png, *.jpg, *.jpeg, *.gif)", "png", "jpg", "jpeg", "gif");
+            // filechooser.addChoosableFileFilter(new FileNameExtensionFilter("Bilder (*.png)", "png"));
+            // filechooser.addChoosableFileFilter(new FileNameExtensionFilter("Bilder (*.jpg)", "jpg"));
+            // filechooser.addChoosableFileFilter(new FileNameExtensionFilter("Bilder (*.jpeg)", "jpeg"));
+            // filechooser.addChoosableFileFilter(new FileNameExtensionFilter("Bilder (*.gif)", "gif"));
+            filechooser.setFileFilter(imageFilter);
             filechooser.setAcceptAllFileFilterUsed(false);
 
             int result = filechooser.showOpenDialog(null);
