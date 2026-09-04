@@ -14,7 +14,7 @@ public class HomeFrame {
     public JPanel contentPanel = new JPanel(new BorderLayout());
     public TopBar topBar;
 
-    private String programName = "Nonbinary Function"; 
+    private final String programName = "Nonbinary Function"; 
 
     public void startup() {
 
