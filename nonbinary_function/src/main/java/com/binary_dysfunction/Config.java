@@ -18,6 +18,13 @@ public class Config {
     private static final File CONFIG_DIR = new File(System.getProperty("user.home"), ".nonbinary_function");
     private static final File CONFIG_FILE = new File(CONFIG_DIR, "config.properties");
 
+    public static final String ANNOUNCEMENTS_DIR = "/announcements/";
+    public static final String ASSEMBLIES_DIR = "/assemblies/";
+    public static final String CHATS_DIR = "/chats/";
+    public static final String EVENTS_DIR = "/events/";
+    public static final String USER_DIR = "/users/";
+    public static final String ACCOUNTS_DIR = "/users/accounts/";
+
     private static final String KEY_SERVER_DIR = "serverDir";
 
     private final Properties usrProperties = new Properties();
@@ -78,6 +85,7 @@ public class Config {
         return usrProperties.getProperty(KEY_SERVER_DIR);
     }
 
+
     private void loadServerProperties() {
         if (!getServerConfigFile().exists()) return;
         try (InputStreamReader reader = new InputStreamReader(new FileInputStream(getServerConfigFile()), "UTF-8")) {
@@ -113,10 +121,13 @@ public class Config {
         chats.mkdirs();
         File announcements = new File(dir.getPath() + "/announcements");
         announcements.mkdirs();
-        File concerts = new File(dir.getPath() + "/concerts");
+        File concerts = new File(dir.getPath() + "/events");
         concerts.mkdirs();
         File users = new File(dir.getPath() + "/users");
         users.mkdirs();
+
+        Main.ownerSet = false;
+        Main.isServerNew = true;
     }
     public static void deleteFolderContent(File dir) throws IOException {
         FileUtils.cleanDirectory(dir);

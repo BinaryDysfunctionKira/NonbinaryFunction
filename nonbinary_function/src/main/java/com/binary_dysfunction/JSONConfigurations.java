@@ -57,12 +57,13 @@ public class JSONConfigurations {
             assembliesArray.put("Admin");
         }
         newAccount.put("assemblies", assembliesArray);
+        newAccount.put("cloudActivated", false);
 
         accounts.put(newAccount);
 
         Files.writeString(ACCOUNT_PATH, accounts.toString(4));
 
-        File privateVault = new File(Main.serverPath + "/users/" + username + "/user-data/");
+        File privateVault = new File(Main.serverPath + Config.ACCOUNTS_DIR + username + "/user-data/");
         privateVault.mkdirs();
         // Path path = Paths.get(Main.serverPath + "/users/." + username);
         // Files.setAttribute(path, "dos:hidden", Boolean.TRUE, LinkOption.NOFOLLOW_LINKS);
@@ -76,7 +77,7 @@ public class JSONConfigurations {
         }
     }
 
-    public static void updateAccountField(String username, String fieldName, String newValue) throws IOException {
+    public static void updateAccountField(String username, String fieldName, Object newValue) throws IOException {
 
         if (!Files.exists(ACCOUNT_PATH)) {
             return; // nothing to update
@@ -128,7 +129,8 @@ public class JSONConfigurations {
                 String profilePicturePath = acc.getString("profilePicturePath");
                 String uid = acc.getString("uid");
                 List<Object> assemblies = acc.getJSONArray("assemblies").toList();
-                return new Account(username, passwordHash, fullName, description, profilePicturePath, uid, assemblies);
+                boolean cloudActivated = acc.getBoolean("cloudActivated");
+                return new Account(username, passwordHash, fullName, description, profilePicturePath, uid, assemblies, cloudActivated);
             }
         }
 

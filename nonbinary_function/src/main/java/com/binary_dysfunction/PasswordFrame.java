@@ -277,6 +277,8 @@ public class PasswordFrame {
                     }
                 }
 
+                
+
                 Main.serverName = directoryChooser.getSelectedFile().getName();
                 currentServer.setText("Aktueller Server: '" + Main.serverName + "'");
                 Main.config.saveServerPath(path.getPath());

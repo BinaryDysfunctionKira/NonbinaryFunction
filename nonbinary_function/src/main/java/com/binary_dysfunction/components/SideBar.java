@@ -2,13 +2,18 @@ package com.binary_dysfunction.components;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.io.File;
+import java.io.IOException;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import com.binary_dysfunction.Config;
 import com.binary_dysfunction.HomeFrame;
 import com.binary_dysfunction.Main;
 
@@ -39,12 +44,25 @@ public class SideBar extends JPanel {
         calendarButton.setPreferredSize(new Dimension(40, 40));
         calendarButton.setBackground(null);
         calendarButton.setBorder(null);
+        calendarButton.addActionListener(e -> {
+            currentFrame.setCalendarPanel();
+            System.out.println("Calendar-Panel loaded");
+        });
 
         JButton driveButton = new JButton(Component.geticon("drive-folder.png"));
         driveButton.setToolTipText("Öffne Drive-Folder");
         driveButton.setPreferredSize(new Dimension(40, 40));
         driveButton.setBackground(null);
         driveButton.setBorder(null);
+        driveButton.addActionListener(e -> {
+            if (!Main.loggedInAccount.cloudActivated) {
+                JOptionPane.showMessageDialog(null, "Kein Zugriff auf den 'Personal-Vault'. Bitte fragen Sie ihre Administratoren auf Berechtigung an.", "Fehler bei Profilbild-Änderung", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            try {
+                Desktop.getDesktop().open(new File(Main.serverPath + Config.ACCOUNTS_DIR + Main.loggedInAccount.username));
+            } catch (IOException e1) {}
+        });
 
         JPanel topButtons = new JPanel(new GridLayout(0, 1, 0, 10));
         topButtons.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));

@@ -51,7 +51,14 @@ public class HomeFrame {
 
     public void setAdminPanel() {
         contentPanel.removeAll();
-        contentPanel.add(new AdminPanel());
+        contentPanel.add(new AdminPanel(this));
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+    public void setCalendarPanel() {
+        contentPanel.removeAll();
+        contentPanel.add(new CalendarPanel());
         contentPanel.revalidate();
         contentPanel.repaint();
     }

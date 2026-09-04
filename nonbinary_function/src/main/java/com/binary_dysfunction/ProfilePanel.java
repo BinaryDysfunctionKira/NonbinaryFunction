@@ -22,6 +22,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
@@ -37,7 +38,7 @@ public class ProfilePanel extends JScrollPane {
     public ProfilePanel(HomeFrame hf) {
 
         JLabel pfp = new JLabel(Component.scaleImage(Main.loggedInAccount.profilePicturePath, 200));
-        pfp.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+        pfp.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
         pfp.setAlignmentX(CENTER_ALIGNMENT);
 
         JButton pfpButton = new JButton("Ändern");
@@ -45,6 +46,12 @@ public class ProfilePanel extends JScrollPane {
         pfpButton.setAlignmentX(CENTER_ALIGNMENT);
         pfpButton.addActionListener(e -> {
             System.out.println("Change PFP");
+
+            if (!Main.loggedInAccount.cloudActivated) {
+                JOptionPane.showMessageDialog(null, "Kein Zugriff auf den 'Personal-Vault'. Bitte fragen Sie ihre Administratoren auf Berechtigung an.", "Fehler bei Profilbild-Änderung", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             JFileChooser filechooser = new JFileChooser();
             filechooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             filechooser.setDialogTitle("Profilbild auswählen");
@@ -61,7 +68,7 @@ public class ProfilePanel extends JScrollPane {
             if (result == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = filechooser.getSelectedFile();
                 try {
-                    File targetDir = new File(Main.serverPath + "/users/" + Main.loggedInAccount.username + "/user-data/");
+                    File targetDir = new File(Main.serverPath + Config.ACCOUNTS_DIR + Main.loggedInAccount.username + "/user-data/");
                     Files.createDirectories(targetDir.toPath()); // ensure it exists (and re-create it, since it may currently be a broken file from prior test runs)
 
                     File targetFile = new File(targetDir, selectedFile.getName());
@@ -153,8 +160,8 @@ public class ProfilePanel extends JScrollPane {
         //     BorderFactory.createEmptyBorder(5, 5, 2, 5)
         // ));
         descriptionArea.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        descriptionArea.setPreferredSize(new Dimension(Integer.MAX_VALUE, 36));
-        descriptionArea.setMaximumSize(new Dimension(Integer.MAX_VALUE, descriptionArea.getPreferredSize().height));
+        descriptionArea.setPreferredSize(new Dimension(800, 36));
+        descriptionArea.setMaximumSize(new Dimension(800, descriptionArea.getPreferredSize().height));
         descriptionArea.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
