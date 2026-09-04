@@ -21,6 +21,7 @@ Dependencies:
 		- Good UX-UI
 		- Registration for events/concerts (check in database and check tickets)
 		- Send tickets to devs for more functions
+		- Uploading and calculating taxes
 
 	Nice-To-Haves:
 		- Automatic log-out after 10min when afk

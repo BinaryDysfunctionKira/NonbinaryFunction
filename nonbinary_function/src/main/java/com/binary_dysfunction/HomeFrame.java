@@ -23,7 +23,7 @@ public class HomeFrame {
         frame.setVisible(true);
 
         topBar = new TopBar(this);
-        SideBar sideBar = new SideBar();
+        SideBar sideBar = new SideBar(this);
 
         contentPanel.add(new HomePanel(this));
         
@@ -45,6 +45,13 @@ public class HomeFrame {
     public void setProfilePanel() {
         contentPanel.removeAll();
         contentPanel.add(new ProfilePanel(this));
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+    public void setAdminPanel() {
+        contentPanel.removeAll();
+        contentPanel.add(new AdminPanel());
         contentPanel.revalidate();
         contentPanel.repaint();
     }
