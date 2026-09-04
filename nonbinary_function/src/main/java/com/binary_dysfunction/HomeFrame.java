@@ -14,9 +14,11 @@ public class HomeFrame {
     public JPanel contentPanel = new JPanel(new BorderLayout());
     public TopBar topBar;
 
+    private String programName = "Nonbinary Function"; 
+
     public void startup() {
 
-        frame = new JFrame("Nonbinary Function - Home");
+        frame = new JFrame(programName + " - Home");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1013, 608);
         frame.setLocationRelativeTo(null);
@@ -38,6 +40,7 @@ public class HomeFrame {
     public void setHomePanel() {
         contentPanel.removeAll();
         contentPanel.add(new HomePanel(this));
+        frame.setTitle(programName + " - Home");
         contentPanel.revalidate();
         contentPanel.repaint();
     }
@@ -45,6 +48,7 @@ public class HomeFrame {
     public void setProfilePanel() {
         contentPanel.removeAll();
         contentPanel.add(new ProfilePanel(this));
+        frame.setTitle(programName + " - Profil");
         contentPanel.revalidate();
         contentPanel.repaint();
     }
@@ -52,6 +56,7 @@ public class HomeFrame {
     public void setAdminPanel() {
         contentPanel.removeAll();
         contentPanel.add(new AdminPanel(this));
+        frame.setTitle(programName + " - Admin Zone");
         contentPanel.revalidate();
         contentPanel.repaint();
     }
@@ -59,6 +64,7 @@ public class HomeFrame {
     public void setCalendarPanel() {
         contentPanel.removeAll();
         contentPanel.add(new CalendarPanel());
+        frame.setTitle(programName + " - Kalendar");
         contentPanel.revalidate();
         contentPanel.repaint();
     }
