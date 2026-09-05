@@ -58,6 +58,7 @@ public class JSONConfigurations {
         }
         newAccount.put("assemblies", assembliesArray);
         newAccount.put("cloudActivated", false);
+        newAccount.put("email", "");
 
         accounts.put(newAccount);
 
@@ -130,7 +131,8 @@ public class JSONConfigurations {
                 String uid = acc.getString("uid");
                 List<Object> assemblies = acc.getJSONArray("assemblies").toList();
                 boolean cloudActivated = acc.getBoolean("cloudActivated");
-                return new Account(username, passwordHash, fullName, description, profilePicturePath, uid, assemblies, cloudActivated);
+                String email = acc.getString("email");
+                return new Account(username, passwordHash, fullName, description, profilePicturePath, uid, assemblies, cloudActivated, email);
             }
         }
 

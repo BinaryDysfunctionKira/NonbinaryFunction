@@ -193,6 +193,56 @@ public class ProfilePanel extends JScrollPane {
         descriptionPanel.add(descriptionArea);
 
 
+        JLabel emailTitle = new JLabel("E-Mail");
+        emailTitle.setFont(new Font("Arial", Font.BOLD, 20));
+        emailTitle.setForeground(new Color(160, 160, 160));
+
+        JTextField emailArea = new JTextField(Main.loggedInAccount.email, JLabel.LEFT);
+        emailArea.setFont(new Font("Arial", Font.PLAIN, 13));
+        emailArea.setBackground(new Color(20, 20, 20));
+        emailArea.setForeground(new Color(200, 200, 200));
+        // descriptionArea.setBorder(BorderFactory.createCompoundBorder(
+        //     BorderFactory.createLineBorder(Color.BLACK),
+        //     BorderFactory.createEmptyBorder(5, 5, 2, 5)
+        // ));
+        emailArea.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        emailArea.setPreferredSize(new Dimension(800, 36));
+        emailArea.setMaximumSize(new Dimension(800, emailArea.getPreferredSize().height));
+        emailArea.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                
+            }
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    if (!emailArea.getText().contains("@")) {
+                        JOptionPane.showMessageDialog(null, "Die E-Mail muss ein '@' beinhalten.", "Fehlerhafte E-Mail", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    emailArea.setFocusable(false);
+                    emailArea.setFocusable(true);
+                    try {
+                        JSONConfigurations.updateAccountField(Main.loggedInAccount.username, "email", emailArea.getText());
+                        Main.loggedInAccount.description = emailArea.getText();
+                        System.out.println("E-Mail updated");
+                    } catch (IOException e1) {}
+                }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+        });
+
+        JPanel emailPanel = new JPanel();
+        emailPanel.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
+        emailPanel.setLayout(new BoxLayout(emailPanel, BoxLayout.Y_AXIS));
+        emailPanel.setBackground(backgroundColor);
+        emailPanel.add(emailTitle);
+        emailPanel.add(emailArea);
+
+
         JLabel oldPasswordTitle = new JLabel("Altes Passwort", JLabel.LEFT);
         oldPasswordTitle.setAlignmentX(LEFT_ALIGNMENT);
         oldPasswordTitle.setFont(new Font("Arial", Font.BOLD, 12));
@@ -401,6 +451,7 @@ public class ProfilePanel extends JScrollPane {
         rightSide.add(username);
         rightSide.add(uid);
         rightSide.add(descriptionPanel);
+        rightSide.add(emailPanel);
         rightSide.add(passwordPanel);
 
         JPanel contentPanel = new JPanel(new BorderLayout());

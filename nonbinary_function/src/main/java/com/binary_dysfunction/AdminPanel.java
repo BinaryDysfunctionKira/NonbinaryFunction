@@ -268,9 +268,59 @@ public class AdminPanel extends JPanel {
         descriptionPanel.add(descriptionArea);
 
 
+        JLabel emailTitle = new JLabel("E-Mail");
+        emailTitle.setFont(new Font("Arial", Font.BOLD, 20));
+        emailTitle.setForeground(new Color(180, 180, 180));
+
+        JTextField emailArea = new JTextField(currentAccount.email, JLabel.LEFT);
+        emailArea.setFont(new Font("Arial", Font.PLAIN, 11));
+        emailArea.setBackground(backgroundColor);
+        emailArea.setForeground(new Color(200, 200, 200));
+        // descriptionArea.setBorder(BorderFactory.createCompoundBorder(
+        //     BorderFactory.createLineBorder(Color.BLACK),
+        //     BorderFactory.createEmptyBorder(5, 5, 2, 5)
+        // ));
+        emailArea.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        emailArea.setPreferredSize(new Dimension(500, 28));
+        emailArea.setMaximumSize(new Dimension(500, emailArea.getPreferredSize().height));
+        emailArea.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                
+            }
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    if (!emailArea.getText().contains("@")) {
+                        JOptionPane.showMessageDialog(null, "Die E-Mail muss ein '@' beinhalten.", "Fehlerhafte E-Mail", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    emailArea.setFocusable(false);
+                    emailArea.setFocusable(true);
+                    try {
+                        JSONConfigurations.updateAccountField(currentAccount.username, "email", emailArea.getText());
+                        currentAccount.email = emailArea.getText();
+                        System.out.println("E-Mail updated for: " + currentAccount.username);
+                    } catch (IOException e1) {}
+                }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+        });
+
+        JPanel emailPanel = new JPanel();
+        emailPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        emailPanel.setLayout(new BoxLayout(emailPanel, BoxLayout.Y_AXIS));
+        emailPanel.setBackground(backgroundColor2);
+        emailPanel.add(emailTitle);
+        emailPanel.add(emailArea);
+
+
         JLabel newPasswordTitle = new JLabel("Neues Passwort", JLabel.LEFT);
-        newPasswordTitle.setAlignmentX(LEFT_ALIGNMENT);
-        newPasswordTitle.setFont(new Font("Arial", Font.BOLD, 12));
+        newPasswordTitle.setFont(new Font("Arial", Font.BOLD, 20));
+        newPasswordTitle.setForeground(new Color(180, 180, 180));
 
         JTextField newPasswordField = new JTextField("", JLabel.LEFT);
         newPasswordField.setAlignmentX(LEFT_ALIGNMENT);
@@ -327,6 +377,10 @@ public class AdminPanel extends JPanel {
         cloudActivatedButton.setFont(new Font("Arial", Font.PLAIN, 12));
         cloudActivatedButton.setBackground(backgroundColor);
         cloudActivatedButton.addActionListener(e -> {
+            if (currentAccount.email.equals("")) {
+                JOptionPane.showMessageDialog(null, "Cloud-Aktivierung für den Nutzer: '" + currentAccount.username + "', nicht möglich. Hier für muss eine E-Mail angegeben sein und berechtigt sein auf deren privaten 'Vault' zugreifen zu können.", "Cloud-Aktivierung nicht möglich!", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             if (currentAccount.cloudActivated) {
                 currentAccount.cloudActivated = false;
                 Main.loggedInAccount.cloudActivated = false;
@@ -358,6 +412,7 @@ public class AdminPanel extends JPanel {
         rightSideConfig.add(username);
         rightSideConfig.add(uid);
         rightSideConfig.add(descriptionPanel);
+        rightSideConfig.add(emailPanel);
         rightSideConfig.add(newPasswordPanel);
         rightSideConfig.add(cloudPanel);
 
@@ -414,8 +469,9 @@ public class AdminPanel extends JPanel {
             String uid = acc.getString("uid");
             List<Object> assemblies = acc.getJSONArray("assemblies").toList();
             boolean cloudActivated = acc.getBoolean("cloudActivated");
+            String email = acc.getString("email");
 
-            registeredAccounts.add(new Account(username, passwordHash, fullName, description, profilePicturePath, uid, assemblies, cloudActivated));
+            registeredAccounts.add(new Account(username, passwordHash, fullName, description, profilePicturePath, uid, assemblies, cloudActivated, email));
             System.out.println("-" + username);
         }
 

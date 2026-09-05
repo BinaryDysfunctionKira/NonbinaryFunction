@@ -50,18 +50,20 @@ public class SideBar extends JPanel {
         });
 
         JButton driveButton = new JButton(Component.geticon("drive-folder.png"));
-        driveButton.setToolTipText("Öffne Drive-Folder");
+        driveButton.setToolTipText("Öffne Personal-Folder");
         driveButton.setPreferredSize(new Dimension(40, 40));
         driveButton.setBackground(null);
         driveButton.setBorder(null);
         driveButton.addActionListener(e -> {
             if (!Main.loggedInAccount.cloudActivated) {
-                JOptionPane.showMessageDialog(null, "Kein Zugriff auf den 'Personal-Vault'. Bitte fragen Sie ihre Administratoren auf Berechtigung an.", "Fehler bei Profilbild-Änderung", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Kein Zugriff auf den 'Personal-Vault'. Bitte fragen Sie ihre Administratoren auf Berechtigung an.", "Kein Zugriff auf die Cloud", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             try {
                 Desktop.getDesktop().open(new File(Main.serverPath + Config.ACCOUNTS_DIR + Main.loggedInAccount.username));
-            } catch (IOException e1) {}
+            } catch (IOException e1) {
+                JOptionPane.showMessageDialog(null, "Kein Zugriff auf den 'Personal-Vault'. Bitte fragen Sie ihre Administratoren auf Berechtigung an.", "Kein Zugriff auf die Cloud", JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         JPanel topButtons = new JPanel(new GridLayout(0, 1, 0, 10));

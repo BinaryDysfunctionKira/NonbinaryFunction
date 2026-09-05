@@ -15,8 +15,9 @@ public class Account {
     public final String uid;
     public List<Object> assemblies;
     public boolean cloudActivated;
+    public String email;
 
-    public Account(String username, String passwordHash, String fullName, String description, String profilePicturePath, String uid, List<Object> assemblies, boolean cloudActivated) {
+    public Account(String username, String passwordHash, String fullName, String description, String profilePicturePath, String uid, List<Object> assemblies, boolean cloudActivated, String email) {
         this.username = username;
         this.passwordHash = passwordHash;
         this.fullName = fullName;
@@ -25,6 +26,9 @@ public class Account {
         this.uid = uid;
         this.assemblies = assemblies;
         this.cloudActivated = cloudActivated;
+        this.email = email;
+
+        if (this.email.equals("")) this.cloudActivated = false;
     }
 
     @Override
@@ -33,7 +37,7 @@ public class Account {
         for (Object assembly : assemblies) {
             output += "\n-'" + assembly.toString() + "'";
         }
-        output += "\nCloud Activated: " + cloudActivated + "\n";
+        output += "\nCloud Activated: " + cloudActivated + "\nE-Mail: " + email + "\n";
         return output;
     }
 
