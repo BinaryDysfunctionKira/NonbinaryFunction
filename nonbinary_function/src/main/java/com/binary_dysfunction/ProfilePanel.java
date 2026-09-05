@@ -224,7 +224,7 @@ public class ProfilePanel extends JScrollPane {
                     emailArea.setFocusable(true);
                     try {
                         JSONConfigurations.updateAccountField(Main.loggedInAccount.username, "email", emailArea.getText());
-                        Main.loggedInAccount.description = emailArea.getText();
+                        Main.loggedInAccount.email = emailArea.getText();
                         System.out.println("E-Mail updated");
                     } catch (IOException e1) {}
                 }
