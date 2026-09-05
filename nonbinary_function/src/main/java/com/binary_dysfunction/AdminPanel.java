@@ -39,6 +39,7 @@ public class AdminPanel extends JPanel {
     private final Color backgroundColor2 = new Color(80, 80, 80);
     private final Color usrButtonColor = new Color(160, 160, 160);
     private final Color greenButtonColor = new Color(51, 134, 55);
+    private final Color redButtonColor = new Color(128, 37, 37);
     private List<Account> registeredAccounts = new ArrayList<>();
 
     public static Account currentAccount = Main.loggedInAccount;
@@ -95,14 +96,42 @@ public class AdminPanel extends JPanel {
             }
         });
 
+        JButton removeUserButton = new JButton("- Nutzer löschen");
+        removeUserButton.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        removeUserButton.setForeground(Color.WHITE);
+        removeUserButton.setBackground(redButtonColor);
+        removeUserButton.setFont(new Font("Arial", Font.BOLD, 13));
+        removeUserButton.addActionListener(e -> {
+            int result = JOptionPane.showConfirmDialog(null, "Sind Sie sicher dass Sie '" + currentAccount.username + "' löschen wollen? Verlorene Daten können nicht wieder erlangt werden.", "Achtung!", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
+            if (result == JOptionPane.YES_OPTION && (!currentAccount.assemblies.contains("Admin") || !currentAccount.assemblies.contains("Owner"))) {
+                try {
+                    JSONConfigurations.removeAccount(currentAccount.username);
+                } catch (IOException e1) {
+                    JOptionPane.showMessageDialog(null, "Der Nutzer konnte nicht gelöscht werden.", "Fehler beim löschen der Nutzers", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Der Nutzer konnte nicht gelöscht werden.", "Fehler beim löschen der Nutzers", JOptionPane.ERROR_MESSAGE);
+            }
+            currentAccount = Main.loggedInAccount;
+            currentFrame.setAdminPanel();
+        });
+
         JPanel addUserButtonPanel = new JPanel(new BorderLayout());
         addUserButtonPanel.add(addUserButton);
+
+        JPanel removeUserButtonPanel = new JPanel(new BorderLayout());
+        removeUserButtonPanel.add(removeUserButton);
+
+        JPanel userButtonPanel = new JPanel();
+        userButtonPanel.setLayout(new BoxLayout(userButtonPanel, BoxLayout.Y_AXIS));
+        userButtonPanel.add(addUserButtonPanel);
+        userButtonPanel.add(removeUserButtonPanel);
 
         JPanel usersPanel = new JPanel(new BorderLayout());
         usersPanel.setAlignmentX(LEFT_ALIGNMENT);
         usersPanel.setBackground(backgroundColor);
         usersPanel.add(userListScrollPane, BorderLayout.CENTER);
-        usersPanel.add(addUserButtonPanel, BorderLayout.SOUTH);
+        usersPanel.add(userButtonPanel, BorderLayout.SOUTH);
 
 
         JLabel pfpLabel = new JLabel(Component.scaleImage(currentAccount.profilePicturePath, 132));

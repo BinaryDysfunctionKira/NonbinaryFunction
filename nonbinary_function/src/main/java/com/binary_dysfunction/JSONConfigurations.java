@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -138,5 +139,36 @@ public class JSONConfigurations {
 
         System.out.println("Account not found.");
         return null;
+    }
+
+    public static void removeAccount(String username) throws IOException {
+
+        if (!Files.exists(ACCOUNT_PATH)) {
+            return;
+        }
+
+        String content = Files.readString(ACCOUNT_PATH);
+        JSONArray accounts = new JSONArray(content);
+
+        JSONArray updatedAccounts = new JSONArray();
+        boolean found = false;
+
+        for (int i = 0; i < accounts.length(); i++) {
+            JSONObject acc = accounts.getJSONObject(i);
+            if (acc.getString("username").equals(username)) {
+                found = true;
+            } else {
+                updatedAccounts.put(acc);
+            }
+        }
+
+        if (!found) {
+            System.out.println("Account not found: " + username);
+            return;
+        }
+
+        Files.writeString(ACCOUNT_PATH, updatedAccounts.toString(4));
+
+        FileUtils.deleteDirectory(new File(Main.serverPath + Config.ACCOUNTS_DIR + username));
     }
 }

@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -34,7 +35,7 @@ public class Config {
         return new File(Main.serverPath, "server-config.properties");
     }
 
-    private static final String SERVER_OWNER = "Admin";
+    public static final String SERVER_OWNER = "Admin";
 
     private final Properties serverProperties = new Properties();
 
@@ -71,6 +72,17 @@ public class Config {
             usrProperties.setProperty(prefix + "." + i, values.get(i));
         }
         saveUsr();
+    }
+    public List<String> loadUsrList(String prefix) {
+        List<String> result = new ArrayList<>();
+        int count = Integer.parseInt(usrProperties.getProperty(prefix + ".count", "0"));
+        for (int i = 0; i < count; i++) {
+            String value = usrProperties.getProperty(prefix + "." + i);
+            if (value != null) {
+                result.add(value);
+            }
+        }
+        return result;
     }
 
     public void saveServerPath(String path) {
