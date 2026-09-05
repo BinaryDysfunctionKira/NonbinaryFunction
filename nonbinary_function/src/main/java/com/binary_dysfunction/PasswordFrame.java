@@ -130,10 +130,7 @@ public class PasswordFrame {
             if (Main.isServerNew) {
                 try {
                     JSONConfigurations.addAccount(usrName, Config.hashPassword(new String(pswd)));
-                } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-
-                }
+                } catch (IOException e1) {}
             }
 
             if (usrName.equals("")) {
