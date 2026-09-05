@@ -50,7 +50,7 @@ public class SideBar extends JPanel {
         });
 
         JButton driveButton = new JButton(Component.geticon("drive-folder.png"));
-        driveButton.setToolTipText("Öffne Personal-Folder");
+        driveButton.setToolTipText("Öffne Personal-Vault");
         driveButton.setPreferredSize(new Dimension(40, 40));
         driveButton.setBackground(null);
         driveButton.setBorder(null);
