@@ -38,6 +38,10 @@ public class SideBar extends JPanel {
         chatButton.setPreferredSize(new Dimension(40, 40));
         chatButton.setBackground(null);
         chatButton.setBorder(null);
+        chatButton.addActionListener(e -> {
+            currentFrame.setChatPanel();
+            System.out.println("Chat-Panel loaded");
+        });
 
         JButton calendarButton = new JButton(Component.geticon("calendar.png"));
         calendarButton.setToolTipText("Kalendar");

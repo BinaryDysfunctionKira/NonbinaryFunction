@@ -68,4 +68,12 @@ public class HomeFrame {
         contentPanel.revalidate();
         contentPanel.repaint();
     }
+
+    public void setChatPanel() {
+        contentPanel.removeAll();
+        contentPanel.add(new ChatPanel());
+        frame.setTitle(programName + " - Chat");
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
 }
