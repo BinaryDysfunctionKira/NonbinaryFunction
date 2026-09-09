@@ -17,7 +17,7 @@ import com.binary_dysfunction.Main;
 
 public class UserCard extends JPanel {
 
-    private final Color backgroundColor = new Color(80, 80, 80);
+    private final Color backgroundColor = Colors.backgroundColor;
 
     public UserCard(HomeFrame currentFrame) {
 

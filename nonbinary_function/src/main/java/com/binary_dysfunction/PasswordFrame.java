@@ -26,6 +26,8 @@ import javax.swing.SwingUtilities;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.binary_dysfunction.components.Colors;
+
 public class PasswordFrame {
 
     public static JFrame frame;
@@ -104,7 +106,7 @@ public class PasswordFrame {
         JLabel errorMessage = new JLabel();
         errorMessage.setAlignmentX(Container.CENTER_ALIGNMENT);
         errorMessage.setFont(new Font("Arial", Font.BOLD, 14));
-        errorMessage.setForeground(new Color(206, 0, 0));
+        errorMessage.setForeground(Colors.redFontColor);
         errorMessage.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
         errorMessage.setVisible(false);
 
@@ -112,10 +114,10 @@ public class PasswordFrame {
         submitButton.setAlignmentX(Container.CENTER_ALIGNMENT);
         submitButton.setFont(new Font("Arial", Font.PLAIN, 20));
         submitButton.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(116, 197, 105), 2),
+            BorderFactory.createLineBorder(Colors.greenButtonOutlineColor, 2),
             BorderFactory.createEmptyBorder(10, 20, 10, 20)
         ));
-        submitButton.setBackground(new Color(51, 134, 55));
+        submitButton.setBackground(Colors.greenButtonColor);
         submitButton.addActionListener(e -> {
             // errorMessage.setVisible(true);
             // Check if User is available in system
@@ -173,7 +175,7 @@ public class PasswordFrame {
         submitButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                submitButton.setBackground(new Color(70, 127, 75));
+                submitButton.setBackground(Colors.lightGreenButtonColor);
             }
             @Override
             public void mouseExited(MouseEvent e) {
@@ -191,7 +193,7 @@ public class PasswordFrame {
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.setBorder(BorderFactory.createEmptyBorder(47, 80, 20, 80));
-        contentPanel.setBackground(new Color(161, 161, 161));
+        contentPanel.setBackground(Colors.lightGrayBackgroundColor);
 
         JPanel mainPanel = new JPanel(new GridBagLayout());
         mainPanel.setBorder(BorderFactory.createEmptyBorder(47, 127, 47 , 127));

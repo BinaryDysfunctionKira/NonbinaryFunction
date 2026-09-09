@@ -29,11 +29,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import com.binary_dysfunction.components.Colors;
 import com.binary_dysfunction.components.Component;
 
 public class ProfilePanel extends JScrollPane {
 
-    private final Color backgroundColor = new Color(40, 40, 40);
+    private final Color backgroundColor = Colors.backgroundColor;
 
     public ProfilePanel(HomeFrame hf) {
 
@@ -42,7 +43,7 @@ public class ProfilePanel extends JScrollPane {
         pfp.setAlignmentX(CENTER_ALIGNMENT);
 
         JButton pfpButton = new JButton("Ändern");
-        pfpButton.setBackground(new Color(51, 134, 55));
+        pfpButton.setBackground(Colors.greenButtonColor);
         pfpButton.setAlignmentX(CENTER_ALIGNMENT);
         pfpButton.addActionListener(e -> {
             System.out.println("Change PFP");
@@ -120,12 +121,12 @@ public class ProfilePanel extends JScrollPane {
 
         JLabel username = new JLabel(Main.loggedInAccount.username, JLabel.LEFT);
         username.setFont(new Font("Arial", Font.BOLD, 24));
-        username.setForeground(new Color(160, 160, 160));
+        username.setForeground(Colors.lightFontColor);
 
         JButton uid = new JButton("UID: " + Main.loggedInAccount.uid);
         uid.setBorder(null);
         uid.setBackground(null);
-        uid.setForeground(new Color(120, 120, 120));
+        uid.setForeground(Colors.subtleFontColor);
         uid.setFont(new Font("Arial", Font.BOLD, 9));
         uid.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
         uid.setToolTipText("Kopieren");
@@ -138,23 +139,23 @@ public class ProfilePanel extends JScrollPane {
         uid.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                uid.setForeground(new Color(51, 134, 55));
+                uid.setForeground(Colors.greenButtonColor);
             }
             @Override
             public void mouseReleased(MouseEvent e) {
-                uid.setForeground(new Color(120, 120, 120));
+                uid.setForeground(Colors.subtleFontColor);
             }
         });
 
 
         JLabel descriptionTitle = new JLabel("Beschreibung");
         descriptionTitle.setFont(new Font("Arial", Font.BOLD, 20));
-        descriptionTitle.setForeground(new Color(160, 160, 160));
+        descriptionTitle.setForeground(Colors.lightFontColor);
 
         JTextField descriptionArea = new JTextField(Main.loggedInAccount.description, JLabel.LEFT);
         descriptionArea.setFont(new Font("Arial", Font.PLAIN, 13));
-        descriptionArea.setBackground(new Color(20, 20, 20));
-        descriptionArea.setForeground(new Color(200, 200, 200));
+        descriptionArea.setBackground(Colors.backgroundColor);
+        descriptionArea.setForeground(Colors.veryLightFontColor);
         // descriptionArea.setBorder(BorderFactory.createCompoundBorder(
         //     BorderFactory.createLineBorder(Color.BLACK),
         //     BorderFactory.createEmptyBorder(5, 5, 2, 5)
@@ -195,12 +196,12 @@ public class ProfilePanel extends JScrollPane {
 
         JLabel emailTitle = new JLabel("E-Mail");
         emailTitle.setFont(new Font("Arial", Font.BOLD, 20));
-        emailTitle.setForeground(new Color(160, 160, 160));
+        emailTitle.setForeground(Colors.lightFontColor);
 
         JTextField emailArea = new JTextField(Main.loggedInAccount.email, JLabel.LEFT);
         emailArea.setFont(new Font("Arial", Font.PLAIN, 13));
-        emailArea.setBackground(new Color(20, 20, 20));
-        emailArea.setForeground(new Color(200, 200, 200));
+        emailArea.setBackground(Colors.backgroundColor);
+        emailArea.setForeground(Colors.veryLightFontColor);
         // descriptionArea.setBorder(BorderFactory.createCompoundBorder(
         //     BorderFactory.createLineBorder(Color.BLACK),
         //     BorderFactory.createEmptyBorder(5, 5, 2, 5)
@@ -250,8 +251,8 @@ public class ProfilePanel extends JScrollPane {
         JPasswordField oldPasswordField = new JPasswordField("", JLabel.LEFT);
         oldPasswordField.setAlignmentX(LEFT_ALIGNMENT);
         oldPasswordField.setFont(new Font("Arial", Font.PLAIN, 13));
-        oldPasswordField.setBackground(new Color(20, 20, 20));
-        oldPasswordField.setForeground(new Color(200, 200, 200));
+        oldPasswordField.setBackground(Colors.backgroundColor);
+        oldPasswordField.setForeground(Colors.veryLightFontColor);
         // descriptionArea.setBorder(BorderFactory.createCompoundBorder(
         //     BorderFactory.createLineBorder(Color.BLACK),
         //     BorderFactory.createEmptyBorder(5, 5, 2, 5)
@@ -299,8 +300,8 @@ public class ProfilePanel extends JScrollPane {
         JTextField newPasswordField = new JTextField("", JLabel.LEFT);
         newPasswordField.setAlignmentX(LEFT_ALIGNMENT);
         newPasswordField.setFont(new Font("Arial", Font.PLAIN, 13));
-        newPasswordField.setBackground(new Color(20, 20, 20));
-        newPasswordField.setForeground(new Color(200, 200, 200));
+        newPasswordField.setBackground(Colors.backgroundColor);
+        newPasswordField.setForeground(Colors.veryLightFontColor);
         // descriptionArea.setBorder(BorderFactory.createCompoundBorder(
         //     BorderFactory.createLineBorder(Color.BLACK),
         //     BorderFactory.createEmptyBorder(5, 5, 2, 5)
@@ -342,8 +343,8 @@ public class ProfilePanel extends JScrollPane {
         JTextField newPasswordRepeatField = new JTextField("", JLabel.LEFT);
         newPasswordRepeatField.setAlignmentX(LEFT_ALIGNMENT);
         newPasswordRepeatField.setFont(new Font("Arial", Font.PLAIN, 13));
-        newPasswordRepeatField.setBackground(new Color(20, 20, 20));
-        newPasswordRepeatField.setForeground(new Color(200, 200, 200));
+        newPasswordRepeatField.setBackground(Colors.backgroundColor);
+        newPasswordRepeatField.setForeground(Colors.veryLightFontColor);
         // descriptionArea.setBorder(BorderFactory.createCompoundBorder(
         //     BorderFactory.createLineBorder(Color.BLACK),
         //     BorderFactory.createEmptyBorder(5, 5, 2, 5)
@@ -387,18 +388,18 @@ public class ProfilePanel extends JScrollPane {
         JLabel passwordPanelTitle = new JLabel("Passwort");
         passwordPanelTitle.setAlignmentX(LEFT_ALIGNMENT);
         passwordPanelTitle.setFont(new Font("Arial", Font.BOLD, 20));
-        passwordPanelTitle.setForeground(new Color(160, 160, 160));
+        passwordPanelTitle.setForeground(Colors.lightFontColor);
 
         JLabel errorMessage = new JLabel("ERROR!"); // Needs to be implemented in check
         errorMessage.setAlignmentX(LEFT_ALIGNMENT);
         errorMessage.setFont(new Font("Arial", Font.BOLD, 14));
-        errorMessage.setForeground(new Color(206, 0, 0));
+        errorMessage.setForeground(Colors.redFontColor);
         errorMessage.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
         errorMessage.setVisible(false);
 
         JButton passwordChangeButton = new JButton("Passwort ändern");
         passwordChangeButton.setAlignmentX(LEFT_ALIGNMENT);
-        passwordChangeButton.setBackground(new Color(51, 134, 55));
+        passwordChangeButton.setBackground(Colors.greenButtonColor);
         // Function of changing password
         passwordChangeButton.addActionListener(e -> {
             String oldPasswordHash = Config.hashPassword(Arrays.toString(oldPasswordField.getPassword()));

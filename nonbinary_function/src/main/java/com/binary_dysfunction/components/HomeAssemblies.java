@@ -1,7 +1,6 @@
 package com.binary_dysfunction.components;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -12,10 +11,10 @@ public class HomeAssemblies extends JScrollPane {
     public HomeAssemblies() {
 
         JPanel mainpanel = new JPanel(new BorderLayout());
-        mainpanel.setBackground(new Color(40, 40, 40));
+        mainpanel.setBackground(Colors.backgroundColor);
 
         this.setViewportView(mainpanel);
-        this.setBackground(new Color(40, 40, 40));
+        this.setBackground(Colors.backgroundColor);
         this.setBorder(BorderFactory.createTitledBorder("Ihre Assemblies"));
     }
 }

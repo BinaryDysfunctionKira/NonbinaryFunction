@@ -31,15 +31,16 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.binary_dysfunction.components.Colors;
 import com.binary_dysfunction.components.Component;
 
 public class AdminPanel extends JPanel {
 
-    private final Color backgroundColor = new Color(40, 40, 40);
-    private final Color backgroundColor2 = new Color(80, 80, 80);
-    private final Color usrButtonColor = new Color(160, 160, 160);
-    private final Color greenButtonColor = new Color(51, 134, 55);
-    private final Color redButtonColor = new Color(128, 37, 37);
+    private final Color backgroundColor = Colors.backgroundColor;
+    private final Color backgroundColor2 = Colors.backgroundColorLighter;
+    private final Color usrButtonColor = Colors.whiteButtonColor;
+    private final Color greenButtonColor = Colors.greenButtonColor;
+    private final Color redButtonColor = Colors.redButtonColor;
     private List<Account> registeredAccounts = new ArrayList<>();
 
     public static Account currentAccount = Main.loggedInAccount;

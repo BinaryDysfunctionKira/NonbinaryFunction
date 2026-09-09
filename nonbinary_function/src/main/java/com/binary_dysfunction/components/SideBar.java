@@ -1,7 +1,6 @@
 package com.binary_dysfunction.components;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -72,7 +71,7 @@ public class SideBar extends JPanel {
 
         JPanel topButtons = new JPanel(new GridLayout(0, 1, 0, 10));
         topButtons.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));
-        topButtons.setBackground(new Color(19, 39, 29));
+        topButtons.setBackground(Colors.greenishBackground);
         topButtons.add(notificationsButton);
         topButtons.add(assembliesButton);
         topButtons.add(chatButton);
@@ -95,22 +94,22 @@ public class SideBar extends JPanel {
         });
 
         JPanel bottomButtons = new JPanel(new GridLayout(0, 1, 0, 10));
-        bottomButtons.setBackground(new Color(19, 39, 29));
+        bottomButtons.setBackground(Colors.greenishBackground);
         bottomButtons.setBorder(BorderFactory.createEmptyBorder(50, 0, 0, 0));
         bottomButtons.add(eventButton);
         if (Main.loggedInAccount.assemblies.contains("Admin") || Main.loggedInAccount.assemblies.contains("Owner")) bottomButtons.add(adminButton);
 
         JPanel fillPanel = new JPanel();
-        fillPanel.setBackground(new Color(19, 39, 29));
+        fillPanel.setBackground(Colors.greenishBackground);
 
         JPanel contentPanel = new JPanel(new BorderLayout());
-        contentPanel.setBackground(new Color(19, 39, 29));
+        contentPanel.setBackground(Colors.greenishBackground);
         contentPanel.add(topButtons, BorderLayout.NORTH);
         contentPanel.add(fillPanel);
         contentPanel.add(bottomButtons, BorderLayout.SOUTH);
 
         JPanel mainPanel = new JPanel();
-        mainPanel.setBackground(new Color(19, 39, 29));
+        mainPanel.setBackground(Colors.greenishBackground);
         mainPanel.add(contentPanel);
 
         this.setLayout(new BorderLayout());

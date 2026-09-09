@@ -1,7 +1,6 @@
 package com.binary_dysfunction.components;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 
@@ -33,7 +32,7 @@ public class TopBar extends JPanel {
         accountButton = new JButton(Main.loggedInAccount.username, Component.scaleImage(Main.loggedInAccount.profilePicturePath, 40));
         accountButton.setToolTipText("Account Details");
         accountButton.setFont(new Font("Arial", Font.PLAIN, 13));
-        accountButton.setBackground(new Color(20, 20, 20));
+        accountButton.setBackground(Colors.backgorundColorDarker);
         accountButton.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 35));
         accountButton.addActionListener(e -> {
             currentFrame.setProfilePanel();
@@ -44,25 +43,25 @@ public class TopBar extends JPanel {
         JButton logoutButton = new JButton(Component.geticon("logout.png"));
         logoutButton.setToolTipText("Log out");
         logoutButton.setPreferredSize(new Dimension(40, 40));
-        logoutButton.setBackground(new Color(128, 37, 37));
+        logoutButton.setBackground(Colors.redButtonColor);
         logoutButton.addActionListener(e -> {
             Account.logOut(currentFrame.frame);
         });
 
         JPanel accountPanel = new JPanel(new BorderLayout());
-        accountPanel.setBackground(new Color(20, 20, 20));
+        accountPanel.setBackground(Colors.backgorundColorDarker);
         accountPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         accountPanel.add(accountButton, BorderLayout.WEST);
         accountPanel.add(logoutButton, BorderLayout.EAST);
 
         JPanel contentPanel = new JPanel(new BorderLayout());
-        contentPanel.setBackground(new Color(10, 10, 10));
+        contentPanel.setBackground(Colors.backgorundColorVeryDark);
         contentPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         contentPanel.add(homeButton, BorderLayout.WEST);
         contentPanel.add(accountPanel, BorderLayout.EAST);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
-        mainPanel.setBackground(new Color(10, 10, 10));
+        mainPanel.setBackground(Colors.backgorundColorVeryDark);
         mainPanel.add(contentPanel);
         
 

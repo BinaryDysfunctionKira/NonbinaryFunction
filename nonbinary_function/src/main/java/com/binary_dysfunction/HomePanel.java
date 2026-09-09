@@ -1,7 +1,6 @@
 package com.binary_dysfunction;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
 
@@ -10,6 +9,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import com.binary_dysfunction.components.Colors;
 import com.binary_dysfunction.components.HomeAnnouncements;
 import com.binary_dysfunction.components.HomeAssemblies;
 import com.binary_dysfunction.components.HomeLastChats;
@@ -24,7 +24,7 @@ public class HomePanel extends JPanel {
         headerTitle.setAlignmentX(CENTER_ALIGNMENT);
         JLabel headerSubtitle = new JLabel("Guten Tag, " + Main.loggedInAccount.fullName + "!");
         headerSubtitle.setFont(new Font("Arial", Font.BOLD, 16));
-        headerSubtitle.setForeground(new Color(180, 180, 180));
+        headerSubtitle.setForeground(Colors.lighterFontColor);
         headerSubtitle.setAlignmentX(CENTER_ALIGNMENT);
 
         JPanel headerTextPanel = new JPanel();
