@@ -1,0 +1,44 @@
+Chat System for the application
+
+Description:
+    Via the chat you shall be able to communicate with other organisation members, without
+    others seeing any of your messages. Also you shall be able to build custom groups. The
+    Chat System will be a core part of further development, like Assemblies for example.
+
+    Chats:
+        Chats must be able to be edited, like the name, if it's a group chat, and also be able
+        to delete the Chat or the messages and edit messages.
+
+    Messages:
+        Messages must be able to be edited and be able to be deleted.
+
+It consists of...
+    - Chats
+    - Group Chats
+    - Chat messages
+which have to be considered when implementing saving structures.
+
+Save-Structure (Group-)Chats:
+    - id: String
+    - members: String Array
+    - lastMessage: Message
+    - isGroupChat : Boolean
+    - groupName: String, only available if isGroupChat
+
+Save-Structure Message:
+    - id: String
+    - content: String
+    - date: LocalDateTime
+    - isRead: Boolean
+    - sender: Account
+
+Directory Structure:
+    root - chats - chatID -> Chat1
+                 - chatID -> Chat2
+                 - chatID -> Chat3
+
+Functionality:
+    When the application is started and you're logged in the application starts a new Thread
+    which checks for new messages all the time, perhaps with a small delay in between, and if
+    being messaged, the user shall receive a desktop toast, unless they disabled the function
+    for themselves.

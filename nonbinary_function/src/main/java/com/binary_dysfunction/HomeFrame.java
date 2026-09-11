@@ -18,6 +18,8 @@ public class HomeFrame {
 
     public void startup() {
 
+        
+
         frame = new JFrame(programName + " - Home");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1013, 608);
@@ -71,7 +73,7 @@ public class HomeFrame {
 
     public void setChatPanel() {
         contentPanel.removeAll();
-        contentPanel.add(new ChatPanel());
+        contentPanel.add(Main.chat.getChatPanel());
         frame.setTitle(programName + " - Chat");
         contentPanel.revalidate();
         contentPanel.repaint();

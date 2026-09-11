@@ -17,6 +17,8 @@ public class Main {
 
     public static Account loggedInAccount;
 
+    public static ChatPanel chat;
+
     public static void main(String[] args) {
         start();
     }
