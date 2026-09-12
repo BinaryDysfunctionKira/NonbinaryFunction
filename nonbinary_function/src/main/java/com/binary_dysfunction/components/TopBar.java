@@ -45,7 +45,7 @@ public class TopBar extends JPanel {
         logoutButton.setPreferredSize(new Dimension(40, 40));
         logoutButton.setBackground(Colors.redButtonColor);
         logoutButton.addActionListener(e -> {
-            Account.logOut(currentFrame.frame);
+            Account.logOut(HomeFrame.frame);
             Main.updater.stopUpdating();
         });
 

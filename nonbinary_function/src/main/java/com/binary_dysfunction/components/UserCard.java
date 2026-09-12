@@ -61,7 +61,7 @@ public class UserCard extends JPanel {
         logoutButton.setPreferredSize(new Dimension(40, 40));
         logoutButton.setBackground(new Color(128, 37, 37));
         logoutButton.addActionListener(e -> {
-            Account.logOut(currentFrame.frame);
+            Account.logOut(HomeFrame.frame);
             Main.updater.stopUpdating();
         });
 
