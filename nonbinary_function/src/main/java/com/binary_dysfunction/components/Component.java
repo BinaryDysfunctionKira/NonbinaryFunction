@@ -24,8 +24,7 @@ public class Component {
             }
         } catch (IOException e) {
             System.err.println("Failed to load image at '" + path + "': " + e.getMessage());
-            // return scaleImage("nonbinary_function\\src\\main\\resources\\BinaryDysfunctionLogo.png", size); // fallback avatar
-            return null;
+            return scaleImage("nonbinary_function\\src\\main\\resources\\BinaryDysfunctionLogo.png", size); // fallback avatar
         }
 
         int w = original.getWidth();

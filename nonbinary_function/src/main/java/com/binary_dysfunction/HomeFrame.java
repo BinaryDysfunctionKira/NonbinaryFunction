@@ -10,15 +10,16 @@ import com.binary_dysfunction.components.TopBar;
 
 public class HomeFrame {
 
-    public JFrame frame;
+    public static JFrame frame;
     public JPanel contentPanel = new JPanel(new BorderLayout());
     public TopBar topBar;
 
-    private final String programName = "Nonbinary Function"; 
+    @SuppressWarnings("FieldMayBeFinal")
+    private static String programName = "Nonbinary Function";
 
     public void startup() {
 
-        
+        Main.updater = new Updater();
 
         frame = new JFrame(programName + " - Home");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -73,7 +74,7 @@ public class HomeFrame {
 
     public void setChatPanel() {
         contentPanel.removeAll();
-        contentPanel.add(Main.chat.getChatPanel());
+        contentPanel.add(new ChatPanel());
         frame.setTitle(programName + " - Chat");
         contentPanel.revalidate();
         contentPanel.repaint();

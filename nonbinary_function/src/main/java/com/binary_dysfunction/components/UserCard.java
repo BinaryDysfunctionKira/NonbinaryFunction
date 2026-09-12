@@ -62,6 +62,7 @@ public class UserCard extends JPanel {
         logoutButton.setBackground(new Color(128, 37, 37));
         logoutButton.addActionListener(e -> {
             Account.logOut(currentFrame.frame);
+            Main.updater.stopUpdating();
         });
 
         JPanel logoutButtonPanel = new JPanel();
