@@ -154,7 +154,7 @@ public class ProfilePanel extends JScrollPane {
 
         JTextField descriptionArea = new JTextField(Main.loggedInAccount.description, JLabel.LEFT);
         descriptionArea.setFont(new Font("Arial", Font.PLAIN, 13));
-        descriptionArea.setBackground(Colors.backgroundColor);
+        descriptionArea.setBackground(Colors.backgorundColorDarker);
         descriptionArea.setForeground(Colors.veryLightFontColor);
         // descriptionArea.setBorder(BorderFactory.createCompoundBorder(
         //     BorderFactory.createLineBorder(Color.BLACK),
@@ -200,7 +200,7 @@ public class ProfilePanel extends JScrollPane {
 
         JTextField emailArea = new JTextField(Main.loggedInAccount.email, JLabel.LEFT);
         emailArea.setFont(new Font("Arial", Font.PLAIN, 13));
-        emailArea.setBackground(Colors.backgroundColor);
+        emailArea.setBackground(Colors.backgorundColorDarker);
         emailArea.setForeground(Colors.veryLightFontColor);
         // descriptionArea.setBorder(BorderFactory.createCompoundBorder(
         //     BorderFactory.createLineBorder(Color.BLACK),
@@ -251,7 +251,7 @@ public class ProfilePanel extends JScrollPane {
         JPasswordField oldPasswordField = new JPasswordField("", JLabel.LEFT);
         oldPasswordField.setAlignmentX(LEFT_ALIGNMENT);
         oldPasswordField.setFont(new Font("Arial", Font.PLAIN, 13));
-        oldPasswordField.setBackground(Colors.backgroundColor);
+        oldPasswordField.setBackground(Colors.backgorundColorDarker);
         oldPasswordField.setForeground(Colors.veryLightFontColor);
         // descriptionArea.setBorder(BorderFactory.createCompoundBorder(
         //     BorderFactory.createLineBorder(Color.BLACK),
@@ -300,7 +300,7 @@ public class ProfilePanel extends JScrollPane {
         JTextField newPasswordField = new JTextField("", JLabel.LEFT);
         newPasswordField.setAlignmentX(LEFT_ALIGNMENT);
         newPasswordField.setFont(new Font("Arial", Font.PLAIN, 13));
-        newPasswordField.setBackground(Colors.backgroundColor);
+        newPasswordField.setBackground(Colors.backgorundColorDarker);
         newPasswordField.setForeground(Colors.veryLightFontColor);
         // descriptionArea.setBorder(BorderFactory.createCompoundBorder(
         //     BorderFactory.createLineBorder(Color.BLACK),
@@ -343,7 +343,7 @@ public class ProfilePanel extends JScrollPane {
         JTextField newPasswordRepeatField = new JTextField("", JLabel.LEFT);
         newPasswordRepeatField.setAlignmentX(LEFT_ALIGNMENT);
         newPasswordRepeatField.setFont(new Font("Arial", Font.PLAIN, 13));
-        newPasswordRepeatField.setBackground(Colors.backgroundColor);
+        newPasswordRepeatField.setBackground(Colors.backgorundColorDarker);
         newPasswordRepeatField.setForeground(Colors.veryLightFontColor);
         // descriptionArea.setBorder(BorderFactory.createCompoundBorder(
         //     BorderFactory.createLineBorder(Color.BLACK),

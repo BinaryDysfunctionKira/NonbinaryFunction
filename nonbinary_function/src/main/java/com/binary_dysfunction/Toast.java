@@ -39,14 +39,13 @@ public class Toast {
             // panel.setBorder(BorderFactory.createEmptyBorder(12, 20, 12, 20));
             panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Colors.backgroundColorLighter),
-                BorderFactory.createEmptyBorder(12, 20, 12, 20)
+                BorderFactory.createEmptyBorder(12, 12, 12, 20)
             ));
             panel.setPreferredSize(new Dimension(230, 80));
 
             JLabel titleLabel = new JLabel(title);
             titleLabel.setForeground(Colors.lighterFontColor);
             titleLabel.setFont(new Font("Arial", Font.BOLD, 13));
-            titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
             panel.add(titleLabel);
 
             JLabel label = new JLabel(message);

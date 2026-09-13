@@ -19,7 +19,7 @@ public class HomePanel extends JPanel {
 
     public HomePanel(HomeFrame hp) {
 
-        JLabel headerTitle = new JLabel("Startseite");
+        JLabel headerTitle = new JLabel(Main.serverName);
         headerTitle.setFont(new Font("Arial", Font.BOLD, 32));
         headerTitle.setAlignmentX(CENTER_ALIGNMENT);
         JLabel headerSubtitle = new JLabel("Guten Tag, " + Main.loggedInAccount.fullName + "!");

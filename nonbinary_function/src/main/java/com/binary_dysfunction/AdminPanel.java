@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -504,6 +505,8 @@ public class AdminPanel extends JPanel {
             registeredAccounts.add(new Account(username, passwordHash, fullName, description, profilePicturePath, uid, assemblies, cloudActivated, email));
             System.out.println("-" + username);
         }
+
+        registeredAccounts.sort(Comparator.comparing(Account::getUsername));
 
         for (Account acc : registeredAccounts) {
             JButton userButton = new JButton(acc.username);

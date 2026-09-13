@@ -46,4 +46,8 @@ public class Account {
         currentFrame.dispose();
         SwingUtilities.invokeLater(new PasswordFrame()::startup);
     }
+
+    public String getUsername() {
+        return username;
+    }
 }

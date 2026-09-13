@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.swing.SwingUtilities;
 
@@ -17,7 +18,7 @@ public final class Updater {
     private Thread updateThread;
     private volatile boolean running = false;
     private volatile int counter = 0;
-    public List<Account> members = new ArrayList<>();
+    public volatile List<Account> members = new ArrayList<>();
 
     public Updater() {
         startUpdating();
@@ -39,7 +40,14 @@ public final class Updater {
 
                 SwingUtilities.invokeLater(() -> {
                     System.out.println("Update"+counter);
-                    if (counter % 20 == 0) Toast.show(null, Main.loggedInAccount.profilePicturePath, Main.loggedInAccount.username, "Hello, World!", 5000, Toast.Position.BOTTOM_RIGHT, true);
+                    if (counter % 20 == 0) {
+                        int randomNum = new Random().nextInt(0, members.size());
+                        Account randomAcc = members.get(randomNum);
+                        Toast.show(null, randomAcc.profilePicturePath, randomAcc.fullName, "Meow!", 5000, Toast.Position.BOTTOM_RIGHT, true);
+                    }
+                    try {
+                        updateAccountList();
+                    } catch (IOException e) {}
                     counter++;
                 });
                 try {
@@ -67,7 +75,8 @@ public final class Updater {
         String content = Files.readString(JSONConfigurations.ACCOUNT_PATH);
         JSONArray accounts = new JSONArray(content);
 
-        System.out.println("Registered accounts:");
+        members.clear();
+
         for (int i = 0; i < accounts.length(); i++) {
             JSONObject acc =  accounts.getJSONObject(i);
 
@@ -81,8 +90,9 @@ public final class Updater {
             boolean cloudActivated = acc.getBoolean("cloudActivated");
             String email = acc.getString("email");
 
+            // System.out.println(username);
             members.add(new Account(username, passwordHash, fullName, description, profilePicturePath, uid, assemblies, cloudActivated, email));
-            System.out.println("-" + username);
         }
+        // System.out.println("Account-List updated");
     }
 }

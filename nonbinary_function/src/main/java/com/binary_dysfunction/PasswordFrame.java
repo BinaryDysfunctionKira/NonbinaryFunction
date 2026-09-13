@@ -34,7 +34,13 @@ public class PasswordFrame {
 
     private void start() {
         System.out.println(Main.serverPath);
-        if (Config.hasServerConfig(new File(Main.serverPath))) {
+        File path = new File(Main.serverPath);
+        if (!path.exists()) {
+            Main.serverName = "";
+            System.out.println("No Server");
+            return;
+        }
+        if (Config.hasServerConfig(path)) {
             Main.ownerSet = Config.hasServerConfig(new File(Main.serverPath));
             Main.isServerNew = !Config.hasServerConfig(new File(Main.serverPath));
             System.out.println("Server Connected");
