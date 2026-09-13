@@ -16,6 +16,7 @@ import org.json.JSONObject;
 public class JSONConfigurations {
 
     public final static Path ACCOUNT_PATH = Paths.get(Main.serverPath + "/users/accounts.json");
+    public final static Path CHATS_PATH = Paths.get(Main.serverPath + "/chats");
 
     public static void addAccount(String username, String passwordHash) throws IOException {
 
