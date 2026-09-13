@@ -27,7 +27,7 @@ public final class Updater {
                 // Push the update onto the EDT — never touch Swing components directly here
                 SwingUtilities.invokeLater(() -> {
                     System.out.println("Update"+counter);
-                    if (counter % 20 == 0) Toast.show(HomeFrame.frame, "Message", "You got mail!", 5000, Toast.Position.BOTTOM_RIGHT, true);
+                    if (counter % 20 == 0) Toast.show(null, Main.loggedInAccount.profilePicturePath, Main.loggedInAccount.username, "Hello, World!", 5000, Toast.Position.BOTTOM_RIGHT, true);
                     counter++;
                 });
                 try {
