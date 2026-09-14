@@ -10,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
 
 import com.binary_dysfunction.components.Colors;
 import com.binary_dysfunction.components.Component;
@@ -79,10 +80,11 @@ public final class ChatPanel extends JPanel {
 
         for (Account acc : Main.updater.members) {
             
-            JButton tmpButton = new JButton(acc.fullName, Component.scaleImage(Main.serverPath + acc.profilePicturePath, WIDTH));
-            tmpButton.setPreferredSize(new Dimension(120, 40));
-            tmpButton.setMinimumSize(new Dimension(120, 40));
-            tmpButton.setMaximumSize(new Dimension(120, 40));
+            JButton tmpButton = new JButton(acc.fullName, Component.scaleImage(Main.serverPath + acc.profilePicturePath, 40));
+            tmpButton.setHorizontalAlignment(SwingConstants.LEFT);
+            tmpButton.setPreferredSize(new Dimension(200, 40));
+            tmpButton.setMinimumSize(new Dimension(200, 40));
+            tmpButton.setMaximumSize(new Dimension(200, 40));
             tmpButton.setBackground(Colors.backgroundColorLighter);
             tmpButton.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             

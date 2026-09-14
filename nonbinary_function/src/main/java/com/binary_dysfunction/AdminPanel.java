@@ -217,6 +217,7 @@ public class AdminPanel extends JPanel {
                         JSONConfigurations.updateAccountField(currentAccount.username, "fullName", fullName.getText());
                         currentAccount.fullName = fullName.getText();
                         if (currentAccount == Main.loggedInAccount) Main.loggedInAccount.fullName = fullName.getText();
+                        Toast.show(null, "Admin", "Name changed.", 3000, Toast.Position.BOTTOM_RIGHT, false);
                         System.out.println("FullName updated");
                     } catch (IOException e1) {}
                 }
@@ -243,6 +244,7 @@ public class AdminPanel extends JPanel {
             StringSelection stringSelection = new StringSelection(myString);
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             clipboard.setContents(stringSelection, null);
+            Toast.show(null, "UID", "Saved to clipboard.", 3000, Toast.Position.BOTTOM_RIGHT, false);
         });
         uid.addMouseListener(new MouseAdapter() {
             @Override
@@ -284,6 +286,7 @@ public class AdminPanel extends JPanel {
                         JSONConfigurations.updateAccountField(currentAccount.username, "description", descriptionArea.getText());
                         currentAccount.description = descriptionArea.getText();
                         if (currentAccount == Main.loggedInAccount) Main.loggedInAccount.description = descriptionArea.getText();
+                        Toast.show(null, "Admin", "Description changed.", 3000, Toast.Position.BOTTOM_RIGHT, false);
                         System.out.println("Description updated");
                     } catch (IOException e1) {}
                 }
@@ -326,7 +329,8 @@ public class AdminPanel extends JPanel {
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     if (!emailArea.getText().contains("@")) {
-                        JOptionPane.showMessageDialog(null, "Die E-Mail muss ein '@' beinhalten.", "Fehlerhafte E-Mail", JOptionPane.ERROR_MESSAGE);
+                        // JOptionPane.showMessageDialog(null, "Die E-Mail muss ein '@' beinhalten.", "Fehlerhafte E-Mail", JOptionPane.ERROR_MESSAGE);
+                        Toast.show(null, "Admin", "Ungültige E-Mail", 3000, Toast.Position.BOTTOM_RIGHT, false);
                         return;
                     }
                     emailArea.setFocusable(false);
@@ -335,6 +339,7 @@ public class AdminPanel extends JPanel {
                         JSONConfigurations.updateAccountField(currentAccount.username, "email", emailArea.getText());
                         currentAccount.email = emailArea.getText();
                         if (currentAccount == Main.loggedInAccount) Main.loggedInAccount.email = emailArea.getText();
+                        Toast.show(null, "Admin", "E-Mail changed.", 3000, Toast.Position.BOTTOM_RIGHT, false);
                         System.out.println("E-Mail updated for: " + currentAccount.username);
                     } catch (IOException e1) {}
                 }
@@ -384,6 +389,7 @@ public class AdminPanel extends JPanel {
                     try {
                         JSONConfigurations.updateAccountField(currentAccount.username, "passwordHash", newHashedPassword);
                         System.out.println("Password changed for: " + currentAccount.username);
+                        Toast.show(null, "Admin", "Password changed.", 3000, Toast.Position.BOTTOM_RIGHT, false);
                         newPasswordField.setText("");
                     } catch (IOException e1) {
                         System.out.println("Failed changing PasswordHash");

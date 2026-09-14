@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import javax.swing.SwingUtilities;
 
@@ -39,11 +38,11 @@ public final class Updater {
             while (running) {
 
                 SwingUtilities.invokeLater(() -> {
-                    System.out.println("Update"+counter);
+                    // System.out.println("Update"+counter);
                     if (counter % 20 == 0) {
-                        int randomNum = new Random().nextInt(0, members.size());
-                        Account randomAcc = members.get(randomNum);
-                        Toast.show(null, Main.serverPath + randomAcc.profilePicturePath, randomAcc.fullName, "Meow!", 5000, Toast.Position.BOTTOM_RIGHT, true);
+                        // int randomNum = new Random().nextInt(0, members.size());
+                        // Account randomAcc = members.get(randomNum);
+                        // Toast.show(null, Main.serverPath + randomAcc.profilePicturePath, randomAcc.fullName, "Meow!", 5000, Toast.Position.BOTTOM_RIGHT, true);
                     }
                     try {
                         updateAccountList();
