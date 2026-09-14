@@ -25,7 +25,12 @@ public class Main {
 
     public static void start() {
         FlatMacDarkLaf.setup();
-        loadSavedUsrConfig();
+        try {
+            loadSavedUsrConfig();
+        } catch (Exception e) {
+            config.saveServerPath("");
+        }
+        
         SwingUtilities.invokeLater(new PasswordFrame()::startup);
     }
 

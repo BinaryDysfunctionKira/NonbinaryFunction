@@ -34,6 +34,7 @@ public class PasswordFrame {
 
     private void start() {
         System.out.println(Main.serverPath);
+        if (Main.serverPath == null) Main.serverPath = "";
         File path = new File(Main.serverPath);
         if (!path.exists()) {
             Main.serverName = "";
