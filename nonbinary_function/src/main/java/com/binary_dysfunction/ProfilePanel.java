@@ -38,7 +38,7 @@ public class ProfilePanel extends JScrollPane {
 
     public ProfilePanel(HomeFrame hf) {
 
-        JLabel pfp = new JLabel(Component.scaleImage(Main.loggedInAccount.profilePicturePath, 200));
+        JLabel pfp = new JLabel(Component.scaleImage(Main.serverPath + Main.loggedInAccount.profilePicturePath, 200));
         pfp.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
         pfp.setAlignmentX(CENTER_ALIGNMENT);
 
@@ -75,8 +75,9 @@ public class ProfilePanel extends JScrollPane {
                     File targetFile = new File(targetDir, selectedFile.getName());
                     Files.copy(selectedFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
-                    Main.loggedInAccount.profilePicturePath = targetFile.getPath();
-                    JSONConfigurations.updateAccountField(Main.loggedInAccount.username, "profilePicturePath", targetFile.getPath());
+                    String finalPath = Config.ACCOUNTS_DIR + Main.loggedInAccount.username + "/user-data/" + targetFile.getName();
+                    Main.loggedInAccount.profilePicturePath = Main.serverPath + finalPath;
+                    JSONConfigurations.updateAccountField(Main.loggedInAccount.username, "profilePicturePath", finalPath);
                     pfp.setIcon(Component.scaleImage(Main.loggedInAccount.profilePicturePath, 200));
                     hf.topBar.accountButton.setIcon(Component.scaleImage(Main.loggedInAccount.profilePicturePath, 40));
 

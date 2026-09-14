@@ -29,7 +29,7 @@ public class TopBar extends JPanel {
             System.out.println("Home-Panel loaded");
         });
 
-        accountButton = new JButton(Main.loggedInAccount.username, Component.scaleImage(Main.loggedInAccount.profilePicturePath, 40));
+        accountButton = new JButton(Main.loggedInAccount.username, Component.scaleImage(Main.serverPath + Main.loggedInAccount.profilePicturePath, 40));
         accountButton.setToolTipText("Account Details");
         accountButton.setFont(new Font("Arial", Font.PLAIN, 13));
         accountButton.setBackground(Colors.backgorundColorDarker);

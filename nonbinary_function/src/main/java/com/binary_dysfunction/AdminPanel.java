@@ -136,7 +136,7 @@ public class AdminPanel extends JPanel {
         usersPanel.add(userButtonPanel, BorderLayout.SOUTH);
 
 
-        JLabel pfpLabel = new JLabel(Component.scaleImage(currentAccount.profilePicturePath, 132));
+        JLabel pfpLabel = new JLabel(Component.scaleImage(Main.serverPath + currentAccount.profilePicturePath, 132));
         pfpLabel.setBorder(BorderFactory.createLineBorder(backgroundColor));
 
         JPanel pfpPanel = new JPanel();
@@ -174,8 +174,9 @@ public class AdminPanel extends JPanel {
                     File targetFile = new File(targetDir, selectedFile.getName());
                     Files.copy(selectedFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
-                    currentAccount.profilePicturePath = targetFile.getPath();
-                    JSONConfigurations.updateAccountField(currentAccount.username, "profilePicturePath", targetFile.getPath());
+                    String finalPath = Config.ACCOUNTS_DIR + currentAccount.username + "/user-data/" + targetFile.getName();
+                    currentAccount.profilePicturePath = Main.serverPath + finalPath;
+                    JSONConfigurations.updateAccountField(currentAccount.username, "profilePicturePath", finalPath);
                     pfpLabel.setIcon(Component.scaleImage(currentAccount.profilePicturePath, 132));
 
                     if (currentAccount == Main.loggedInAccount) {
@@ -215,6 +216,7 @@ public class AdminPanel extends JPanel {
                     try {
                         JSONConfigurations.updateAccountField(currentAccount.username, "fullName", fullName.getText());
                         currentAccount.fullName = fullName.getText();
+                        if (currentAccount == Main.loggedInAccount) Main.loggedInAccount.fullName = fullName.getText();
                         System.out.println("FullName updated");
                     } catch (IOException e1) {}
                 }
@@ -281,6 +283,7 @@ public class AdminPanel extends JPanel {
                     try {
                         JSONConfigurations.updateAccountField(currentAccount.username, "description", descriptionArea.getText());
                         currentAccount.description = descriptionArea.getText();
+                        if (currentAccount == Main.loggedInAccount) Main.loggedInAccount.description = descriptionArea.getText();
                         System.out.println("Description updated");
                     } catch (IOException e1) {}
                 }
@@ -331,6 +334,7 @@ public class AdminPanel extends JPanel {
                     try {
                         JSONConfigurations.updateAccountField(currentAccount.username, "email", emailArea.getText());
                         currentAccount.email = emailArea.getText();
+                        if (currentAccount == Main.loggedInAccount) Main.loggedInAccount.email = emailArea.getText();
                         System.out.println("E-Mail updated for: " + currentAccount.username);
                     } catch (IOException e1) {}
                 }

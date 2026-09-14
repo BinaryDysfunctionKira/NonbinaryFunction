@@ -21,7 +21,7 @@ public class UserCard extends JPanel {
 
     public UserCard(HomeFrame currentFrame) {
 
-        JLabel pfp = new JLabel(Component.scaleImage(Main.loggedInAccount.profilePicturePath, 40));
+        JLabel pfp = new JLabel(Component.scaleImage(Main.serverPath + Main.loggedInAccount.profilePicturePath, 40));
         pfp.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
 
         JLabel subtitleLabel = new JLabel("Angemeldet | " + Main.loggedInAccount.username);

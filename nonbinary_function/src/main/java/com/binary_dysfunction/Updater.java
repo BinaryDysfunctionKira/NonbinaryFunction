@@ -43,7 +43,7 @@ public final class Updater {
                     if (counter % 20 == 0) {
                         int randomNum = new Random().nextInt(0, members.size());
                         Account randomAcc = members.get(randomNum);
-                        Toast.show(null, randomAcc.profilePicturePath, randomAcc.fullName, "Meow!", 5000, Toast.Position.BOTTOM_RIGHT, true);
+                        Toast.show(null, Main.serverPath + randomAcc.profilePicturePath, randomAcc.fullName, "Meow!", 5000, Toast.Position.BOTTOM_RIGHT, true);
                     }
                     try {
                         updateAccountList();
