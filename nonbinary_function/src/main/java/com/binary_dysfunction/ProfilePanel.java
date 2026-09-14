@@ -136,6 +136,7 @@ public class ProfilePanel extends JScrollPane {
             StringSelection stringSelection = new StringSelection(myString);
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             clipboard.setContents(stringSelection, null);
+            Toast.show(null, "Profil", "UID kopiert!", 3000, Toast.Position.BOTTOM_RIGHT, false);
         });
         uid.addMouseListener(new MouseAdapter() {
             @Override
