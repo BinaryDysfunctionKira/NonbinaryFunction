@@ -88,9 +88,10 @@ public final class Updater {
             List<Object> assemblies = acc.getJSONArray("assemblies").toList();
             boolean cloudActivated = acc.getBoolean("cloudActivated");
             String email = acc.getString("email");
+            List<Object> chats = acc.getJSONArray("chats").toList();
 
             // System.out.println(username);
-            members.add(new Account(username, passwordHash, fullName, description, profilePicturePath, uid, assemblies, cloudActivated, email));
+            members.add(new Account(username, passwordHash, fullName, description, profilePicturePath, uid, assemblies, cloudActivated, email, chats));
         }
         // System.out.println("Account-List updated");
     }

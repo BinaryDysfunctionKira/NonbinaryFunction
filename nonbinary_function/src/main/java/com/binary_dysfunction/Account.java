@@ -16,8 +16,9 @@ public class Account {
     public List<Object> assemblies;
     public boolean cloudActivated;
     public String email;
+    public List<Object> chats;
 
-    public Account(String username, String passwordHash, String fullName, String description, String profilePicturePath, String uid, List<Object> assemblies, boolean cloudActivated, String email) {
+    public Account(String username, String passwordHash, String fullName, String description, String profilePicturePath, String uid, List<Object> assemblies, boolean cloudActivated, String email, List<Object> chats) {
         this.username = username;
         this.passwordHash = passwordHash;
         this.fullName = fullName;
@@ -27,6 +28,7 @@ public class Account {
         this.assemblies = assemblies;
         this.cloudActivated = cloudActivated;
         this.email = email;
+        this.chats = chats;
 
         if (this.email.equals("")) this.cloudActivated = false;
     }

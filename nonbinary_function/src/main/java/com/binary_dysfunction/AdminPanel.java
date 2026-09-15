@@ -511,8 +511,9 @@ public class AdminPanel extends JPanel {
             List<Object> assemblies = acc.getJSONArray("assemblies").toList();
             boolean cloudActivated = acc.getBoolean("cloudActivated");
             String email = acc.getString("email");
+            List<Object> chats = acc.getJSONArray("chats").toList();
 
-            registeredAccounts.add(new Account(username, passwordHash, fullName, description, profilePicturePath, uid, assemblies, cloudActivated, email));
+            registeredAccounts.add(new Account(username, passwordHash, fullName, description, profilePicturePath, uid, assemblies, cloudActivated, email, chats));
             System.out.println("-" + username);
         }
 
