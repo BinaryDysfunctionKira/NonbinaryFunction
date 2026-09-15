@@ -22,6 +22,7 @@ public class Config {
     public static final String ANNOUNCEMENTS_DIR = "/announcements/";
     public static final String ASSEMBLIES_DIR = "/assemblies/";
     public static final String CHATS_DIR = "/chats/";
+    public static final String CHATS_FILE = CHATS_DIR + "chats.json";
     public static final String EVENTS_DIR = "/events/";
     public static final String USER_DIR = "/users/";
     public static final String ACCOUNTS_DIR = "/users/accounts/";

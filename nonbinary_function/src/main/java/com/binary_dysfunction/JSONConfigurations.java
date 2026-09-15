@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Random;
 
 import javax.swing.JOptionPane;
 
@@ -16,7 +17,7 @@ import org.json.JSONObject;
 public class JSONConfigurations {
 
     public final static Path ACCOUNT_PATH = Paths.get(Main.serverPath + "/users/accounts.json");
-    public final static Path CHATS_PATH = Paths.get(Main.serverPath + "/chats");
+    public final static Path CHATS_PATH = Paths.get(Main.serverPath + "/chats/chats.json");
 
     public static void addAccount(String username, String passwordHash) throws IOException {
 
@@ -174,5 +175,57 @@ public class JSONConfigurations {
         Files.writeString(ACCOUNT_PATH, updatedAccounts.toString(4));
 
         FileUtils.deleteDirectory(new File(Main.serverPath + Config.ACCOUNTS_DIR + username));
+    }
+
+    public static void addChat(Account... member) throws IOException {
+
+        if (CHATS_PATH.getParent() != null) {
+            Files.createDirectories(CHATS_PATH.getParent());
+        }
+
+        JSONArray chats;
+        if (Files.exists(CHATS_PATH)) {
+            String content = Files.readString(CHATS_PATH);
+            chats = new JSONArray(content);
+        } else {
+            chats = new JSONArray();
+        }
+
+        String id = "";
+        boolean chatIDFound = false;
+        while (!chatIDFound) {
+            boolean idAlreadyTaken = false;
+            String chatID = Integer.toString(new Random().nextInt());
+            String hashedChatID = Config.hashPassword(chatID);
+            for (int i = 0; i < chats.length(); i++) {
+                JSONObject chat = chats.getJSONObject(i);
+                if (chat.getString("id").equals(hashedChatID)) {
+                    idAlreadyTaken = true;
+                }
+            }
+            if (!idAlreadyTaken) {
+                id = hashedChatID;
+                chatIDFound = true;
+            }
+        }
+        
+
+        JSONObject newChat = new JSONObject();
+        newChat.put("id", id);
+        JSONArray members = new JSONArray();
+        for (Account mbr : member) {
+            members.put(mbr.uid);
+        }
+        newChat.put("members", members);
+        boolean isGroupChat = false;
+        if (member.length > 2) isGroupChat = true;
+        newChat.put("isGroupChat", isGroupChat);
+        if (isGroupChat) newChat.put("groupName", "New Group");
+        else newChat.put("groupName", "New Chat");
+        newChat.put("pfpPath", "");
+
+        chats.put(newChat);
+
+        Files.writeString(CHATS_PATH, chats.toString(4));
     }
 }

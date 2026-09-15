@@ -17,7 +17,8 @@ public final class Updater {
     private Thread updateThread;
     private volatile boolean running = false;
     private volatile int counter = 0;
-    public volatile List<Account> members = new ArrayList<>();
+    public volatile List<Account> membersList = new ArrayList<>();
+    public volatile List<Chat> chatsList = new ArrayList<>();
 
     public Updater() {
         startUpdating();
@@ -46,6 +47,7 @@ public final class Updater {
                     }
                     try {
                         updateAccountList();
+                        updateChatList();
                     } catch (IOException e) {}
                     counter++;
                 });
@@ -71,13 +73,18 @@ public final class Updater {
 
     public void updateAccountList() throws IOException {
 
-        String content = Files.readString(JSONConfigurations.ACCOUNT_PATH);
+        String content;
+        try {
+            content = Files.readString(JSONConfigurations.ACCOUNT_PATH);
+        } catch (IOException e) {
+            return;
+        }
         JSONArray accounts = new JSONArray(content);
 
-        members.clear();
+        membersList.clear();
 
         for (int i = 0; i < accounts.length(); i++) {
-            JSONObject acc =  accounts.getJSONObject(i);
+            JSONObject acc = accounts.getJSONObject(i);
 
             String username = acc.getString("username");
             String passwordHash = acc.getString("passwordHash");
@@ -91,8 +98,35 @@ public final class Updater {
             List<Object> chats = acc.getJSONArray("chats").toList();
 
             // System.out.println(username);
-            members.add(new Account(username, passwordHash, fullName, description, profilePicturePath, uid, assemblies, cloudActivated, email, chats));
+            membersList.add(new Account(username, passwordHash, fullName, description, profilePicturePath, uid, assemblies, cloudActivated, email, chats));
         }
         // System.out.println("Account-List updated");
+    }
+
+    public void updateChatList() throws IOException {
+
+        String content = Files.readString(JSONConfigurations.CHATS_PATH);
+        JSONArray chats = new JSONArray(content);
+
+        chatsList.clear();
+
+        for (int i = 0; i < chats.length(); i++) {
+            JSONObject chat = chats.getJSONObject(i);
+
+            String id = chat.getString("id");
+            List<Object> members = chat.getJSONArray("members").toList();
+            boolean isGroupChat = chat.getBoolean("isGroupChat");
+            String groupName = chat.getString("groupName");
+            String pfpPath = chat.getString("pfpPath");
+
+            chatsList.add(new Chat(id, members, isGroupChat, groupName, pfpPath));
+        }
+    }
+
+    public Account getAccountByUID(String uid) {
+        for (Account acc : membersList) {
+            if (acc.uid.equals(uid)) return acc;
+        }
+        return null;
     }
 }

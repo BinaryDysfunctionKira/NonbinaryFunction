@@ -176,6 +176,7 @@ public class AdminPanel extends JPanel {
 
                     String finalPath = Config.ACCOUNTS_DIR + currentAccount.username + "/user-data/" + targetFile.getName();
                     currentAccount.profilePicturePath = Main.serverPath + finalPath;
+                    if (currentAccount == Main.loggedInAccount) Main.loggedInAccount.profilePicturePath = Main.serverPath + finalPath;
                     JSONConfigurations.updateAccountField(currentAccount.username, "profilePicturePath", finalPath);
                     pfpLabel.setIcon(Component.scaleImage(currentAccount.profilePicturePath, 132));
 
