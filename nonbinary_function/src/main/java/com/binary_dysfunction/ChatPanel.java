@@ -148,13 +148,7 @@ public final class ChatPanel extends JPanel {
                 alreadyExists = CollectionUtils.isEqualCollection(members, compareList);
                 if (alreadyExists) {
                     System.out.println("Already exists!");
-                    System.out.println(members);
-                    System.out.println(compareList);
                     break;
-                } else {
-                    System.out.println("Does not already exists!");
-                    System.out.println(members);
-                    System.out.println(compareList);
                 }
             }
 
