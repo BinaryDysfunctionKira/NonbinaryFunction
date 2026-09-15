@@ -20,7 +20,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import com.binary_dysfunction.components.Colors;
 import com.binary_dysfunction.components.Component;
 
-public final class ChatPanel extends JPanel {
+public class ChatPanel extends JPanel {
 
     JPanel chatsPanel;
     HomeFrame currentFrame;
@@ -101,7 +101,11 @@ public final class ChatPanel extends JPanel {
                     if (!chat.isGroupChat) {
                         for (Object memberHashBrown : chat.members) {
                             if (memberHashBrown.toString() == null ? Main.loggedInAccount.uid != null : !memberHashBrown.toString().equals(Main.loggedInAccount.uid)) {
-                                chatName = Main.updater.getAccountByUID(memberHashBrown.toString()).fullName;
+                                try {
+                                    chatName = Main.updater.getAccountByUID(memberHashBrown.toString()).fullName;
+                                } catch (Exception e) {
+                                    chatName = "User deleted";
+                                }
                             }
                         }
                     } else chatName = chat.groupName;

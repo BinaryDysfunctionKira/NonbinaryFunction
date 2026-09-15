@@ -102,6 +102,14 @@ public class JSONConfigurations {
                 break; // stop once found, assuming usernames are unique
             }
         }
+        // for (int i = 0; i < accounts.length(); i++) {
+        //     JSONObject acc = accounts.getJSONObject(i);
+        //     if (acc.getString("uid").equals(username)) {
+        //         acc.put(fieldName, newValue); // overwrites the existing key, or adds it if missing
+        //         found = true;
+        //         break; // stop once found, assuming usernames are unique
+        //     }
+        // }
 
         if (!found) {
             System.out.println("Account not found: " + username);
@@ -109,6 +117,42 @@ public class JSONConfigurations {
         }
 
         Files.writeString(ACCOUNT_PATH, accounts.toString(4));
+    }
+    public static Object getAccountField(String username, String fieldName) throws IOException {
+
+        if (!Files.exists(ACCOUNT_PATH)) {
+            return null; // nothing to return
+        }
+
+        String content = Files.readString(ACCOUNT_PATH);
+        JSONArray accounts = new JSONArray(content);
+
+        for (int i = 0; i < accounts.length(); i++) {
+            JSONObject acc = accounts.getJSONObject(i);
+            if (acc.getString("username").equals(username)) {
+                
+                return acc.get(fieldName);
+            }
+        }
+        return null;
+    }
+    public static List<Object> getAccountFieldList(String username, String fieldName) throws IOException {
+
+        if (!Files.exists(ACCOUNT_PATH)) {
+            return null; // nothing to return
+        }
+
+        String content = Files.readString(ACCOUNT_PATH);
+        JSONArray accounts = new JSONArray(content);
+
+        for (int i = 0; i < accounts.length(); i++) {
+            JSONObject acc = accounts.getJSONObject(i);
+            if (acc.getString("username").equals(username)) {
+                
+                return acc.getJSONArray(fieldName).toList();
+            }
+        }
+        return null;
     }
 
     public static Account logInAccount(String username, String passwordHash) throws IOException {
@@ -227,5 +271,12 @@ public class JSONConfigurations {
         chats.put(newChat);
 
         Files.writeString(CHATS_PATH, chats.toString(4));
+
+        for (Account mbr : member) {
+            Object rawChats = getAccountField(mbr.username, "chats");
+            JSONArray oldChats = (rawChats instanceof JSONArray) ? (JSONArray) rawChats : new JSONArray();
+            oldChats.put(id);
+            updateAccountField(mbr.username, "chats", oldChats);
+        }
     }
 }
