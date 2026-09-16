@@ -23,7 +23,7 @@ public class Component {
                 throw new IOException("Unsupported or unreadable image format: " + path);
             }
         } catch (IOException e) {
-            System.err.println("Failed to load image at '" + path + "': " + e.getMessage());
+            // System.err.println("Failed to load image at '" + path + "': " + e.getMessage());
             return scaleImage("nonbinary_function\\src\\main\\resources\\BinaryDysfunctionLogo.png", size); // fallback avatar
         }
 

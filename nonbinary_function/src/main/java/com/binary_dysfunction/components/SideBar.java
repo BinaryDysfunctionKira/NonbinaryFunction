@@ -12,6 +12,8 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import com.binary_dysfunction.AdminPanel;
+import com.binary_dysfunction.ChatPanel;
 import com.binary_dysfunction.Config;
 import com.binary_dysfunction.HomeFrame;
 import com.binary_dysfunction.Main;
@@ -38,6 +40,7 @@ public class SideBar extends JPanel {
         chatButton.setBackground(null);
         chatButton.setBorder(null);
         chatButton.addActionListener(e -> {
+            ChatPanel.currentTargetUser = null;
             currentFrame.setChatPanel();
             System.out.println("Chat-Panel loaded");
         });
@@ -89,6 +92,7 @@ public class SideBar extends JPanel {
         adminButton.setToolTipText("Admin Zone");
         adminButton.setPreferredSize(new Dimension(40, 40));
         adminButton.addActionListener(e -> {
+            AdminPanel.currentAccount = Main.loggedInAccount;
             currentFrame.setAdminPanel();
             System.out.println("Admin-Panel loaded");
         });

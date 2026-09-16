@@ -3,6 +3,8 @@ package com.binary_dysfunction;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +14,10 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -25,58 +29,62 @@ public class ChatPanel extends JPanel {
     JPanel chatsPanel;
     HomeFrame currentFrame;
 
-    static Chat currentTargetUser = Main.updater.chatsList.get(0);
+    public static Chat currentTargetUser;
 
     public ChatPanel(HomeFrame currentFrame) {
         this.currentFrame = currentFrame;
 
-        String chatPfp = Main.serverPath + currentTargetUser.pfpPath;
-        if (!currentTargetUser.isGroupChat) {
-            for (Object usr : currentTargetUser.members) {
-                if (!usr.toString().equals(Main.loggedInAccount.uid)) {
-                    try {
-                        chatPfp = Main.serverPath + Main.updater.getAccountByUID(usr.toString()).profilePicturePath;
-                    } catch (Exception e) {}
-                }
-            }
-        }
-        JLabel currentTargetUserPfpLabel = new JLabel(Component.scaleImage(chatPfp, 60));
-        currentTargetUserPfpLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        String chatName = currentTargetUser.groupName;
-        if (!currentTargetUser.isGroupChat) {
-            for (Object usr : currentTargetUser.members) {
-                if (!usr.toString().equals(Main.loggedInAccount.uid)) {
-                    try {
-                        chatName = Main.updater.getAccountByUID(usr.toString()).fullName;
-                    } catch (Exception e) {
-                        chatName = "User deleted";
+        JLabel currentTargetUserPfpLabel = new JLabel();
+        JPanel currentTargetUserDetailsPanel = new JPanel();
+        if (currentTargetUser != null) {
+            String chatPfp = Main.serverPath + currentTargetUser.pfpPath;
+            if (!currentTargetUser.isGroupChat) {
+                for (Object usr : currentTargetUser.members) {
+                    if (!usr.toString().equals(Main.loggedInAccount.uid)) {
+                        try {
+                            chatPfp = Main.serverPath + Main.updater.getAccountByUID(usr.toString()).profilePicturePath;
+                        } catch (Exception e) {}
                     }
                 }
             }
-        }
-        JLabel currentTargetUserFullNameLabel = new JLabel(chatName);
-        currentTargetUserFullNameLabel.setFont(new Font("Arial", Font.BOLD, 18));
+            currentTargetUserPfpLabel = new JLabel(Component.scaleImage(chatPfp, 60));
+            currentTargetUserPfpLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        String chatUsername = currentTargetUser.id;
-        if (!currentTargetUser.isGroupChat) {
-            for (Object usr : currentTargetUser.members) {
-                if (!usr.toString().equals(Main.loggedInAccount.uid)) {
-                    try {
-                        chatUsername = Main.updater.getAccountByUID(usr.toString()).username;
-                    } catch(Exception e) {}
+            String chatName = currentTargetUser.groupName;
+            if (!currentTargetUser.isGroupChat) {
+                for (Object usr : currentTargetUser.members) {
+                    if (!usr.toString().equals(Main.loggedInAccount.uid)) {
+                        try {
+                            chatName = Main.updater.getAccountByUID(usr.toString()).fullName;
+                        } catch (Exception e) {
+                            chatName = "User deleted";
+                        }
+                    }
                 }
             }
-        }
-        JLabel currentTargetUserUserNameLabel = new JLabel(chatUsername);
-        currentTargetUserUserNameLabel.setFont(new Font("Arial", Font.BOLD, 12));
-        currentTargetUserUserNameLabel.setForeground(Colors.subtleFontColor);
+            JLabel currentTargetUserFullNameLabel = new JLabel(chatName);
+            currentTargetUserFullNameLabel.setFont(new Font("Arial", Font.BOLD, 18));
 
-        JPanel currentTargetUserDetailsPanel = new JPanel();
-        currentTargetUserDetailsPanel.setLayout(new BoxLayout(currentTargetUserDetailsPanel, BoxLayout.Y_AXIS));
-        currentTargetUserDetailsPanel.setBackground(Colors.backgorundColorVeryDark);
-        currentTargetUserDetailsPanel.add(currentTargetUserFullNameLabel);
-        currentTargetUserDetailsPanel.add(currentTargetUserUserNameLabel);
+            String chatUsername = currentTargetUser.id;
+            if (!currentTargetUser.isGroupChat) {
+                for (Object usr : currentTargetUser.members) {
+                    if (!usr.toString().equals(Main.loggedInAccount.uid)) {
+                        try {
+                            chatUsername = Main.updater.getAccountByUID(usr.toString()).username;
+                        } catch(Exception e) {}
+                    }
+                }
+            }
+            JLabel currentTargetUserUserNameLabel = new JLabel(chatUsername);
+            currentTargetUserUserNameLabel.setFont(new Font("Arial", Font.BOLD, 12));
+            currentTargetUserUserNameLabel.setForeground(Colors.subtleFontColor);
+
+            currentTargetUserDetailsPanel = new JPanel();
+            currentTargetUserDetailsPanel.setLayout(new BoxLayout(currentTargetUserDetailsPanel, BoxLayout.Y_AXIS));
+            currentTargetUserDetailsPanel.setBackground(Colors.backgorundColorVeryDark);
+            currentTargetUserDetailsPanel.add(currentTargetUserFullNameLabel);
+            currentTargetUserDetailsPanel.add(currentTargetUserUserNameLabel);
+        }
 
         JPanel currentTargetInformationPanel = new JPanel();
         currentTargetInformationPanel.setLayout(new BoxLayout(currentTargetInformationPanel, BoxLayout.X_AXIS));
@@ -93,11 +101,35 @@ public class ChatPanel extends JPanel {
         currentTargetUserPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
         currentTargetUserPanel.add(currentTargetInformationPanel, BorderLayout.WEST);
 
+        Message message = new Message("5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9", "poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo", 11111111, true, "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9");
+        
+        JPanel chatContentPanel = new JPanel();
+        chatContentPanel.setLayout(new BoxLayout(chatContentPanel, BoxLayout.Y_AXIS));
+        chatContentPanel.setBackground(Colors.backgroundColor);
+        chatContentPanel.add(message.getJPanel());
+        chatContentPanel.add(message.getJPanel());
+        chatContentPanel.add(message.getJPanel());
+        chatContentPanel.add(message.getJPanel());
+        chatContentPanel.add(message.getJPanel());
+
+        JScrollPane chatContentScrollPane = new JScrollPane(chatContentPanel);
+        chatContentScrollPane.setHorizontalScrollBar(null);
+        chatContentScrollPane.getVerticalScrollBar().setUnitIncrement(8);
+        chatContentScrollPane.setBackground(Colors.backgroundColor);
+
+        chatContentPanel.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                JScrollBar bar = chatContentScrollPane.getVerticalScrollBar();
+                SwingUtilities.invokeLater(() -> bar.setValue(bar.getMaximum()));
+            }
+        });
+
         JPanel currentChatPanel = new JPanel();
         currentChatPanel.setLayout(new BorderLayout());
         currentChatPanel.setBackground(Colors.backgroundColor);
         currentChatPanel.add(currentTargetUserPanel, BorderLayout.NORTH);
-
+        currentChatPanel.add(chatContentScrollPane);
 
         JLabel chatsLabel = new JLabel("Chats", JLabel.LEFT);
         chatsLabel.setFont(new Font("Arial", Font.BOLD, 16));
@@ -135,6 +167,9 @@ public class ChatPanel extends JPanel {
         mainPanel.add(contentPanel);
 
         updateChatList();
+
+
+        
 
         this.setLayout(new BorderLayout());
         this.add(mainPanel);
@@ -223,7 +258,7 @@ public class ChatPanel extends JPanel {
                 List<Object> members = chat.members;
                 alreadyExists = CollectionUtils.isEqualCollection(members, compareList);
                 if (alreadyExists) {
-                    System.out.println("Already exists!");
+                    // System.out.println("Already exists!");
                     break;
                 }
             }
