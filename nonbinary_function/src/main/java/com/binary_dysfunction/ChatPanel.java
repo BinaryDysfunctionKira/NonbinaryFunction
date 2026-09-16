@@ -25,14 +25,73 @@ public class ChatPanel extends JPanel {
     JPanel chatsPanel;
     HomeFrame currentFrame;
 
+    static Chat currentTargetUser = Main.updater.chatsList.get(0);
+
     public ChatPanel(HomeFrame currentFrame) {
         this.currentFrame = currentFrame;
+
+        String chatPfp = Main.serverPath + currentTargetUser.pfpPath;
+        if (!currentTargetUser.isGroupChat) {
+            for (Object usr : currentTargetUser.members) {
+                if (!usr.toString().equals(Main.loggedInAccount.uid)) {
+                    try {
+                        chatPfp = Main.serverPath + Main.updater.getAccountByUID(usr.toString()).profilePicturePath;
+                    } catch (Exception e) {}
+                }
+            }
+        }
+        JLabel currentTargetUserPfpLabel = new JLabel(Component.scaleImage(chatPfp, 60));
+        currentTargetUserPfpLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        String chatName = currentTargetUser.groupName;
+        if (!currentTargetUser.isGroupChat) {
+            for (Object usr : currentTargetUser.members) {
+                if (!usr.toString().equals(Main.loggedInAccount.uid)) {
+                    try {
+                        chatName = Main.updater.getAccountByUID(usr.toString()).fullName;
+                    } catch (Exception e) {
+                        chatName = "User deleted";
+                    }
+                }
+            }
+        }
+        JLabel currentTargetUserFullNameLabel = new JLabel(chatName);
+        currentTargetUserFullNameLabel.setFont(new Font("Arial", Font.BOLD, 18));
+
+        String chatUsername = currentTargetUser.id;
+        if (!currentTargetUser.isGroupChat) {
+            for (Object usr : currentTargetUser.members) {
+                if (!usr.toString().equals(Main.loggedInAccount.uid)) {
+                    try {
+                        chatUsername = Main.updater.getAccountByUID(usr.toString()).username;
+                    } catch(Exception e) {}
+                }
+            }
+        }
+        JLabel currentTargetUserUserNameLabel = new JLabel(chatUsername);
+        currentTargetUserUserNameLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        currentTargetUserUserNameLabel.setForeground(Colors.subtleFontColor);
+
+        JPanel currentTargetUserDetailsPanel = new JPanel();
+        currentTargetUserDetailsPanel.setLayout(new BoxLayout(currentTargetUserDetailsPanel, BoxLayout.Y_AXIS));
+        currentTargetUserDetailsPanel.setBackground(Colors.backgorundColorVeryDark);
+        currentTargetUserDetailsPanel.add(currentTargetUserFullNameLabel);
+        currentTargetUserDetailsPanel.add(currentTargetUserUserNameLabel);
+
+        JPanel currentTargetInformationPanel = new JPanel();
+        currentTargetInformationPanel.setLayout(new BoxLayout(currentTargetInformationPanel, BoxLayout.X_AXIS));
+        currentTargetInformationPanel.setBackground(Colors.backgorundColorVeryDark);
+        currentTargetInformationPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 80));
+        currentTargetInformationPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
+        currentTargetInformationPanel.add(currentTargetUserPfpLabel);
+        currentTargetInformationPanel.add(currentTargetUserDetailsPanel);
 
         JPanel currentTargetUserPanel = new JPanel();
         currentTargetUserPanel.setLayout(new BorderLayout());
         currentTargetUserPanel.setBackground(Colors.backgorundColorVeryDark);
         currentTargetUserPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 80));
         currentTargetUserPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
+        currentTargetUserPanel.add(currentTargetInformationPanel, BorderLayout.WEST);
 
         JPanel currentChatPanel = new JPanel();
         currentChatPanel.setLayout(new BorderLayout());
@@ -99,10 +158,10 @@ public class ChatPanel extends JPanel {
                 if (member.toString() == null ? Main.loggedInAccount.uid == null : member.toString().equals(Main.loggedInAccount.uid)) {
                     String chatName = "";
                     if (!chat.isGroupChat) {
-                        for (Object memberHashBrown : chat.members) {
-                            if (memberHashBrown.toString() == null ? Main.loggedInAccount.uid != null : !memberHashBrown.toString().equals(Main.loggedInAccount.uid)) {
+                        for (Object memberHash : chat.members) {
+                            if (memberHash.toString() == null ? Main.loggedInAccount.uid != null : !memberHash.toString().equals(Main.loggedInAccount.uid)) {
                                 try {
-                                    chatName = Main.updater.getAccountByUID(memberHashBrown.toString()).fullName;
+                                    chatName = Main.updater.getAccountByUID(memberHash.toString()).fullName;
                                 } catch (Exception e) {
                                     chatName = "User deleted";
                                 }
@@ -110,7 +169,18 @@ public class ChatPanel extends JPanel {
                         }
                     } else chatName = chat.groupName;
 
-                    JButton tmpButton = new JButton(chatName, Component.scaleImage(Main.serverPath + chat.pfpPath, 40));
+                    String pfpPath = Main.serverPath + chat.pfpPath;
+                    if(!chat.isGroupChat) {
+                        for (Object memberHash : chat.members) {
+                            if (!memberHash.equals(Main.loggedInAccount)) {
+                                try {
+                                    pfpPath = Main.serverPath + Main.updater.getAccountByUID(memberHash.toString()).profilePicturePath;
+                                } catch (Exception e) {}
+                            }
+                        }
+                    }
+
+                    JButton tmpButton = new JButton(chatName, Component.scaleImage(pfpPath, 40));
                     tmpButton.setHorizontalAlignment(SwingConstants.LEFT);
                     tmpButton.setPreferredSize(new Dimension(200, 40));
                     tmpButton.setMinimumSize(new Dimension(200, 40));
@@ -121,6 +191,8 @@ public class ChatPanel extends JPanel {
                         // try {
                         //     // LOAD CHAT
                         // } catch (IOException e1) {}
+                        currentTargetUser = chat;
+                        currentFrame.setChatPanel();
                     });
                     
 

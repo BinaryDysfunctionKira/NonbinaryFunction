@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -162,18 +163,55 @@ public class Config {
         return false;
     }
 
-    public static String hashPassword(String password) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = digest.digest(password.getBytes());
+    // public static String hashPassword(String password) {
+    //     try {
+    //         byte[] salt = new byte[16];
+    //         new SecureRandom().nextBytes(salt);
 
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hashBytes) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+    //         MessageDigest digest = MessageDigest.getInstance("SHA-256");
+    //         digest.update(salt);
+    //         byte[] hashBytes = digest.digest(password.getBytes());
+
+    //         StringBuilder sb = new StringBuilder();
+    //         for (byte b : salt) {
+    //             sb.append(String.format("%02x", b));
+    //         }
+    //         for (byte b : hashBytes) {
+    //             sb.append(String.format("%02x", b));
+    //         }
+    //         return sb.toString();
+    //     } catch (NoSuchAlgorithmException e) {
+    //         throw new RuntimeException(e);
+    //     }
+    // }
+
+    public static String hashPassword(String password) {
+    try {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hashBytes = digest.digest(password.getBytes(StandardCharsets.UTF_8));
+
+        StringBuilder sb = new StringBuilder(hashBytes.length * 2);
+        for (byte b : hashBytes) {
+            sb.append(String.format("%02x", b));
         }
+        return sb.toString();
+    } catch (NoSuchAlgorithmException e) {
+        throw new RuntimeException(e);
     }
+}
+
+    // public static String hashPassword(String password) {
+    //     try {
+    //         MessageDigest digest = MessageDigest.getInstance("SHA-256");
+    //         byte[] hashBytes = digest.digest(password.getBytes());
+
+    //         StringBuilder sb = new StringBuilder();
+    //         for (byte b : hashBytes) {
+    //             sb.append(String.format("%02x", b));
+    //         }
+    //         return sb.toString();
+    //     } catch (NoSuchAlgorithmException e) {
+    //         throw new RuntimeException(e);
+    //     }
+    // }
 }
