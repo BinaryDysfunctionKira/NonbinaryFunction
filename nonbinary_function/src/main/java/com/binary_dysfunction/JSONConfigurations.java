@@ -18,6 +18,7 @@ public class JSONConfigurations {
 
     public final static Path ACCOUNT_PATH = Paths.get(Main.serverPath + "/users/accounts.json");
     public final static Path CHATS_PATH = Paths.get(Main.serverPath + "/chats/chats.json");
+    public final static String CHATS_DIR = Main.serverPath + "/chats/";
 
     public static void addAccount(String username, String passwordHash) throws IOException {
 
@@ -272,11 +273,62 @@ public class JSONConfigurations {
 
         Files.writeString(CHATS_PATH, chats.toString(4));
 
+        addMessage(id, "Neuer Chat wurde erstellt.", "Admin");
+
         for (Account mbr : member) {
             Object rawChats = getAccountField(mbr.username, "chats");
             JSONArray oldChats = (rawChats instanceof JSONArray) ? (JSONArray) rawChats : new JSONArray();
             oldChats.put(id);
             updateAccountField(mbr.username, "chats", oldChats);
         }
+    }
+
+    public static void addMessage(String chatsID, String messageContent, String senderUID) throws IOException {
+
+        Path messagesPath = Path.of(CHATS_DIR + chatsID + "/messages.json");
+
+        if (CHATS_PATH.getParent() != null) {
+            Files.createDirectories(messagesPath.getParent());
+        }
+        if (!new File(CHATS_DIR + chatsID + "/uploads").exists()) {
+            Files.createDirectory(Path.of(CHATS_DIR + chatsID + "/uploads"));
+        }
+
+        JSONArray messages;
+        if (Files.exists(messagesPath)) {
+            String content = Files.readString(messagesPath);
+            messages = new JSONArray(content);
+        } else {
+            messages = new JSONArray();
+        }
+
+        String id = "";
+        boolean chatIDFound = false;
+        while (!chatIDFound) {
+            boolean idAlreadyTaken = false;
+            String chatID = Integer.toString(new Random().nextInt());
+            String hashedChatID = Config.hashPassword(chatID);
+            for (int i = 0; i < messages.length(); i++) {
+                JSONObject chat = messages.getJSONObject(i);
+                if (chat.getString("id").equals(hashedChatID)) {
+                    idAlreadyTaken = true;
+                }
+            }
+            if (!idAlreadyTaken) {
+                id = hashedChatID;
+                chatIDFound = true;
+            }
+        }
+        
+        JSONObject newMessage = new JSONObject();
+        newMessage.put("id", id);
+        newMessage.put("content", messageContent);
+        newMessage.put("date", System.currentTimeMillis());
+        newMessage.put("isRead", false);
+        newMessage.put("senderUID", senderUID);
+
+        messages.put(newMessage);
+
+        Files.writeString(messagesPath, messages.toString(4));
     }
 }

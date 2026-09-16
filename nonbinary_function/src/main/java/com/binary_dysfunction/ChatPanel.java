@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
@@ -24,16 +27,18 @@ import org.apache.commons.collections4.CollectionUtils;
 import com.binary_dysfunction.components.Colors;
 import com.binary_dysfunction.components.Component;
 
-public class ChatPanel extends JPanel {
+public final class ChatPanel extends JPanel {
 
     JPanel chatsPanel;
     HomeFrame currentFrame;
+    static JPanel chatContentPanel = new JPanel();
 
     public static Chat currentTargetUser;
 
     public ChatPanel(HomeFrame currentFrame) {
         this.currentFrame = currentFrame;
 
+        // UI Constructor
         JLabel currentTargetUserPfpLabel = new JLabel();
         JPanel currentTargetUserDetailsPanel = new JPanel();
         if (currentTargetUser != null) {
@@ -100,17 +105,12 @@ public class ChatPanel extends JPanel {
         currentTargetUserPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 80));
         currentTargetUserPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
         currentTargetUserPanel.add(currentTargetInformationPanel, BorderLayout.WEST);
-
-        Message message = new Message("5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9", "poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo poo", 11111111, true, "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9");
         
-        JPanel chatContentPanel = new JPanel();
+        chatContentPanel = new JPanel();
         chatContentPanel.setLayout(new BoxLayout(chatContentPanel, BoxLayout.Y_AXIS));
         chatContentPanel.setBackground(Colors.backgroundColor);
-        chatContentPanel.add(message.getJPanel());
-        chatContentPanel.add(message.getJPanel());
-        chatContentPanel.add(message.getJPanel());
-        chatContentPanel.add(message.getJPanel());
-        chatContentPanel.add(message.getJPanel());
+        // load chat
+        loadMessages();
 
         JScrollPane chatContentScrollPane = new JScrollPane(chatContentPanel);
         chatContentScrollPane.setHorizontalScrollBar(null);
@@ -125,11 +125,55 @@ public class ChatPanel extends JPanel {
             }
         });
 
+        JTextField chatTextField = new JTextField();
+        chatTextField.setSize(Integer.MAX_VALUE, 50);
+        chatTextField.setFont(new Font("Arial", Font.PLAIN, 15));
+        if (currentTargetUser == null) chatTextField.setEnabled(false);
+        chatTextField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    System.out.println("Send");
+                    try {
+                        JSONConfigurations.addMessage(currentTargetUser.id, chatTextField.getText(), Main.loggedInAccount.uid);
+                    } catch (IOException ex) {System.out.println(ex);}
+                    chatTextField.setText("");
+                    chatTextField.setEnabled(false);
+                    chatTextField.setEnabled(true);
+                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    chatTextField.setEnabled(false);
+                    chatTextField.setEnabled(true);
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+            
+        });
+
+        JButton chatSelectFileButton = new JButton(Component.scaleImage("nonbinary_function\\src\\main\\resources\\drive-folder.png", 30));
+        chatSelectFileButton.setFocusable(false);
+        if (currentTargetUser == null) chatSelectFileButton.setEnabled(false);
+
+        JPanel chatBarPanel = new JPanel(new BorderLayout());
+        chatBarPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 50));
+        chatBarPanel.setBackground(Colors.backgorundColorVeryDark);
+        chatBarPanel.add(chatTextField);
+        chatBarPanel.add(chatSelectFileButton, BorderLayout.EAST);
+
         JPanel currentChatPanel = new JPanel();
         currentChatPanel.setLayout(new BorderLayout());
         currentChatPanel.setBackground(Colors.backgroundColor);
         currentChatPanel.add(currentTargetUserPanel, BorderLayout.NORTH);
         currentChatPanel.add(chatContentScrollPane);
+        currentChatPanel.add(chatBarPanel, BorderLayout.SOUTH);
 
         JLabel chatsLabel = new JLabel("Chats", JLabel.LEFT);
         chatsLabel.setFont(new Font("Arial", Font.BOLD, 16));
@@ -186,6 +230,7 @@ public class ChatPanel extends JPanel {
         myChatsLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 2, 0));
         chatsPanel.add(myChatsLabel);
 
+        // create buttons for existing chats
         List<Chat> chatterList = Main.updater.chatsList;
         for (Chat chat : chatterList) {
             List<Object> members = chat.members;
@@ -215,6 +260,7 @@ public class ChatPanel extends JPanel {
                         }
                     }
 
+                    //create button for existing chats
                     JButton tmpButton = new JButton(chatName, Component.scaleImage(pfpPath, 40));
                     tmpButton.setHorizontalAlignment(SwingConstants.LEFT);
                     tmpButton.setPreferredSize(new Dimension(200, 40));
@@ -223,10 +269,11 @@ public class ChatPanel extends JPanel {
                     tmpButton.setBackground(Colors.backgroundColorLighter);
                     tmpButton.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
                     tmpButton.addActionListener(e -> {
-                        // try {
-                        //     // LOAD CHAT
-                        // } catch (IOException e1) {}
+                        // load chat
                         currentTargetUser = chat;
+                        try {
+                            Main.updater.updateMessages();
+                        } catch (IOException ex) {}
                         currentFrame.setChatPanel();
                     });
                     
@@ -247,6 +294,7 @@ public class ChatPanel extends JPanel {
         recommendedLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 2, 0));
         chatsPanel.add(recommendedLabel);
 
+        // creates buttons for recommended chats
         for (Account acc : Main.updater.membersList) {
 
             boolean alreadyExists = false;
@@ -264,6 +312,7 @@ public class ChatPanel extends JPanel {
             }
 
             if ((acc.uid == null ? Main.loggedInAccount.uid != null : !acc.uid.equals(Main.loggedInAccount.uid)) && !alreadyExists) {
+                // create button
                 JButton tmpButton = new JButton(acc.fullName, Component.scaleImage(Main.serverPath + acc.profilePicturePath, 40));
                 tmpButton.setHorizontalAlignment(SwingConstants.LEFT);
                 tmpButton.setPreferredSize(new Dimension(200, 40));
@@ -273,6 +322,7 @@ public class ChatPanel extends JPanel {
                 tmpButton.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
                 tmpButton.addActionListener(e -> {
                     try {
+                        // save new chat
                         JSONConfigurations.addChat(Main.loggedInAccount, acc);
                         Main.updater.updateChatList();
                         currentFrame.setChatPanel();
@@ -285,6 +335,18 @@ public class ChatPanel extends JPanel {
                 tmpButtonPanel.add(tmpButton);
 
                 chatsPanel.add(tmpButtonPanel);
+            }
+        }
+    }
+    public static void loadMessages() {
+        chatContentPanel.removeAll();
+        for (Message msg : Main.updater.currentChatsMessages) {
+            if (currentTargetUser != null) {
+                chatContentPanel.add(msg.getJPanel());
+                SwingUtilities.invokeLater(() -> {
+                    chatContentPanel.revalidate();
+                    chatContentPanel.repaint();
+                });
             }
         }
     }

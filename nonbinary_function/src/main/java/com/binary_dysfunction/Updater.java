@@ -2,6 +2,7 @@ package com.binary_dysfunction;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +20,7 @@ public final class Updater {
     private volatile int counter = 0;
     public volatile List<Account> membersList = new ArrayList<>();
     public volatile List<Chat> chatsList = new ArrayList<>();
+    public volatile List<Message> currentChatsMessages = new ArrayList<>();
 
     public Updater() {
         startUpdating();
@@ -48,6 +50,8 @@ public final class Updater {
                     try {
                         updateAccountList();
                         updateChatList();
+                        if (ChatPanel.currentTargetUser != null) updateMessages();
+                        else currentChatsMessages.clear();
                     } catch (IOException e) {}
                     counter++;
                 });
@@ -128,5 +132,28 @@ public final class Updater {
             if (acc.uid.equals(uid)) return acc;
         }
         return null;
+    }
+
+    public void updateMessages() throws IOException {
+
+        Path messagesPath = Path.of(JSONConfigurations.CHATS_DIR + ChatPanel.currentTargetUser.id + "/messages.json");
+        String content = Files.readString(messagesPath);
+        JSONArray messages = new JSONArray(content);
+
+        currentChatsMessages.clear();
+
+        for (int i = 0; i < messages.length(); i++) {
+            JSONObject message = messages.getJSONObject(i);
+
+            String id = message.getString("id");
+            String messageContent = message.getString("content");
+            long date = message.getLong("date");
+            boolean isRead = message.getBoolean("isRead");
+            String senderUID = message.getString("senderUID");
+
+            currentChatsMessages.add(new Message(id, messageContent, date, isRead, senderUID));
+        }
+
+        ChatPanel.loadMessages();
     }
 }
