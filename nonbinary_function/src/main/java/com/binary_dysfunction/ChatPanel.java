@@ -182,7 +182,12 @@ public final class ChatPanel extends JPanel {
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     try {
-                        JSONConfigurations.addMessage(currentTargetUser.id, chatTextField.getText(), Main.loggedInAccount.uid);
+                        char[] chatMessageTmp = chatTextField.getText().toCharArray();
+                        boolean chatIsEmpty = true;
+                        for (char c : chatMessageTmp) {
+                            if (c != ' ' || c != '\n') chatIsEmpty = false;
+                        }
+                        if (!chatIsEmpty) JSONConfigurations.addMessage(currentTargetUser.id, chatTextField.getText(), Main.loggedInAccount.uid);
                     } catch (IOException ex) {
                         System.out.println(ex);
                     }
