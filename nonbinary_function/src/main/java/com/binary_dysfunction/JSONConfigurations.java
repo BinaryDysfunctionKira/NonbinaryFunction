@@ -2,16 +2,22 @@ package com.binary_dysfunction;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import javax.swing.JOptionPane;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class JSONConfigurations {
@@ -72,11 +78,6 @@ public class JSONConfigurations {
 
         File privateVault = new File(Main.serverPath + Config.ACCOUNTS_DIR + username + "/user-data/");
         privateVault.mkdirs();
-        // Path path = Paths.get(Main.serverPath + "/users/." + username);
-        // Files.setAttribute(path, "dos:hidden", Boolean.TRUE, LinkOption.NOFOLLOW_LINKS);
-        // Path path2 = Paths.get(privateVault.getPath());
-        // Files.setAttribute(path2, "dos:hidden", Boolean.TRUE, LinkOption.NOFOLLOW_LINKS);
-        
 
         if (Main.isServerNew && !Main.ownerSet) {
             Main.config.saveServerOwner(uid);
@@ -103,14 +104,6 @@ public class JSONConfigurations {
                 break; // stop once found, assuming usernames are unique
             }
         }
-        // for (int i = 0; i < accounts.length(); i++) {
-        //     JSONObject acc = accounts.getJSONObject(i);
-        //     if (acc.getString("uid").equals(username)) {
-        //         acc.put(fieldName, newValue); // overwrites the existing key, or adds it if missing
-        //         found = true;
-        //         break; // stop once found, assuming usernames are unique
-        //     }
-        // }
 
         if (!found) {
             System.out.println("Account not found: " + username);
@@ -119,6 +112,7 @@ public class JSONConfigurations {
 
         Files.writeString(ACCOUNT_PATH, accounts.toString(4));
     }
+
     public static Object getAccountField(String username, String fieldName) throws IOException {
 
         if (!Files.exists(ACCOUNT_PATH)) {
@@ -131,12 +125,13 @@ public class JSONConfigurations {
         for (int i = 0; i < accounts.length(); i++) {
             JSONObject acc = accounts.getJSONObject(i);
             if (acc.getString("username").equals(username)) {
-                
+
                 return acc.get(fieldName);
             }
         }
         return null;
     }
+
     public static List<Object> getAccountFieldList(String username, String fieldName) throws IOException {
 
         if (!Files.exists(ACCOUNT_PATH)) {
@@ -149,7 +144,7 @@ public class JSONConfigurations {
         for (int i = 0; i < accounts.length(); i++) {
             JSONObject acc = accounts.getJSONObject(i);
             if (acc.getString("username").equals(username)) {
-                
+
                 return acc.getJSONArray(fieldName).toList();
             }
         }
@@ -174,7 +169,7 @@ public class JSONConfigurations {
             JSONObject acc = accounts.getJSONObject(i);
             if (acc.getString("username").equals(username)) {
                 System.out.println("Logged in: " + username);
-                
+
                 String fullName = acc.getString("fullName");
                 String description = acc.getString("description");
                 String profilePicturePath = acc.getString("profilePicturePath");
@@ -222,6 +217,9 @@ public class JSONConfigurations {
         FileUtils.deleteDirectory(new File(Main.serverPath + Config.ACCOUNTS_DIR + username));
     }
 
+    // NOTE: chats.json is still one shared file, same read-modify-write shape as
+    // messages.json used to be. Left as is for now since chat creation is rare -
+    // say the word if you want the same per-file treatment here too.
     public static void addChat(Account... member) throws IOException {
 
         if (CHATS_PATH.getParent() != null) {
@@ -253,7 +251,6 @@ public class JSONConfigurations {
                 chatIDFound = true;
             }
         }
-        
 
         JSONObject newChat = new JSONObject();
         newChat.put("id", id);
@@ -283,43 +280,28 @@ public class JSONConfigurations {
         }
     }
 
+    // --------------------------------------------------------------------
+    // messages: one file per message instead of one shared array.
+    //
+    // Two clients can now both add a message at the same time without
+    // clobbering each other, because each write only ever creates a brand
+    // new file - it never opens or rewrites a file someone else might also
+    // be writing to. Google Drive syncing a new file is a non-event; the
+    // race only existed because everyone was fighting over the same file.
+    // --------------------------------------------------------------------
+
     public static void addMessage(String chatsID, String messageContent, String senderUID) throws IOException {
 
-        Path messagesPath = Path.of(CHATS_DIR + chatsID + "/messages.json");
+        Path messagesDir = Path.of(CHATS_DIR + chatsID + "/messages");
+        Files.createDirectories(messagesDir);
 
-        if (CHATS_PATH.getParent() != null) {
-            Files.createDirectories(messagesPath.getParent());
-        }
-        if (!new File(CHATS_DIR + chatsID + "/uploads").exists()) {
-            Files.createDirectory(Path.of(CHATS_DIR + chatsID + "/uploads"));
-        }
-
-        JSONArray messages;
-        if (Files.exists(messagesPath)) {
-            String content = Files.readString(messagesPath);
-            messages = new JSONArray(content);
-        } else {
-            messages = new JSONArray();
+        Path uploadsDir = Path.of(CHATS_DIR + chatsID + "/uploads");
+        if (!Files.exists(uploadsDir)) {
+            Files.createDirectories(uploadsDir);
         }
 
-        String id = "";
-        boolean chatIDFound = false;
-        while (!chatIDFound) {
-            boolean idAlreadyTaken = false;
-            String chatID = Integer.toString(new Random().nextInt());
-            String hashedChatID = Config.hashPassword(chatID);
-            for (int i = 0; i < messages.length(); i++) {
-                JSONObject chat = messages.getJSONObject(i);
-                if (chat.getString("id").equals(hashedChatID)) {
-                    idAlreadyTaken = true;
-                }
-            }
-            if (!idAlreadyTaken) {
-                id = hashedChatID;
-                chatIDFound = true;
-            }
-        }
-        
+        String id = generateUniqueMessageId(messagesDir);
+
         JSONObject newMessage = new JSONObject();
         newMessage.put("id", id);
         newMessage.put("content", messageContent);
@@ -327,8 +309,132 @@ public class JSONConfigurations {
         newMessage.put("isRead", false);
         newMessage.put("senderUID", senderUID);
 
-        messages.put(newMessage);
+        Path messageFile = messagesDir.resolve(id + ".json");
 
-        Files.writeString(messagesPath, messages.toString(4));
+        // write to a temp file first, then rename into place - so nobody
+        // (including Drive's own sync scan) can ever see a half-written file
+        Path tmpFile = Files.createTempFile(messagesDir, id + "-", ".tmp");
+        Files.writeString(tmpFile, newMessage.toString(4));
+        Files.move(tmpFile, messageFile, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    private static String generateUniqueMessageId(Path messagesDir) throws IOException {
+        while (true) {
+            String candidate = Config.hashPassword(Integer.toString(new Random().nextInt()));
+            if (!Files.exists(messagesDir.resolve(candidate + ".json"))) {
+                return candidate;
+            }
+        }
+    }
+
+    /** All messages of a chat, oldest first. */
+    public static List<Message> readMessages(String chatsID) throws IOException {
+        Path messagesDir = Path.of(CHATS_DIR + chatsID + "/messages");
+        List<Message> result = new ArrayList<>();
+
+        if (!Files.isDirectory(messagesDir)) return result;
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(messagesDir, "*.json")) {
+            for (Path file : stream) {
+                Message msg = parseMessageFile(file);
+                if (msg != null) result.add(msg);
+            }
+        }
+
+        result.sort((a, b) -> Long.compare(a.date, b.date));
+        return result;
+    }
+
+    /** A single message by id, or null if it doesn't exist (yet). */
+    public static Message readMessage(String chatsID, String messageId) throws IOException {
+        Path messageFile = Path.of(CHATS_DIR + chatsID + "/messages/" + messageId + ".json");
+        return parseMessageFile(messageFile);
+    }
+
+    /**
+     * Just the message ids of a chat - cheap to call often since it doesn't
+     * parse any JSON, only lists filenames. Used to spot new messages.
+     */
+    public static Set<String> listMessageIds(String chatsID) throws IOException {
+        Path messagesDir = Path.of(CHATS_DIR + chatsID + "/messages");
+        Set<String> ids = new HashSet<>();
+
+        if (!Files.isDirectory(messagesDir)) return ids;
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(messagesDir, "*.json")) {
+            for (Path file : stream) {
+                String name = file.getFileName().toString();
+                ids.add(name.substring(0, name.length() - ".json".length()));
+            }
+        }
+
+        return ids;
+    }
+
+    // --------------------------------------------------------------------
+    // read markers: one small file per (chat, user), holding the timestamp
+    // up to which that user has read the chat. Never touches a message file,
+    // and only the user themself ever writes their own marker - so, same as
+    // with messages, two writers can never collide on the same file.
+    // --------------------------------------------------------------------
+
+    public static void markChatAsRead(String chatsID, String readerUid, long readUpToDate) throws IOException {
+        Path readsDir = Path.of(CHATS_DIR + chatsID + "/reads");
+        Files.createDirectories(readsDir);
+
+        JSONObject marker = new JSONObject();
+        marker.put("lastReadDate", readUpToDate);
+
+        Path readFile = readsDir.resolve(readerUid + ".json");
+        Path tmpFile = Files.createTempFile(readsDir, readerUid + "-", ".tmp");
+        Files.writeString(tmpFile, marker.toString(4));
+        Files.move(tmpFile, readFile, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    /** 0 if the user has never opened this chat (i.e. treat everything in it as unread). */
+    public static long getLastReadDate(String chatsID, String readerUid) throws IOException {
+        Path readFile = Path.of(CHATS_DIR + chatsID + "/reads/" + readerUid + ".json");
+        if (!Files.exists(readFile)) return 0L;
+
+        String content;
+        try {
+            content = Files.readString(readFile);
+        } catch (IOException e) {
+            return 0L; // mid-sync, safest to treat as unread for now
+        }
+        if (content.isBlank()) return 0L;
+
+        try {
+            return new JSONObject(content).getLong("lastReadDate");
+        } catch (JSONException e) {
+            return 0L;
+        }
+    }
+
+    private static Message parseMessageFile(Path file) throws IOException {
+        if (!Files.exists(file)) return null;
+
+        String content;
+        try {
+            content = Files.readString(file);
+        } catch (IOException e) {
+            return null; // Drive might still be syncing this one, try again later
+        }
+        if (content.isBlank()) return null; // Drive briefly shows a 0-byte placeholder for new files sometimes
+
+        JSONObject message;
+        try {
+            message = new JSONObject(content);
+        } catch (JSONException e) {
+            return null; // same story - caught it mid-write/mid-sync
+        }
+
+        String id = message.getString("id");
+        String messageContent = message.getString("content");
+        long date = message.getLong("date");
+        boolean isRead = message.getBoolean("isRead");
+        String senderUID = message.getString("senderUID");
+
+        return new Message(id, messageContent, date, isRead, senderUID);
     }
 }

@@ -1,15 +1,19 @@
 package com.binary_dysfunction;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -29,14 +33,30 @@ import com.binary_dysfunction.components.Component;
 
 public final class ChatPanel extends JPanel {
 
+    // px away from the bottom that still counts as "at the bottom"
+    private static final int BOTTOM_TOLERANCE = 30;
+
+    // background of a chat button that has unread messages
+    private static final Color UNREAD_COLOR = new Color(46, 125, 60);
+
+    // the ChatPanel currently on screen, so Updater can ask it to redraw
+    // the sidebar without having to rebuild the whole panel
+    private static ChatPanel activeInstance;
+
     JPanel chatsPanel;
     HomeFrame currentFrame;
-    static JPanel chatContentPanel = new JPanel();
 
-    public static Chat currentTargetUser;
+    static JPanel chatContentPanel = new JPanel();
+    static JScrollPane chatContentScrollPane;
+
+    // message id -> its component, so we only add what's actually new
+    private static final Map<String, java.awt.Component> renderedMessages = new LinkedHashMap<>();
+
+    public static volatile Chat currentTargetUser;
 
     public ChatPanel(HomeFrame currentFrame) {
         this.currentFrame = currentFrame;
+        activeInstance = this;
 
         // UI Constructor
         JLabel currentTargetUserPfpLabel = new JLabel();
@@ -76,7 +96,7 @@ public final class ChatPanel extends JPanel {
                     if (!usr.toString().equals(Main.loggedInAccount.uid)) {
                         try {
                             chatUsername = Main.updater.getAccountByUID(usr.toString()).username;
-                        } catch(Exception e) {}
+                        } catch (Exception e) {}
                     }
                 }
             }
@@ -105,25 +125,21 @@ public final class ChatPanel extends JPanel {
         currentTargetUserPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 80));
         currentTargetUserPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
         currentTargetUserPanel.add(currentTargetInformationPanel, BorderLayout.WEST);
-        
+
         chatContentPanel = new JPanel();
         chatContentPanel.setLayout(new BoxLayout(chatContentPanel, BoxLayout.Y_AXIS));
         chatContentPanel.setBackground(Colors.backgroundColor);
-        // load chat
-        loadMessages();
+        renderedMessages.clear(); // new panel, cached components are gone
 
-        JScrollPane chatContentScrollPane = new JScrollPane(chatContentPanel);
+        chatContentScrollPane = new JScrollPane(chatContentPanel);
         chatContentScrollPane.setHorizontalScrollBar(null);
         chatContentScrollPane.getVerticalScrollBar().setUnitIncrement(8);
         chatContentScrollPane.setBackground(Colors.backgroundColor);
 
-        chatContentPanel.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                JScrollBar bar = chatContentScrollPane.getVerticalScrollBar();
-                SwingUtilities.invokeLater(() -> bar.setValue(bar.getMaximum()));
-            }
-        });
+        // no resize listener here anymore, scrolling down is handled in loadMessages()
+
+        // load chat
+        loadMessages();
 
         JTextField chatTextField = new JTextField();
         chatTextField.setSize(Integer.MAX_VALUE, 50);
@@ -132,22 +148,20 @@ public final class ChatPanel extends JPanel {
         chatTextField.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
-                
+
             }
 
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    System.out.println("Send");
                     try {
                         JSONConfigurations.addMessage(currentTargetUser.id, chatTextField.getText(), Main.loggedInAccount.uid);
-                    } catch (IOException ex) {System.out.println(ex);}
+                    } catch (IOException ex) {
+                        System.out.println(ex);
+                    }
                     chatTextField.setText("");
-                    chatTextField.setEnabled(false);
-                    chatTextField.setEnabled(true);
                 } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    chatTextField.setEnabled(false);
-                    chatTextField.setEnabled(true);
+                    chatTextField.setText("");
                 }
             }
 
@@ -155,7 +169,7 @@ public final class ChatPanel extends JPanel {
             public void keyReleased(KeyEvent e) {
 
             }
-            
+
         });
 
         JButton chatSelectFileButton = new JButton(Component.scaleImage("nonbinary_function\\src\\main\\resources\\drive-folder.png", 30));
@@ -212,9 +226,6 @@ public final class ChatPanel extends JPanel {
 
         updateChatList();
 
-
-        
-
         this.setLayout(new BorderLayout());
         this.add(mainPanel);
     }
@@ -222,7 +233,6 @@ public final class ChatPanel extends JPanel {
     private void updateChatList() {
 
         chatsPanel.removeAll();
-        System.out.println(Main.updater.chatsList.size());
 
         JLabel myChatsLabel = new JLabel("Meine Chats");
         myChatsLabel.setFont(new Font("Arial", Font.BOLD, 12));
@@ -250,7 +260,7 @@ public final class ChatPanel extends JPanel {
                     } else chatName = chat.groupName;
 
                     String pfpPath = Main.serverPath + chat.pfpPath;
-                    if(!chat.isGroupChat) {
+                    if (!chat.isGroupChat) {
                         for (Object memberHash : chat.members) {
                             if (!memberHash.equals(Main.loggedInAccount)) {
                                 try {
@@ -260,23 +270,26 @@ public final class ChatPanel extends JPanel {
                         }
                     }
 
-                    //create button for existing chats
+                    // create button for existing chats
+                    boolean unread = Main.updater.isChatUnread(chat.id);
+
                     JButton tmpButton = new JButton(chatName, Component.scaleImage(pfpPath, 40));
                     tmpButton.setHorizontalAlignment(SwingConstants.LEFT);
                     tmpButton.setPreferredSize(new Dimension(200, 40));
                     tmpButton.setMinimumSize(new Dimension(200, 40));
                     tmpButton.setMaximumSize(new Dimension(200, 40));
-                    tmpButton.setBackground(Colors.backgroundColorLighter);
+                    tmpButton.setBackground(unread ? UNREAD_COLOR : Colors.backgroundColorLighter);
                     tmpButton.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
                     tmpButton.addActionListener(e -> {
                         // load chat
                         currentTargetUser = chat;
+                        resetMessageCache();
                         try {
+                            // also marks the chat as read for this user
                             Main.updater.updateMessages();
                         } catch (IOException ex) {}
                         currentFrame.setChatPanel();
                     });
-                    
 
                     JPanel tmpButtonPanel = new JPanel();
                     tmpButtonPanel.setLayout(new BoxLayout(tmpButtonPanel, BoxLayout.Y_AXIS));
@@ -301,12 +314,11 @@ public final class ChatPanel extends JPanel {
             List<Object> compareList = new ArrayList<>();
             compareList.add(Main.loggedInAccount.uid);
             compareList.add(acc.uid);
-            
+
             for (Chat chat : chatterList) {
                 List<Object> members = chat.members;
                 alreadyExists = CollectionUtils.isEqualCollection(members, compareList);
                 if (alreadyExists) {
-                    // System.out.println("Already exists!");
                     break;
                 }
             }
@@ -337,17 +349,79 @@ public final class ChatPanel extends JPanel {
                 chatsPanel.add(tmpButtonPanel);
             }
         }
+
+        chatsPanel.revalidate();
+        chatsPanel.repaint();
     }
-    public static void loadMessages() {
+
+    // lets Updater redraw the sidebar (e.g. unread colors) without rebuilding the whole panel
+    public static void refreshChatList() {
+        ChatPanel instance = activeInstance;
+        if (instance != null) instance.updateChatList();
+    }
+
+    // call this when the displayed chat changes
+    public static void resetMessageCache() {
+        renderedMessages.clear();
         chatContentPanel.removeAll();
-        for (Message msg : Main.updater.currentChatsMessages) {
-            if (currentTargetUser != null) {
-                chatContentPanel.add(msg.getJPanel());
-                SwingUtilities.invokeLater(() -> {
-                    chatContentPanel.revalidate();
-                    chatContentPanel.repaint();
-                });
+        chatContentPanel.revalidate();
+        chatContentPanel.repaint();
+    }
+
+    public static void loadMessages() {
+        if (chatContentScrollPane == null) return;
+
+        if (currentTargetUser == null) {
+            if (!renderedMessages.isEmpty()) resetMessageCache();
+            return;
+        }
+
+        JScrollBar bar = chatContentScrollPane.getVerticalScrollBar();
+        boolean firstLoad = renderedMessages.isEmpty();
+        boolean wasAtBottom = firstLoad
+                || bar.getValue() + bar.getVisibleAmount() >= bar.getMaximum() - BOTTOM_TOLERANCE;
+
+        List<Message> messages = Main.updater.currentChatsMessages;
+
+        Set<String> wantedIds = new HashSet<>();
+        for (Message msg : messages) {
+            wantedIds.add(msg.id);
+        }
+
+        boolean changed = false;
+
+        // throw out messages that don't exist anymore
+        Iterator<Map.Entry<String, java.awt.Component>> it = renderedMessages.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, java.awt.Component> entry = it.next();
+            if (!wantedIds.contains(entry.getKey())) {
+                chatContentPanel.remove(entry.getValue());
+                it.remove();
+                changed = true;
             }
+        }
+
+        // append everything we haven't drawn yet
+        for (Message msg : messages) {
+            if (!renderedMessages.containsKey(msg.id)) {
+                java.awt.Component msgComponent = msg.getJPanel();
+                renderedMessages.put(msg.id, msgComponent);
+                chatContentPanel.add(msgComponent);
+                changed = true;
+            }
+        }
+
+        if (!changed) return;
+
+        chatContentPanel.revalidate();
+        chatContentPanel.repaint();
+
+        if (wasAtBottom) {
+            // getMaximum() is only correct after the layout pass
+            SwingUtilities.invokeLater(() -> {
+                JScrollBar b = chatContentScrollPane.getVerticalScrollBar();
+                b.setValue(b.getMaximum());
+            });
         }
     }
 }
