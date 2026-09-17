@@ -496,7 +496,7 @@ public class AdminPanel extends JPanel {
 
     private void updateAccountList(JPanel target) throws IOException {
 
-        String content = Files.readString(JSONConfigurations.ACCOUNT_PATH);
+        String content = Files.readString(JSONConfigurations.getAccountPath());
         JSONArray accounts = new JSONArray(content);
 
         System.out.println("Registered accounts:");

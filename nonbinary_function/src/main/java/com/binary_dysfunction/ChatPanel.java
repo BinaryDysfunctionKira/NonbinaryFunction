@@ -726,7 +726,7 @@ public final class ChatPanel extends JPanel {
 
     private void renameGroupChat(String chatId, String newName) {
         try {
-            String content = java.nio.file.Files.readString(JSONConfigurations.CHATS_PATH);
+            String content = java.nio.file.Files.readString(JSONConfigurations.getChatsPath());
             org.json.JSONArray chats = new org.json.JSONArray(content);
             for (int i = 0; i < chats.length(); i++) {
                 org.json.JSONObject chat = chats.getJSONObject(i);
@@ -735,7 +735,7 @@ public final class ChatPanel extends JPanel {
                     break;
                 }
             }
-            java.nio.file.Files.writeString(JSONConfigurations.CHATS_PATH, chats.toString(4));
+            java.nio.file.Files.writeString(JSONConfigurations.getChatsPath(), chats.toString(4));
         } catch (IOException ignored) {}
     }
 

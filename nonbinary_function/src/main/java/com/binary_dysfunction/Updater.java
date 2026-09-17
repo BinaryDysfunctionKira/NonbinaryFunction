@@ -100,7 +100,7 @@ public final class Updater {
 
         String content;
         try {
-            content = Files.readString(JSONConfigurations.ACCOUNT_PATH);
+            content = Files.readString(JSONConfigurations.getAccountPath());
         } catch (IOException e) {
             return;
         }
@@ -131,7 +131,7 @@ public final class Updater {
 
     public void updateChatList() throws IOException {
 
-        String content = Files.readString(JSONConfigurations.CHATS_PATH);
+        String content = Files.readString(JSONConfigurations.getChatsPath());
         JSONArray chats = new JSONArray(content);
 
         List<Chat> fresh = new ArrayList<>(chats.length());

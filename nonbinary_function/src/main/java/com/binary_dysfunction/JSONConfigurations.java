@@ -22,19 +22,27 @@ import org.json.JSONObject;
 
 public class JSONConfigurations {
 
-    public final static Path ACCOUNT_PATH = Paths.get(Main.serverPath + "/users/accounts.json");
-    public final static Path CHATS_PATH = Paths.get(Main.serverPath + "/chats/chats.json");
-    public final static String CHATS_DIR = Main.serverPath + "/chats/";
+    public static Path getAccountPath() {
+        return Paths.get(Main.serverPath + "/users/accounts.json");
+    }
+
+    public static Path getChatsPath() {
+        return Paths.get(Main.serverPath + "/chats/chats.json");
+    }
+
+    public static String getChatsDir() {
+        return Main.serverPath + "/chats/";
+    }
 
     public static void addAccount(String username, String passwordHash) throws IOException {
 
-        if (ACCOUNT_PATH.getParent() != null) {
-            Files.createDirectories(ACCOUNT_PATH.getParent());
+        if (getAccountPath().getParent() != null) {
+            Files.createDirectories(getAccountPath().getParent());
         }
 
         JSONArray accounts;
-        if (Files.exists(ACCOUNT_PATH)) {
-            String content = Files.readString(ACCOUNT_PATH);
+        if (Files.exists(getAccountPath())) {
+            String content = Files.readString(getAccountPath());
             accounts = new JSONArray(content);
         } else {
             accounts = new JSONArray();
@@ -74,7 +82,7 @@ public class JSONConfigurations {
 
         accounts.put(newAccount);
 
-        Files.writeString(ACCOUNT_PATH, accounts.toString(4));
+        Files.writeString(getAccountPath(), accounts.toString(4));
 
         File privateVault = new File(Main.serverPath + Config.ACCOUNTS_DIR + username + "/user-data/");
         privateVault.mkdirs();
@@ -87,11 +95,11 @@ public class JSONConfigurations {
 
     public static void updateAccountField(String username, String fieldName, Object newValue) throws IOException {
 
-        if (!Files.exists(ACCOUNT_PATH)) {
+        if (!Files.exists(getAccountPath())) {
             return; // nothing to update
         }
 
-        String content = Files.readString(ACCOUNT_PATH);
+        String content = Files.readString(getAccountPath());
         JSONArray accounts = new JSONArray(content);
 
         boolean found = false;
@@ -110,16 +118,16 @@ public class JSONConfigurations {
             return;
         }
 
-        Files.writeString(ACCOUNT_PATH, accounts.toString(4));
+        Files.writeString(getAccountPath(), accounts.toString(4));
     }
 
     public static Object getAccountField(String username, String fieldName) throws IOException {
 
-        if (!Files.exists(ACCOUNT_PATH)) {
+        if (!Files.exists(getAccountPath())) {
             return null; // nothing to return
         }
 
-        String content = Files.readString(ACCOUNT_PATH);
+        String content = Files.readString(getAccountPath());
         JSONArray accounts = new JSONArray(content);
 
         for (int i = 0; i < accounts.length(); i++) {
@@ -134,11 +142,11 @@ public class JSONConfigurations {
 
     public static List<Object> getAccountFieldList(String username, String fieldName) throws IOException {
 
-        if (!Files.exists(ACCOUNT_PATH)) {
+        if (!Files.exists(getAccountPath())) {
             return null; // nothing to return
         }
 
-        String content = Files.readString(ACCOUNT_PATH);
+        String content = Files.readString(getAccountPath());
         JSONArray accounts = new JSONArray(content);
 
         for (int i = 0; i < accounts.length(); i++) {
@@ -153,13 +161,13 @@ public class JSONConfigurations {
 
     public static Account logInAccount(String username, String passwordHash) throws IOException {
 
-        if (ACCOUNT_PATH.getParent() != null) {
-            Files.createDirectories(ACCOUNT_PATH.getParent());
+        if (getAccountPath().getParent() != null) {
+            Files.createDirectories(getAccountPath().getParent());
         }
 
         JSONArray accounts;
-        if (Files.exists(ACCOUNT_PATH)) {
-            String content = Files.readString(ACCOUNT_PATH);
+        if (Files.exists(getAccountPath())) {
+            String content = Files.readString(getAccountPath());
             accounts = new JSONArray(content);
         } else {
             accounts = new JSONArray();
@@ -188,11 +196,11 @@ public class JSONConfigurations {
 
     public static void removeAccount(String username) throws IOException {
 
-        if (!Files.exists(ACCOUNT_PATH)) {
+        if (!Files.exists(getAccountPath())) {
             return;
         }
 
-        String content = Files.readString(ACCOUNT_PATH);
+        String content = Files.readString(getAccountPath());
         JSONArray accounts = new JSONArray(content);
 
         JSONArray updatedAccounts = new JSONArray();
@@ -212,7 +220,7 @@ public class JSONConfigurations {
             return;
         }
 
-        Files.writeString(ACCOUNT_PATH, updatedAccounts.toString(4));
+        Files.writeString(getAccountPath(), updatedAccounts.toString(4));
 
         FileUtils.deleteDirectory(new File(Main.serverPath + Config.ACCOUNTS_DIR + username));
     }
@@ -222,13 +230,13 @@ public class JSONConfigurations {
     // say the word if you want the same per-file treatment here too.
     public static void addChat(Account... member) throws IOException {
 
-        if (CHATS_PATH.getParent() != null) {
-            Files.createDirectories(CHATS_PATH.getParent());
+        if (getChatsPath().getParent() != null) {
+            Files.createDirectories(getChatsPath().getParent());
         }
 
         JSONArray chats;
-        if (Files.exists(CHATS_PATH)) {
-            String content = Files.readString(CHATS_PATH);
+        if (Files.exists(getChatsPath())) {
+            String content = Files.readString(getChatsPath());
             chats = new JSONArray(content);
         } else {
             chats = new JSONArray();
@@ -268,7 +276,7 @@ public class JSONConfigurations {
 
         chats.put(newChat);
 
-        Files.writeString(CHATS_PATH, chats.toString(4));
+        Files.writeString(getChatsPath(), chats.toString(4));
 
         addMessage(id, "Neuer Chat wurde erstellt.", "Admin");
 
@@ -288,9 +296,9 @@ public class JSONConfigurations {
      */
     public static void addMembersToChat(String chatId, List<Account> newMembers) throws IOException {
 
-        if (!Files.exists(CHATS_PATH)) return;
+        if (!Files.exists(getChatsPath())) return;
 
-        String content = Files.readString(CHATS_PATH);
+        String content = Files.readString(getChatsPath());
         JSONArray chats = new JSONArray(content);
 
         boolean found = false;
@@ -323,7 +331,7 @@ public class JSONConfigurations {
             return;
         }
 
-        Files.writeString(CHATS_PATH, chats.toString(4));
+        Files.writeString(getChatsPath(), chats.toString(4));
 
         for (Account acc : newMembers) {
             Object rawChats = getAccountField(acc.username, "chats");
@@ -354,10 +362,10 @@ public class JSONConfigurations {
 
     public static void addMessage(String chatsID, String messageContent, String senderUID) throws IOException {
 
-        Path messagesDir = Path.of(CHATS_DIR + chatsID + "/messages");
+        Path messagesDir = Path.of(getChatsDir() + chatsID + "/messages");
         Files.createDirectories(messagesDir);
 
-        Path uploadsDir = Path.of(CHATS_DIR + chatsID + "/uploads");
+        Path uploadsDir = Path.of(getChatsDir() + chatsID + "/uploads");
         if (!Files.exists(uploadsDir)) {
             Files.createDirectories(uploadsDir);
         }
@@ -391,7 +399,7 @@ public class JSONConfigurations {
 
     /** All messages of a chat, oldest first. */
     public static List<Message> readMessages(String chatsID) throws IOException {
-        Path messagesDir = Path.of(CHATS_DIR + chatsID + "/messages");
+        Path messagesDir = Path.of(getChatsDir() + chatsID + "/messages");
         List<Message> result = new ArrayList<>();
 
         if (!Files.isDirectory(messagesDir)) return result;
@@ -409,7 +417,7 @@ public class JSONConfigurations {
 
     /** A single message by id, or null if it doesn't exist (yet). */
     public static Message readMessage(String chatsID, String messageId) throws IOException {
-        Path messageFile = Path.of(CHATS_DIR + chatsID + "/messages/" + messageId + ".json");
+        Path messageFile = Path.of(getChatsDir() + chatsID + "/messages/" + messageId + ".json");
         return parseMessageFile(messageFile);
     }
 
@@ -418,7 +426,7 @@ public class JSONConfigurations {
      * parse any JSON, only lists filenames. Used to spot new messages.
      */
     public static Set<String> listMessageIds(String chatsID) throws IOException {
-        Path messagesDir = Path.of(CHATS_DIR + chatsID + "/messages");
+        Path messagesDir = Path.of(getChatsDir() + chatsID + "/messages");
         Set<String> ids = new HashSet<>();
 
         if (!Files.isDirectory(messagesDir)) return ids;
@@ -441,7 +449,7 @@ public class JSONConfigurations {
     // --------------------------------------------------------------------
 
     public static void markChatAsRead(String chatsID, String readerUid, long readUpToDate) throws IOException {
-        Path readsDir = Path.of(CHATS_DIR + chatsID + "/reads");
+        Path readsDir = Path.of(getChatsDir() + chatsID + "/reads");
         Files.createDirectories(readsDir);
 
         JSONObject marker = new JSONObject();
@@ -455,7 +463,7 @@ public class JSONConfigurations {
 
     /** 0 if the user has never opened this chat (i.e. treat everything in it as unread). */
     public static long getLastReadDate(String chatsID, String readerUid) throws IOException {
-        Path readFile = Path.of(CHATS_DIR + chatsID + "/reads/" + readerUid + ".json");
+        Path readFile = Path.of(getChatsDir() + chatsID + "/reads/" + readerUid + ".json");
         if (!Files.exists(readFile)) return 0L;
 
         String content;
@@ -501,9 +509,9 @@ public class JSONConfigurations {
     }
 
     public static void updateChatField(String chatId, String fieldName, Object newValue) throws IOException {
-        if (!Files.exists(CHATS_PATH)) return;
+        if (!Files.exists(getChatsPath())) return;
 
-        String content = Files.readString(CHATS_PATH);
+        String content = Files.readString(getChatsPath());
         JSONArray chats = new JSONArray(content);
 
         boolean found = false;
@@ -521,7 +529,7 @@ public class JSONConfigurations {
             return;
         }
 
-        Files.writeString(CHATS_PATH, chats.toString(4));
+        Files.writeString(getChatsPath(), chats.toString(4));
     }
 
     /**
@@ -531,7 +539,7 @@ public class JSONConfigurations {
      * Main.serverPath, so the caller can use it immediately.
      */
     public static String setChatPfp(String chatId, File sourceImage) throws IOException {
-        Path pfpDir = Path.of(CHATS_DIR + chatId + "/pfp");
+        Path pfpDir = Path.of(getChatsDir() + chatId + "/pfp");
         Files.createDirectories(pfpDir);
 
         String name = sourceImage.getName();

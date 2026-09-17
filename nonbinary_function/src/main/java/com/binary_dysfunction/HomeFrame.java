@@ -129,6 +129,7 @@ public class HomeFrame {
         MenuItem chatItem = new MenuItem("Nachrichten");
         MenuItem logoutItem = new MenuItem("Abmelden");
         MenuItem exitItem = new MenuItem("Beenden");
+        MenuItem newWindowItem = new MenuItem("Neues Fenster");
 
         showItem.addActionListener(e -> openFrame());
         logoutItem.addActionListener(e -> Account.logOut(frame));
@@ -136,6 +137,7 @@ public class HomeFrame {
         profileItem.addActionListener(e -> setProfilePanel());
         chatItem.addActionListener(e -> setChatPanel());
         exitItem.addActionListener(e -> System.exit(0));
+        newWindowItem.addActionListener(e -> Main.launchNewInstance());
 
         popup.add(profileItem);
         popup.addSeparator();
@@ -144,6 +146,7 @@ public class HomeFrame {
         popup.add(chatItem);
         popup.add(logoutItem);
         popup.addSeparator();
+        popup.add(newWindowItem);
         popup.add(exitItem);
 
         trayIcon = new TrayIcon(image, Main.serverName, popup);
@@ -176,7 +179,6 @@ public class HomeFrame {
     }
     public static void openFrame() {
         frame.setVisible(true);
-        frame.setExtendedState(JFrame.NORMAL);
         frame.toFront();
     }
 }

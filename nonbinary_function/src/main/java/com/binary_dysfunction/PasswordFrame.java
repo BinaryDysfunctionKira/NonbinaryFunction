@@ -241,6 +241,7 @@ public class PasswordFrame {
                         try {
                             Config.setupServer(path);
                             Main.serverPath = directory;
+                            Main.serverName = path.getName();
                         } catch (IOException ex) {
                             System.getLogger(PasswordFrame.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
                             JOptionPane.showMessageDialog(null, "Fehler beim Löschen: " + ex.getMessage(), "Fehler", JOptionPane.ERROR_MESSAGE);
@@ -316,11 +317,11 @@ public class PasswordFrame {
 
         String password = new String(pswd);
 
-        if (!Files.exists(JSONConfigurations.ACCOUNT_PATH)) {
+        if (!Files.exists(JSONConfigurations.getAccountPath())) {
             return false;
         }
 
-        String content = Files.readString(JSONConfigurations.ACCOUNT_PATH);
+        String content = Files.readString(JSONConfigurations.getAccountPath());
         JSONArray accounts = new JSONArray(content);
 
         String typedHash = Config.hashPassword(password);
