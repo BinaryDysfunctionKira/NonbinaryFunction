@@ -353,7 +353,7 @@ public final class ChatPanel extends JPanel {
             String pfpPath = Main.serverPath + chat.pfpPath;
             if (!chat.isGroupChat) {
                 for (Object memberHash : chat.members) {
-                    if (!memberHash.equals(Main.loggedInAccount)) {
+                    if (!memberHash.equals(Main.loggedInAccount.uid)) {
                         try {
                             pfpPath = Main.serverPath + Main.updater.getAccountByUID(memberHash.toString()).profilePicturePath;
                         } catch (Exception e) {}
