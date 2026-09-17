@@ -531,7 +531,7 @@ public final class ChatPanel extends JPanel {
             allMembers.addAll(selected);
 
             try {
-                JSONConfigurations.addChat(allMembers.toArray(new Account[0]));
+                JSONConfigurations.addChat(allMembers.toArray(Account[]::new));
 
                 // addChat() always names new group chats "New Group" - rename to what the user typed
                 Main.updater.updateChatList();
