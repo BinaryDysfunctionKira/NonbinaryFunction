@@ -43,6 +43,33 @@ public final class ChatPanel extends JPanel {
     // the sidebar without having to rebuild the whole panel
     private static ChatPanel activeInstance;
 
+    // True only while a ChatPanel instance is actually attached to the
+    // visible frame. addNotify()/removeNotify() are called automatically by
+    // Swing whenever a component is added to / removed from a realized
+    // container - which is exactly what HomeFrame's contentPanel.removeAll()
+    // + contentPanel.add(...) does when switching screens. This is what lets
+    // Updater tell "chat panel is on screen right now" apart from
+    // "currentTargetUser still remembers the last chat we looked at", so
+    // toasts for that chat resume as soon as you navigate away, instead of
+    // being suppressed forever.
+    private static volatile boolean panelVisible = false;
+
+    public static boolean isPanelVisible() {
+        return panelVisible;
+    }
+
+    @Override
+    public void addNotify() {
+        super.addNotify();
+        panelVisible = true;
+    }
+
+    @Override
+    public void removeNotify() {
+        super.removeNotify();
+        panelVisible = false;
+    }
+
     JPanel chatsPanel;
     HomeFrame currentFrame;
 

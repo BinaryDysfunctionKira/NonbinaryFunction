@@ -245,7 +245,17 @@ public final class Updater {
         return unreadByChatId.getOrDefault(chatId, false);
     }
 
-    /** Returns true once the message file was fully readable, toast or not. */
+    /**
+     * Returns true once the message file was fully readable, toast or not.
+     *
+     * NOTE: a toast is only suppressed when ChatPanel is BOTH currently
+     * attached to the visible frame (ChatPanel.isPanelVisible()) AND showing
+     * this exact chat. currentTargetUser alone isn't enough to go on -
+     * it's a static field that keeps remembering the last-viewed chat even
+     * after you've navigated away to Home/Profile/Admin/Calendar, so relying
+     * on it by itself would permanently mute whichever chat you looked at
+     * last, no matter where you are in the app.
+     */
     private boolean notifyNewMessage(Chat chat, String messageId, String myUid) {
         Message msg;
         try {
@@ -258,7 +268,9 @@ public final class Updater {
         if (myUid.equals(msg.senderUID)) return true; // our own message, nothing to show
 
         Chat openChat = ChatPanel.currentTargetUser;
-        if (openChat != null && openChat.id.equals(chat.id)) return true; // already looking at this chat, stays "read"
+        if (ChatPanel.isPanelVisible() && openChat != null && openChat.id.equals(chat.id)) {
+            return true; // genuinely looking at this chat right now, stays "read"
+        }
 
         setUnread(chat.id, true);
 
