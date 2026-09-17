@@ -15,7 +15,7 @@ public class Main {
     public static boolean isServerNew = false;
     public static boolean ownerSet = false;
 
-    public static Image appIcon = new ImageIcon("nonbinary_function\\src\\main\\resources\\BinaryDysfunctionLogo.png").getImage();
+    public static Image appIcon = new ImageIcon("nonbinary_function\\src\\main\\resources\\icon.png").getImage();
 
     public static final Config config = new Config();
 
