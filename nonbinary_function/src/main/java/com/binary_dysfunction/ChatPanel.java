@@ -185,7 +185,7 @@ public final class ChatPanel extends JPanel {
                         char[] chatMessageTmp = chatTextField.getText().toCharArray();
                         boolean chatIsEmpty = true;
                         for (char c : chatMessageTmp) {
-                            if (c != ' ' || c != '\n') chatIsEmpty = false;
+                            if (c != ' ' && c != '\n') chatIsEmpty = false;
                         }
                         if (!chatIsEmpty) JSONConfigurations.addMessage(currentTargetUser.id, chatTextField.getText(), Main.loggedInAccount.uid);
                     } catch (IOException ex) {
