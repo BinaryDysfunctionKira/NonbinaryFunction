@@ -437,4 +437,58 @@ public class JSONConfigurations {
 
         return new Message(id, messageContent, date, isRead, senderUID);
     }
+
+    public static void updateChatField(String chatId, String fieldName, Object newValue) throws IOException {
+        if (!Files.exists(CHATS_PATH)) return;
+
+        String content = Files.readString(CHATS_PATH);
+        JSONArray chats = new JSONArray(content);
+
+        boolean found = false;
+        for (int i = 0; i < chats.length(); i++) {
+            JSONObject chat = chats.getJSONObject(i);
+            if (chat.getString("id").equals(chatId)) {
+                chat.put(fieldName, newValue);
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            System.out.println("Chat not found: " + chatId);
+            return;
+        }
+
+        Files.writeString(CHATS_PATH, chats.toString(4));
+    }
+
+    /**
+     * Copies the chosen image into this chat's own pfp folder (giving it a
+     * fresh, timestamped filename so old cached thumbnails don't stick around)
+     * and points chats.json at it. Returns the new pfpPath, relative to
+     * Main.serverPath, so the caller can use it immediately.
+     */
+    public static String setChatPfp(String chatId, File sourceImage) throws IOException {
+        Path pfpDir = Path.of(CHATS_DIR + chatId + "/pfp");
+        Files.createDirectories(pfpDir);
+
+        String name = sourceImage.getName();
+        int dot = name.lastIndexOf('.');
+        String extension = (dot >= 0) ? name.substring(dot) : "";
+        String fileName = "pfp-" + System.currentTimeMillis() + extension;
+        Path destination = pfpDir.resolve(fileName);
+
+        Files.copy(sourceImage.toPath(), destination, StandardCopyOption.REPLACE_EXISTING);
+
+        // clean up previous pfp files for this chat so they don't pile up
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(pfpDir, "pfp-*")) {
+            for (Path file : stream) {
+                if (!file.equals(destination)) Files.deleteIfExists(file);
+            }
+        }
+
+        String relativePath = "/chats/" + chatId + "/pfp/" + fileName;
+        updateChatField(chatId, "pfpPath", relativePath);
+        return relativePath;
+    }
 }

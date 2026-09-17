@@ -40,6 +40,13 @@ public final class Updater {
     // an EDT button click (which calls updateMessages()) racing each other
     private final Object messagesLock = new Object();
 
+    // chat id -> timestamp of its most recent message, used to sort the chat list
+    private final Map<String, Long> lastMessageDateByChatId = new ConcurrentHashMap<>();
+
+    public long getLastMessageDate(String chatId) {
+        return lastMessageDateByChatId.getOrDefault(chatId, 0L);
+    }
+
     public Updater() {
         startUpdating();
     }
@@ -216,12 +223,14 @@ public final class Updater {
             List<Message> messages = JSONConfigurations.readMessages(chat.id);
 
             boolean unread = false;
+            long latest = 0;
             for (Message msg : messages) {
+                if (msg.date > latest) latest = msg.date;
                 if (!myUid.equals(msg.senderUID) && msg.date > lastRead) {
                     unread = true;
-                    break;
                 }
             }
+            if (latest > 0) lastMessageDateByChatId.put(chat.id, latest);
             setUnread(chat.id, unread);
         } catch (IOException e) {
             // couldn't read right now - it'll still get flagged correctly
@@ -261,11 +270,13 @@ public final class Updater {
         }
         if (msg == null) return false; // still syncing, retry next round
 
+        lastMessageDateByChatId.merge(chat.id, msg.date, Math::max); // see sorting section below
+
         if (myUid.equals(msg.senderUID)) return true; // our own message, nothing to show
 
         Chat openChat = ChatPanel.currentTargetUser;
         if (ChatPanel.isPanelVisible() && openChat != null && openChat.id.equals(chat.id)) {
-            return true; // genuinely looking at this chat right now, stays "read"
+            return true;
         }
 
         setUnread(chat.id, true);
@@ -274,11 +285,18 @@ public final class Updater {
         String senderName = sender != null ? sender.fullName : "Unbekannt";
         String iconPath = sender != null ? Main.serverPath + sender.profilePicturePath : null;
 
+        String toastTitle = senderName;
+        if (chat.isGroupChat) {
+            String groupName = (chat.groupName != null && !chat.groupName.isBlank()) ? chat.groupName : "Gruppe";
+            toastTitle = senderName + " (" + groupName + ")";
+        }
+        String finalTitle = toastTitle;
+
         SwingUtilities.invokeLater(() -> {
             if (iconPath != null) {
-                Toast.show(null, iconPath, senderName, msg.content, 5000, Toast.Position.BOTTOM_RIGHT, true);
+                Toast.show(null, iconPath, finalTitle, msg.content, 5000, Toast.Position.BOTTOM_RIGHT, true);
             } else {
-                Toast.show(null, senderName, msg.content, 5000, Toast.Position.BOTTOM_RIGHT, true);
+                Toast.show(null, finalTitle, msg.content, 5000, Toast.Position.BOTTOM_RIGHT, true);
             }
         });
 

@@ -2,10 +2,12 @@ package com.binary_dysfunction;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,6 +15,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
@@ -20,6 +23,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -28,6 +32,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -105,6 +110,31 @@ public final class ChatPanel extends JPanel {
             currentTargetUserPfpLabel = new JLabel(Component.scaleImage(chatPfp, 60));
             currentTargetUserPfpLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
+            if (currentTargetUser.isGroupChat) {
+                currentTargetUserPfpLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                currentTargetUserPfpLabel.setToolTipText("Gruppenbild ändern");
+                Chat groupChat = currentTargetUser;
+                currentTargetUserPfpLabel.addMouseListener(new MouseListener() {
+                    @Override
+                    public void mouseClicked(java.awt.event.MouseEvent e) {
+                        changeGroupPfp(groupChat);
+                    }
+
+                    @Override
+                    public void mousePressed(java.awt.event.MouseEvent e) {}
+
+                    @Override
+                    public void mouseReleased(java.awt.event.MouseEvent e) {}
+
+                    @Override
+                    public void mouseEntered(java.awt.event.MouseEvent e) {}
+
+                    @Override
+                    public void mouseExited(java.awt.event.MouseEvent e) {}
+                    
+                });
+            }
+
             String chatName = currentTargetUser.groupName;
             if (!currentTargetUser.isGroupChat) {
                 for (Object usr : currentTargetUser.members) {
@@ -120,13 +150,21 @@ public final class ChatPanel extends JPanel {
             JLabel currentTargetUserFullNameLabel = new JLabel(chatName);
             currentTargetUserFullNameLabel.setFont(new Font("Arial", Font.BOLD, 18));
 
-            String chatUsername = currentTargetUser.id;
+            String chatUsername = "";
             if (!currentTargetUser.isGroupChat) {
                 for (Object usr : currentTargetUser.members) {
                     if (!usr.toString().equals(Main.loggedInAccount.uid)) {
                         try {
                             chatUsername = Main.updater.getAccountByUID(usr.toString()).username;
                         } catch (Exception e) {}
+                    }
+                }
+            } else {
+                for (Object usr : currentTargetUser.members) {
+                    if (chatUsername.equals("")) {
+                        chatUsername = Main.updater.getAccountByUID(usr.toString()).username;
+                    } else {
+                        chatUsername += ", " + Main.updater.getAccountByUID(usr.toString()).username;
                     }
                 }
             }
@@ -284,63 +322,69 @@ public final class ChatPanel extends JPanel {
 
         // create buttons for existing chats
         List<Chat> chatterList = Main.updater.chatsList;
+        List<Chat> myChats = new ArrayList<>();
         for (Chat chat : chatterList) {
-            List<Object> members = chat.members;
-            for (Object member : members) {
-                if (member.toString() == null ? Main.loggedInAccount.uid == null : member.toString().equals(Main.loggedInAccount.uid)) {
-                    String chatName = "";
-                    if (!chat.isGroupChat) {
-                        for (Object memberHash : chat.members) {
-                            if (memberHash.toString() == null ? Main.loggedInAccount.uid != null : !memberHash.toString().equals(Main.loggedInAccount.uid)) {
-                                try {
-                                    chatName = Main.updater.getAccountByUID(memberHash.toString()).fullName;
-                                } catch (Exception e) {
-                                    chatName = "User deleted";
-                                }
-                            }
-                        }
-                    } else chatName = chat.groupName;
-
-                    String pfpPath = Main.serverPath + chat.pfpPath;
-                    if (!chat.isGroupChat) {
-                        for (Object memberHash : chat.members) {
-                            if (!memberHash.equals(Main.loggedInAccount)) {
-                                try {
-                                    pfpPath = Main.serverPath + Main.updater.getAccountByUID(memberHash.toString()).profilePicturePath;
-                                } catch (Exception e) {}
-                            }
-                        }
-                    }
-
-                    // create button for existing chats
-                    boolean unread = Main.updater.isChatUnread(chat.id);
-
-                    JButton tmpButton = new JButton(chatName, Component.scaleImage(pfpPath, 40));
-                    tmpButton.setHorizontalAlignment(SwingConstants.LEFT);
-                    tmpButton.setPreferredSize(new Dimension(200, 40));
-                    tmpButton.setMinimumSize(new Dimension(200, 40));
-                    tmpButton.setMaximumSize(new Dimension(200, 40));
-                    tmpButton.setBackground(unread ? UNREAD_COLOR : Colors.backgroundColorLighter);
-                    tmpButton.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-                    tmpButton.addActionListener(e -> {
-                        // load chat
-                        currentTargetUser = chat;
-                        resetMessageCache();
-                        try {
-                            // also marks the chat as read for this user
-                            Main.updater.updateMessages();
-                        } catch (IOException ex) {}
-                        currentFrame.setChatPanel();
-                    });
-
-                    JPanel tmpButtonPanel = new JPanel();
-                    tmpButtonPanel.setLayout(new BoxLayout(tmpButtonPanel, BoxLayout.Y_AXIS));
-                    tmpButtonPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
-                    tmpButtonPanel.add(tmpButton);
-
-                    chatsPanel.add(tmpButtonPanel);
+            for (Object member : chat.members) {
+                String memberUid = member == null ? null : member.toString();
+                if (Objects.equals(Main.loggedInAccount.uid, memberUid)) {
+                    myChats.add(chat);
+                    break;
                 }
             }
+        }
+        myChats.sort((a, b) -> Long.compare(
+                Main.updater.getLastMessageDate(b.id),
+                Main.updater.getLastMessageDate(a.id)));
+
+        for (Chat chat : myChats) {
+            String chatName = "";
+            if (!chat.isGroupChat) {
+                for (Object memberHash : chat.members) {
+                    if (!Objects.equals(memberHash.toString(), Main.loggedInAccount.uid)) {
+                        try {
+                            chatName = Main.updater.getAccountByUID(memberHash.toString()).fullName;
+                        } catch (Exception e) {
+                            chatName = "User deleted";
+                        }
+                    }
+                }
+            } else chatName = chat.groupName;
+
+            String pfpPath = Main.serverPath + chat.pfpPath;
+            if (!chat.isGroupChat) {
+                for (Object memberHash : chat.members) {
+                    if (!memberHash.equals(Main.loggedInAccount)) {
+                        try {
+                            pfpPath = Main.serverPath + Main.updater.getAccountByUID(memberHash.toString()).profilePicturePath;
+                        } catch (Exception e) {}
+                    }
+                }
+            }
+
+            boolean unread = Main.updater.isChatUnread(chat.id);
+
+            JButton tmpButton = new JButton(chatName, Component.scaleImage(pfpPath, 40));
+            tmpButton.setHorizontalAlignment(SwingConstants.LEFT);
+            tmpButton.setPreferredSize(new Dimension(200, 40));
+            tmpButton.setMinimumSize(new Dimension(200, 40));
+            tmpButton.setMaximumSize(new Dimension(200, 40));
+            tmpButton.setBackground(unread ? UNREAD_COLOR : Colors.backgroundColorLighter);
+            tmpButton.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+            tmpButton.addActionListener(e -> {
+                currentTargetUser = chat;
+                resetMessageCache();
+                try {
+                    Main.updater.updateMessages();
+                } catch (IOException ex) {}
+                currentFrame.setChatPanel();
+            });
+
+            JPanel tmpButtonPanel = new JPanel();
+            tmpButtonPanel.setLayout(new BoxLayout(tmpButtonPanel, BoxLayout.Y_AXIS));
+            tmpButtonPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
+            tmpButtonPanel.add(tmpButton);
+
+            chatsPanel.add(tmpButtonPanel);
         }
 
         JLabel recommendedLabel = new JLabel("Empfohlen");
@@ -585,5 +629,34 @@ public final class ChatPanel extends JPanel {
             }
             java.nio.file.Files.writeString(JSONConfigurations.CHATS_PATH, chats.toString(4));
         } catch (IOException ignored) {}
+    }
+
+    private void changeGroupPfp(Chat chat) {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Gruppenbild auswählen");
+        chooser.setFileFilter(new FileNameExtensionFilter("Bilder", "png", "jpg", "jpeg", "gif"));
+
+        if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
+
+        try {
+            JSONConfigurations.setChatPfp(chat.id, chooser.getSelectedFile());
+
+            // Chat objects are replaced wholesale, never mutated in place, so pull
+            // the fresh one (with the new pfpPath) after reloading rather than
+            // patching this one.
+            Main.updater.updateChatList();
+            for (Chat fresh : Main.updater.chatsList) {
+                if (fresh.id.equals(chat.id)) {
+                    currentTargetUser = fresh;
+                    break;
+                }
+            }
+
+            currentFrame.setChatPanel(); // rebuild so header + sidebar pick up the new image
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Gruppenbild konnte nicht gespeichert werden: " + ex.getMessage(),
+                    "Fehler", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }
