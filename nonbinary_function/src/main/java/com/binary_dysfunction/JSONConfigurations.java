@@ -280,6 +280,68 @@ public class JSONConfigurations {
         }
     }
 
+    /**
+     * Adds one or more accounts to an existing chat's member list and promotes
+     * it to a group chat if it now has more than 2 members. Also appends the
+     * chat id to each new member's own "chats" list, same as addChat() does
+     * for the initial members. Accounts already in the chat are skipped.
+     */
+    public static void addMembersToChat(String chatId, List<Account> newMembers) throws IOException {
+
+        if (!Files.exists(CHATS_PATH)) return;
+
+        String content = Files.readString(CHATS_PATH);
+        JSONArray chats = new JSONArray(content);
+
+        boolean found = false;
+        for (int i = 0; i < chats.length(); i++) {
+            JSONObject chat = chats.getJSONObject(i);
+            if (chat.getString("id").equals(chatId)) {
+                JSONArray members = chat.getJSONArray("members");
+
+                Set<String> existing = new HashSet<>();
+                for (int j = 0; j < members.length(); j++) {
+                    existing.add(members.getString(j));
+                }
+
+                for (Account acc : newMembers) {
+                    if (!existing.contains(acc.uid)) {
+                        members.put(acc.uid);
+                        existing.add(acc.uid);
+                    }
+                }
+
+                chat.put("members", members);
+                if (members.length() > 2) chat.put("isGroupChat", true);
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            System.out.println("Chat not found: " + chatId);
+            return;
+        }
+
+        Files.writeString(CHATS_PATH, chats.toString(4));
+
+        for (Account acc : newMembers) {
+            Object rawChats = getAccountField(acc.username, "chats");
+            JSONArray oldChats = (rawChats instanceof JSONArray) ? (JSONArray) rawChats : new JSONArray();
+
+            boolean already = false;
+            for (int i = 0; i < oldChats.length(); i++) {
+                if (oldChats.getString(i).equals(chatId)) {
+                    already = true;
+                    break;
+                }
+            }
+            if (!already) oldChats.put(chatId);
+
+            updateAccountField(acc.username, "chats", oldChats);
+        }
+    }
+
     // --------------------------------------------------------------------
     // messages: one file per message instead of one shared array.
     //

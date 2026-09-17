@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
@@ -182,8 +183,11 @@ public final class ChatPanel extends JPanel {
         JPanel currentTargetInformationPanel = new JPanel();
         currentTargetInformationPanel.setLayout(new BoxLayout(currentTargetInformationPanel, BoxLayout.X_AXIS));
         currentTargetInformationPanel.setBackground(Colors.backgorundColorVeryDark);
-        currentTargetInformationPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 80));
-        currentTargetInformationPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
+        // NOTE: previously this was Integer.MAX_VALUE, which made this panel claim the
+        // entire header width once placed in BorderLayout.WEST/CENTER, painting over
+        // anything added to BorderLayout.EAST (e.g. the "add member" button). We now
+        // rely on BorderLayout.CENTER to size this panel to "whatever space is left"
+        // instead, so it no longer needs (or should have) an oversized preferred size.
         currentTargetInformationPanel.add(currentTargetUserPfpLabel);
         currentTargetInformationPanel.add(currentTargetUserDetailsPanel);
 
@@ -192,7 +196,25 @@ public final class ChatPanel extends JPanel {
         currentTargetUserPanel.setBackground(Colors.backgorundColorVeryDark);
         currentTargetUserPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 80));
         currentTargetUserPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
-        currentTargetUserPanel.add(currentTargetInformationPanel, BorderLayout.WEST);
+        // CENTER (not WEST): CENTER is sized to the remaining space by BorderLayout,
+        // so it no longer fights the EAST "add member" button for room, and it can't
+        // paint over it either.
+        currentTargetUserPanel.add(currentTargetInformationPanel, BorderLayout.CENTER);
+
+        // group chats get a button to add more members to the header's east side
+        if (currentTargetUser != null && currentTargetUser.isGroupChat) {
+            JButton addMemberButton = new JButton("+");
+            addMemberButton.setFocusable(false);
+            addMemberButton.setToolTipText("Mitglied hinzufügen");
+            Chat groupChatForAdd = currentTargetUser;
+            addMemberButton.addActionListener(e -> openAddMemberDialog(groupChatForAdd));
+
+            JPanel addMemberButtonPanel = new JPanel(new GridBagLayout());
+            addMemberButtonPanel.setBackground(Colors.backgorundColorVeryDark);
+            addMemberButtonPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 25));
+            addMemberButtonPanel.add(addMemberButton);
+            currentTargetUserPanel.add(addMemberButtonPanel, BorderLayout.EAST);
+        }
 
         chatContentPanel = new JPanel();
         chatContentPanel.setLayout(new BoxLayout(chatContentPanel, BoxLayout.Y_AXIS));
@@ -596,6 +618,92 @@ public final class ChatPanel extends JPanel {
         bottomPanel.add(createButton);
 
         dialog.add(topPanel, BorderLayout.NORTH);
+        dialog.add(checkboxScrollPane, BorderLayout.CENTER);
+        dialog.add(bottomPanel, BorderLayout.SOUTH);
+
+        dialog.setVisible(true);
+    }
+
+    /**
+     * Opens a modal dialog letting the user pick additional accounts (not
+     * already in the chat) and add them as members of an existing group
+     * chat. Uses JSONConfigurations.addMembersToChat(), which also promotes
+     * a 1:1 chat to a group once membership exceeds 2 (not reachable from
+     * here today since the button is only shown for chats already flagged
+     * as group chats).
+     */
+    private void openAddMemberDialog(Chat chat) {
+
+        JDialog dialog = new JDialog(HomeFrame.frame, "Mitglieder hinzufügen", true);
+        dialog.setSize(320, 420);
+        dialog.setLocationRelativeTo(HomeFrame.frame);
+        dialog.setLayout(new BorderLayout());
+
+        Set<String> existingMembers = new HashSet<>();
+        for (Object m : chat.members) existingMembers.add(m.toString());
+
+        JPanel checkboxPanel = new JPanel();
+        checkboxPanel.setLayout(new BoxLayout(checkboxPanel, BoxLayout.Y_AXIS));
+
+        // one checkbox per account not already in this chat
+        List<JCheckBox> checkboxes = new ArrayList<>();
+        List<Account> selectableAccounts = new ArrayList<>();
+        for (Account acc : Main.updater.membersList) {
+            if (existingMembers.contains(acc.uid)) continue;
+            JCheckBox box = new JCheckBox(acc.fullName + " (" + acc.username + ")");
+            checkboxes.add(box);
+            selectableAccounts.add(acc);
+            checkboxPanel.add(box);
+        }
+
+        JScrollPane checkboxScrollPane = new JScrollPane(checkboxPanel);
+
+        JButton addButton = new JButton("Hinzufügen");
+        addButton.addActionListener(e -> {
+            List<Account> selected = new ArrayList<>();
+            for (int i = 0; i < checkboxes.size(); i++) {
+                if (checkboxes.get(i).isSelected()) {
+                    selected.add(selectableAccounts.get(i));
+                }
+            }
+
+            if (selected.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog,
+                        "Bitte mindestens ein Mitglied auswählen.",
+                        "Keine Auswahl", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            try {
+                JSONConfigurations.addMembersToChat(chat.id, selected);
+                Main.updater.updateChatList();
+
+                // Chat objects are immutable/replaced wholesale - pull the fresh one
+                // (with the updated member list) rather than mutating this one.
+                for (Chat fresh : Main.updater.chatsList) {
+                    if (fresh.id.equals(chat.id)) {
+                        currentTargetUser = fresh;
+                        break;
+                    }
+                }
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(dialog,
+                        "Mitglieder konnten nicht hinzugefügt werden: " + ex.getMessage(),
+                        "Fehler", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            dialog.dispose();
+            currentFrame.setChatPanel(); // rebuild so header/sidebar reflect the new membership
+        });
+
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.add(addButton);
+
+        JLabel infoLabel = new JLabel("Verfügbare Accounts:");
+        infoLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 10));
+
+        dialog.add(infoLabel, BorderLayout.NORTH);
         dialog.add(checkboxScrollPane, BorderLayout.CENTER);
         dialog.add(bottomPanel, BorderLayout.SOUTH);
 

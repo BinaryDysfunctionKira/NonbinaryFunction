@@ -125,7 +125,7 @@ public class HomeFrame {
         PopupMenu popup = new PopupMenu();
         MenuItem showItem = new MenuItem("Öffnen");
         MenuItem homeItem = new MenuItem("Home");
-        MenuItem profileItem = new MenuItem("Profil");
+        MenuItem profileItem = new MenuItem(Main.loggedInAccount.username);
         MenuItem chatItem = new MenuItem("Nachrichten");
         MenuItem logoutItem = new MenuItem("Abmelden");
         MenuItem exitItem = new MenuItem("Beenden");
@@ -137,11 +137,10 @@ public class HomeFrame {
         chatItem.addActionListener(e -> setChatPanel());
         exitItem.addActionListener(e -> System.exit(0));
 
-        popup.add(Main.loggedInAccount.username);
+        popup.add(profileItem);
         popup.addSeparator();
         popup.add(showItem);
         popup.add(homeItem);
-        popup.add(profileItem);
         popup.add(chatItem);
         popup.add(logoutItem);
         popup.addSeparator();
