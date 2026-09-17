@@ -151,10 +151,6 @@ public final class Updater {
         return null;
     }
 
-    // ------------------------------------------------------------------
-    // messages + toasts
-    // ------------------------------------------------------------------
-
     /**
      * Runs every cycle. Cheaply checks every chat the user is in for new
      * message files (just filenames, no parsing) and toasts for anything

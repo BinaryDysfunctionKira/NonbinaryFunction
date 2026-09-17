@@ -467,9 +467,6 @@ public final class ChatPanel extends JPanel {
         }
     }
 
-    // ------------------------------------------------------------------
-    // group chat creation
-    // ------------------------------------------------------------------
 
     /**
      * Opens a modal dialog letting the user name a new group and pick which
