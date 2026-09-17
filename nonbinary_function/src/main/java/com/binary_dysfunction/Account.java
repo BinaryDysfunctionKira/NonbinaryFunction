@@ -1,5 +1,6 @@
 package com.binary_dysfunction;
 
+import java.awt.SystemTray;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -47,6 +48,10 @@ public class Account {
         Main.loggedInAccount = null;
         currentFrame.dispose();
         SwingUtilities.invokeLater(new PasswordFrame()::startup);
+        if (HomeFrame.trayIcon != null) {
+            SystemTray systemTray = SystemTray.getSystemTray();
+            systemTray.remove(HomeFrame.trayIcon);
+        }
     }
 
     public String getUsername() {
