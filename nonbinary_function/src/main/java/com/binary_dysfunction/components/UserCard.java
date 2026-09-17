@@ -56,7 +56,7 @@ public class UserCard extends JPanel {
         profileButtonPanel.setBackground(backgroundColor);
         profileButtonPanel.add(profileButton);
 
-        JButton logoutButton = new JButton(Component.geticon("logout.png"));
+        JButton logoutButton = new JButton(Component.geticon("/logout.png"));
         logoutButton.setToolTipText("Log out");
         logoutButton.setPreferredSize(new Dimension(40, 40));
         logoutButton.setBackground(new Color(128, 37, 37));

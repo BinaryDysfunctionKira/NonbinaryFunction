@@ -5,12 +5,12 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.Window;
-import java.io.File;
 import java.io.IOException;
 
-import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.BorderFactory;
@@ -233,9 +233,10 @@ public class Toast {
     }
 
     private static void playNotificationSound() throws LineUnavailableException, UnsupportedAudioFileException, IOException {
-        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("nonbinary_function\\src\\main\\resources\\notification-sound.wav"));
-        Clip clip = AudioSystem.getClip();
-        clip.open(audioInputStream);
+        AudioFormat format = Main.notificationSound.getFormat();
+        DataLine.Info info = new DataLine.Info(Clip.class, format);
+        Clip clip = (Clip) AudioSystem.getLine(info);
+        clip.open(Main.notificationSound);
         clip.start();
     }
 }

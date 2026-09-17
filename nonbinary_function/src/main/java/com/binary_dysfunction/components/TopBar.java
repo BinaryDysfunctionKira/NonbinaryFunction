@@ -18,7 +18,7 @@ public class TopBar extends JPanel {
 
     public TopBar(HomeFrame currentFrame) {
 
-        JButton homeButton = new JButton(Component.geticon("home.png"));
+        JButton homeButton = new JButton(Component.geticon("/home.png"));
         homeButton.setPreferredSize(new Dimension(50, 50));
         homeButton.setToolTipText("Home");
         homeButton.setBackground(null);
@@ -40,7 +40,7 @@ public class TopBar extends JPanel {
         });
         
 
-        JButton logoutButton = new JButton(Component.geticon("logout.png"));
+        JButton logoutButton = new JButton(Component.geticon("/logout.png"));
         logoutButton.setToolTipText("Log out");
         logoutButton.setPreferredSize(new Dimension(40, 40));
         logoutButton.setBackground(Colors.redButtonColor);

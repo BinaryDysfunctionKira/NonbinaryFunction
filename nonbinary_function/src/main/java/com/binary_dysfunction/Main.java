@@ -6,6 +6,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -19,7 +23,9 @@ public class Main {
     public static boolean isServerNew = false;
     public static boolean ownerSet = false;
 
-    public static Image appIcon = new ImageIcon("nonbinary_function\\src\\main\\resources\\icon.png").getImage();
+    public static Image appIcon;
+    public static ImageIcon defaultImage;
+    public static AudioInputStream notificationSound;
 
     public static final Config config = new Config();
 
@@ -32,6 +38,11 @@ public class Main {
     }
 
     public static void start() {
+        try {
+            appIcon = ImageIO.read(Main.class.getResource("/icon.png"));
+            defaultImage = new ImageIcon(ImageIO.read(Main.class.getResource("/BinaryDysfunctionLogo.png")));
+            notificationSound = AudioSystem.getAudioInputStream(Toast.class.getResource("/notification-sound.wav"));
+        } catch (IOException | UnsupportedAudioFileException e) {}
         FlatMacDarkLaf.setup();
         try {
             loadSavedUsrConfig();

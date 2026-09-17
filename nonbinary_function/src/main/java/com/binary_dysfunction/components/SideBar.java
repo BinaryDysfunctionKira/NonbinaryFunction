@@ -22,19 +22,19 @@ public class SideBar extends JPanel {
 
     public SideBar(HomeFrame currentFrame) {
 
-        JButton notificationsButton = new JButton(Component.geticon("notifications.png"));
+        JButton notificationsButton = new JButton(Component.geticon("/notifications.png"));
         notificationsButton.setToolTipText("Benachrichtigungen");
         notificationsButton.setPreferredSize(new Dimension(40, 40));
         notificationsButton.setBackground(null);
         notificationsButton.setBorder(null);
 
-        JButton assembliesButton = new JButton(Component.geticon("groups.png"));
+        JButton assembliesButton = new JButton(Component.geticon("/groups.png"));
         assembliesButton.setToolTipText("Assemblies");
         assembliesButton.setPreferredSize(new Dimension(40, 40));
         assembliesButton.setBackground(null);
         assembliesButton.setBorder(null);
 
-        JButton chatButton = new JButton(Component.geticon("chat-bubble.png"));
+        JButton chatButton = new JButton(Component.geticon("/chat-bubble.png"));
         chatButton.setToolTipText("Chats");
         chatButton.setPreferredSize(new Dimension(40, 40));
         chatButton.setBackground(null);
@@ -45,7 +45,7 @@ public class SideBar extends JPanel {
             System.out.println("Chat-Panel loaded");
         });
 
-        JButton calendarButton = new JButton(Component.geticon("calendar.png"));
+        JButton calendarButton = new JButton(Component.geticon("/calendar.png"));
         calendarButton.setToolTipText("Kalendar");
         calendarButton.setPreferredSize(new Dimension(40, 40));
         calendarButton.setBackground(null);
@@ -55,7 +55,7 @@ public class SideBar extends JPanel {
             System.out.println("Calendar-Panel loaded");
         });
 
-        JButton driveButton = new JButton(Component.geticon("drive-folder.png"));
+        JButton driveButton = new JButton(Component.geticon("/drive-folder.png"));
         driveButton.setToolTipText("Öffne Personal-Vault");
         driveButton.setPreferredSize(new Dimension(40, 40));
         driveButton.setBackground(null);
@@ -82,13 +82,13 @@ public class SideBar extends JPanel {
         topButtons.add(driveButton);
 
 
-        JButton eventButton = new JButton(Component.geticon("event.png"));
+        JButton eventButton = new JButton(Component.geticon("/event.png"));
         eventButton.setToolTipText("Event Mode");
         eventButton.setPreferredSize(new Dimension(40, 40));
         eventButton.setBackground(null);
         eventButton.setBorder(null);
 
-        JButton adminButton = new JButton(Component.geticon("admin.png"));
+        JButton adminButton = new JButton(Component.geticon("/admin.png"));
         adminButton.setToolTipText("Admin Zone");
         adminButton.setPreferredSize(new Dimension(40, 40));
         adminButton.addActionListener(e -> {
