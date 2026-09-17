@@ -77,7 +77,6 @@ public class HomeFrame {
     }
 
     public void setChatPanel() {
-        ChatPanel.currentTargetUser = null;
         contentPanel.removeAll();
         contentPanel.add(new ChatPanel(this));
         frame.setTitle(programName + " - Chat");
