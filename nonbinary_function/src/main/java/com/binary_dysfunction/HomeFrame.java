@@ -12,6 +12,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import com.binary_dysfunction.components.SideBar;
@@ -36,11 +37,16 @@ public class HomeFrame {
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(1013, 608);
         frame.setLocationRelativeTo(null);
-        // frame.setIconImage(new ImageIcon("nonbinary_function\\src\\main\\resources\\BinaryDysfunctionLogo.png").getImage());
+        frame.setIconImage(Main.appIcon);
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                frame.setVisible(false); // Fenster unsichtbar machen
+                int result = JOptionPane.showConfirmDialog(frame, "Wollen Sie " + programName + " im Hintergrund laufen lassen?", programName + " schliessen?", JOptionPane.YES_NO_CANCEL_OPTION);
+                if (result == JOptionPane.YES_OPTION) {
+                    frame.setVisible(false); // Fenster unsichtbar machen
+                } else if (result == JOptionPane.NO_OPTION) {
+                    System.exit(0);
+                }
             }
         });
         if (SystemTray.isSupported()) {

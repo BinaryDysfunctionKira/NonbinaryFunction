@@ -212,6 +212,7 @@ public class PasswordFrame {
         frame.getContentPane().add(mainPanel);
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
+        frame.setIconImage(Main.appIcon);
         frame.setVisible(true);
 
 
