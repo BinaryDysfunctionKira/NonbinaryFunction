@@ -18,7 +18,10 @@ import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
@@ -245,6 +248,13 @@ public final class ChatPanel extends JPanel {
         allChatsPanel.add(chatsLabelPanel);
         allChatsPanel.add(chatsScrollPane);
 
+        // fixed below the (scrollable) chat list, so it never scrolls out of view
+        JButton newGroupButton = new JButton("Neue Gruppe");
+        newGroupButton.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT);
+        newGroupButton.setFocusable(false);
+        newGroupButton.addActionListener(e -> openCreateGroupDialog());
+        allChatsPanel.add(newGroupButton);
+
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BorderLayout());
         contentPanel.setBackground(Colors.backgorundColorDarker);
@@ -455,5 +465,128 @@ public final class ChatPanel extends JPanel {
                 b.setValue(b.getMaximum());
             });
         }
+    }
+
+    // ------------------------------------------------------------------
+    // group chat creation
+    // ------------------------------------------------------------------
+
+    /**
+     * Opens a modal dialog letting the user name a new group and pick which
+     * other accounts to add. Requires at least 2 other members, since
+     * JSONConfigurations.addChat() only marks a chat as a group once it has
+     * more than 2 total members (you + 2 others).
+     */
+    private void openCreateGroupDialog() {
+
+        JDialog dialog = new JDialog(HomeFrame.frame, "Neue Gruppe erstellen", true);
+        dialog.setSize(320, 420);
+        dialog.setLocationRelativeTo(HomeFrame.frame);
+        dialog.setLayout(new BorderLayout());
+
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 10));
+        JLabel nameLabel = new JLabel("Gruppenname:");
+        JTextField groupNameField = new JTextField("Neue Gruppe");
+        topPanel.add(nameLabel, BorderLayout.NORTH);
+        topPanel.add(groupNameField, BorderLayout.CENTER);
+
+        JPanel checkboxPanel = new JPanel();
+        checkboxPanel.setLayout(new BoxLayout(checkboxPanel, BoxLayout.Y_AXIS));
+
+        // one checkbox per account, excluding the logged-in user (they're always in the chat)
+        List<JCheckBox> checkboxes = new ArrayList<>();
+        List<Account> selectableAccounts = new ArrayList<>();
+        for (Account acc : Main.updater.membersList) {
+            if (acc.uid.equals(Main.loggedInAccount.uid)) continue;
+            JCheckBox box = new JCheckBox(acc.fullName + " (" + acc.username + ")");
+            checkboxes.add(box);
+            selectableAccounts.add(acc);
+            checkboxPanel.add(box);
+        }
+
+        JScrollPane checkboxScrollPane = new JScrollPane(checkboxPanel);
+
+        JButton createButton = new JButton("Erstellen");
+        createButton.addActionListener(e -> {
+            List<Account> selected = new ArrayList<>();
+            for (int i = 0; i < checkboxes.size(); i++) {
+                if (checkboxes.get(i).isSelected()) {
+                    selected.add(selectableAccounts.get(i));
+                }
+            }
+
+            if (selected.size() < 2) {
+                JOptionPane.showMessageDialog(dialog,
+                        "Bitte mindestens 2 Mitglieder für eine Gruppe auswählen.",
+                        "Zu wenige Mitglieder", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            String groupName = groupNameField.getText().trim();
+            if (groupName.isEmpty()) groupName = "Neue Gruppe";
+
+            List<Account> allMembers = new ArrayList<>();
+            allMembers.add(Main.loggedInAccount);
+            allMembers.addAll(selected);
+
+            try {
+                JSONConfigurations.addChat(allMembers.toArray(new Account[0]));
+
+                // addChat() always names new group chats "New Group" - rename to what the user typed
+                Main.updater.updateChatList();
+                Chat created = findChatByMembers(allMembers);
+                if (created != null && !groupName.equals(created.groupName)) {
+                    renameGroupChat(created.id, groupName);
+                    Main.updater.updateChatList();
+                }
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(dialog,
+                        "Gruppe konnte nicht erstellt werden: " + ex.getMessage(),
+                        "Fehler", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            dialog.dispose();
+            currentFrame.setChatPanel();
+        });
+
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.add(createButton);
+
+        dialog.add(topPanel, BorderLayout.NORTH);
+        dialog.add(checkboxScrollPane, BorderLayout.CENTER);
+        dialog.add(bottomPanel, BorderLayout.SOUTH);
+
+        dialog.setVisible(true);
+    }
+
+    /** Finds the just-created chat by matching its member set (uids), newest match wins. */
+    private Chat findChatByMembers(List<Account> members) {
+        Set<String> wantedUids = new HashSet<>();
+        for (Account acc : members) wantedUids.add(acc.uid);
+
+        Chat match = null;
+        for (Chat chat : Main.updater.chatsList) {
+            Set<String> chatUids = new HashSet<>();
+            for (Object m : chat.members) chatUids.add(m.toString());
+            if (chatUids.equals(wantedUids)) match = chat; // last one wins if duplicates somehow exist
+        }
+        return match;
+    }
+
+    private void renameGroupChat(String chatId, String newName) {
+        try {
+            String content = java.nio.file.Files.readString(JSONConfigurations.CHATS_PATH);
+            org.json.JSONArray chats = new org.json.JSONArray(content);
+            for (int i = 0; i < chats.length(); i++) {
+                org.json.JSONObject chat = chats.getJSONObject(i);
+                if (chat.getString("id").equals(chatId)) {
+                    chat.put("groupName", newName);
+                    break;
+                }
+            }
+            java.nio.file.Files.writeString(JSONConfigurations.CHATS_PATH, chats.toString(4));
+        } catch (IOException ignored) {}
     }
 }
