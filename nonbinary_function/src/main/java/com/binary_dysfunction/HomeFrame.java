@@ -41,6 +41,7 @@ public class HomeFrame {
     }
 
     public void setHomePanel() {
+        ChatPanel.currentTargetUser = null;
         contentPanel.removeAll();
         contentPanel.add(new HomePanel(this));
         frame.setTitle(programName + " - Home");
@@ -49,6 +50,7 @@ public class HomeFrame {
     }
 
     public void setProfilePanel() {
+        ChatPanel.currentTargetUser = null;
         contentPanel.removeAll();
         contentPanel.add(new ProfilePanel(this));
         frame.setTitle(programName + " - Profil");
@@ -57,6 +59,7 @@ public class HomeFrame {
     }
 
     public void setAdminPanel() {
+        ChatPanel.currentTargetUser = null;
         contentPanel.removeAll();
         contentPanel.add(new AdminPanel(this));
         frame.setTitle(programName + " - Admin Zone");
@@ -65,6 +68,7 @@ public class HomeFrame {
     }
 
     public void setCalendarPanel() {
+        ChatPanel.currentTargetUser = null;
         contentPanel.removeAll();
         contentPanel.add(new CalendarPanel());
         frame.setTitle(programName + " - Kalendar");
@@ -73,6 +77,7 @@ public class HomeFrame {
     }
 
     public void setChatPanel() {
+        ChatPanel.currentTargetUser = null;
         contentPanel.removeAll();
         contentPanel.add(new ChatPanel(this));
         frame.setTitle(programName + " - Chat");
