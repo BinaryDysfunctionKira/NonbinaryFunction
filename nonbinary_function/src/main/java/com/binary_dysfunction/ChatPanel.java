@@ -267,7 +267,7 @@ public final class ChatPanel extends JPanel {
 
         });
 
-        JButton chatSelectFileButton = new JButton(Component.scaleImage("nonbinary_function\\src\\main\\resources\\drive-folder.png", 30));
+        JButton chatSelectFileButton = new JButton(Component.geticon("/drive-folder.png"));
         chatSelectFileButton.setFocusable(false);
         if (currentTargetUser == null) chatSelectFileButton.setEnabled(false);
 
