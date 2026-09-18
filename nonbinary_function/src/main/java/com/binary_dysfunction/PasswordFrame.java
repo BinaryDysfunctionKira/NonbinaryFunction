@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Font;
 import java.awt.GridBagLayout;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -86,6 +88,19 @@ public class PasswordFrame {
         userField.setBackground(Color.WHITE);
         userField.setForeground(Color.BLACK);
         userField.setCaretColor(Color.BLACK);
+        userField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    userField.setEnabled(false);
+                    userField.setEnabled(true);
+                }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
 
         JLabel passwordText = new JLabel("Passwort");
         passwordText.setAlignmentX(Container.CENTER_ALIGNMENT);
@@ -105,6 +120,19 @@ public class PasswordFrame {
         passwordField.setBackground(Color.WHITE);
         passwordField.setForeground(Color.BLACK);
         passwordField.setCaretColor(Color.BLACK);
+        passwordField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    passwordField.setEnabled(false);
+                    passwordField.setEnabled(true);
+                }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
 
         JLabel emptyLabel = new JLabel(" ");
         emptyLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 6, 0));
