@@ -43,6 +43,7 @@ public class HomeFrame {
             public void windowClosing(WindowEvent e) {
                 int result = JOptionPane.showConfirmDialog(frame, "Wollen Sie " + programName + " im Hintergrund laufen lassen?", programName + " schliessen?", JOptionPane.YES_NO_CANCEL_OPTION);
                 if (result == JOptionPane.YES_OPTION) {
+                    setHomePanel();
                     frame.setVisible(false); // Fenster unsichtbar machen
                 } else if (result == JOptionPane.NO_OPTION) {
                     System.exit(0);
