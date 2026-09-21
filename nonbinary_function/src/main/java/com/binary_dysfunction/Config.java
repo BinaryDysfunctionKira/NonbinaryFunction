@@ -153,12 +153,10 @@ public class Config {
     }
 
     public static boolean hasServerConfig(final File dir) {
-        if (!Main.serverPath.equals("")) {
-            String[] files = dir.list();
-            for (String file : files) {
-                if (file.equals("server-config.properties")) return true;
-            }
-            return false;
+        String[] files = dir.list();
+        if (files == null) return false; // dir existiert nicht oder ist kein Verzeichnis / keine Leserechte
+        for (String file : files) {
+            if (file.equals("server-config.properties")) return true;
         }
         return false;
     }

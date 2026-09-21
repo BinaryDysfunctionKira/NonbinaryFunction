@@ -87,6 +87,10 @@ public class SideBar extends JPanel {
         eventButton.setPreferredSize(new Dimension(40, 40));
         eventButton.setBackground(null);
         eventButton.setBorder(null);
+        eventButton.addActionListener(e -> {
+            currentFrame.setEventPanel();
+            System.out.println("Event-Panel loaded");
+        });
 
         JButton adminButton = new JButton(Component.geticon("/admin.png"));
         adminButton.setToolTipText("Admin Zone");
