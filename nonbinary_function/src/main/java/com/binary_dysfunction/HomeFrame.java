@@ -12,7 +12,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import com.binary_dysfunction.components.SideBar;
@@ -41,13 +40,9 @@ public class HomeFrame {
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                int result = JOptionPane.showConfirmDialog(frame, "Wollen Sie " + programName + " im Hintergrund laufen lassen?", programName + " schliessen?", JOptionPane.YES_NO_CANCEL_OPTION);
-                if (result == JOptionPane.YES_OPTION) {
-                    setHomePanel();
-                    frame.setVisible(false); // Fenster unsichtbar machen
-                } else if (result == JOptionPane.NO_OPTION) {
-                    System.exit(0);
-                }
+                
+                setHomePanel();
+                frame.setVisible(false); // Fenster unsichtbar machen
             }
         });
         if (SystemTray.isSupported()) {
@@ -113,6 +108,47 @@ public class HomeFrame {
         contentPanel.removeAll();
         contentPanel.add(new ChatPanel(this));
         frame.setTitle(programName + " - Chat");
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+    public void setEventPanel() {
+        openFrame();
+        contentPanel.removeAll();
+        contentPanel.add(new EventPanel(this));
+        frame.setTitle(programName + " - Event Funktionen");
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+    public void setAddTicketPanel() {
+        openFrame();
+        contentPanel.removeAll();
+        contentPanel.add(new AddTicketPanel(this));
+        frame.setTitle(programName + " - Tickets Hinzufügen");
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+    public void setConfigureTicketPanel() {
+        openFrame();
+        contentPanel.removeAll();
+        contentPanel.add(new ConfigureTicketPanel(this));
+        frame.setTitle(programName + " - Tickets Bearbeiten");
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+    public void setRegisterTicketPanel() {
+        openFrame();
+        contentPanel.removeAll();
+        contentPanel.add(new RegisterTicketPanel(this));
+        frame.setTitle(programName + " - Tickets Registrieren");
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+    public void setStatisticsPanel() {
+        openFrame();
+        contentPanel.removeAll();
+        contentPanel.add(new StatisticPanel(this));
+        frame.setTitle(programName + " - Statistik");
         contentPanel.revalidate();
         contentPanel.repaint();
     }
