@@ -4,17 +4,44 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.time.LocalDate;
+import java.time.YearMonth;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class CalendarPanel extends JPanel {
 
+    private YearMonth aktuellerMonat = YearMonth.now();
+    private LocalDate ausgewaehltesDatum;
+    private JLabel monatsLabel;
+    private JPanel kalenderGrid;
+
     public CalendarPanel() {
 
         setLayout(new BorderLayout());
 
+
+        //Monatsbereich
+         JPanel navigationPanel = new JPanel(new BorderLayout()
+        );
+        JButton vorherigerButton = new JButton("<");
+        JButton naechsterButton = new JButton(">");
+        monatsLabel = new JLabel("", JLabel.CENTER);
+        navigationPanel.add(
+            vorherigerButton,
+            BorderLayout.WEST
+        );
+
+        navigationPanel.add(monatsLabel,BorderLayout.CENTER
+        );
+
+        navigationPanel.add(naechsterButton,BorderLayout.EAST
+        );
+        add(navigationPanel, BorderLayout.NORTH);
+        
+        
         // 0 = beliebig viele Zeilen
         JPanel kalenderGrid = new JPanel(new GridLayout(0, 7));
 
