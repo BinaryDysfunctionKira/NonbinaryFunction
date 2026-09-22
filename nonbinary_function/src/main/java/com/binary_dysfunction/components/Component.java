@@ -9,7 +9,7 @@ import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
-import com.binary_dysfunction.Main;
+import com.binary_dysfunction.main.Main;
 
 public class Component {
 

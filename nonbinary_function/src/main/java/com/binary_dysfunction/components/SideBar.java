@@ -12,11 +12,11 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import com.binary_dysfunction.AdminPanel;
-import com.binary_dysfunction.ChatPanel;
-import com.binary_dysfunction.Config;
-import com.binary_dysfunction.HomeFrame;
-import com.binary_dysfunction.Main;
+import com.binary_dysfunction.config.Config;
+import com.binary_dysfunction.frames.HomeFrame;
+import com.binary_dysfunction.main.Main;
+import com.binary_dysfunction.panels.AdminPanel;
+import com.binary_dysfunction.panels.ChatPanel;
 
 public class SideBar extends JPanel {
 

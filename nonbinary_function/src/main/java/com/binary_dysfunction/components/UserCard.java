@@ -11,9 +11,9 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.binary_dysfunction.Account;
-import com.binary_dysfunction.HomeFrame;
-import com.binary_dysfunction.Main;
+import com.binary_dysfunction.frames.HomeFrame;
+import com.binary_dysfunction.main.Main;
+import com.binary_dysfunction.types.Account;
 
 public class UserCard extends JPanel {
 
