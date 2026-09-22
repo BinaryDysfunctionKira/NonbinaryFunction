@@ -1,6 +1,7 @@
 package com.binary_dysfunction.panels;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -13,6 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SpinnerDateModel;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 
@@ -25,6 +27,8 @@ public class AddTicketPanel extends JPanel {
 
         JLabel titleLabel = new JLabel("Ticket hinzufügen");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JTextField eventNameTextField = new JTextField();
         eventNameTextField.setFont(new Font("Arial", Font.PLAIN, 14));
@@ -43,15 +47,75 @@ public class AddTicketPanel extends JPanel {
 
         JPanel eventTicketCountPanel = new JPanel(new BorderLayout());
         eventTicketCountPanel.setBackground(null);
-        eventTicketCountPanel.setMaximumSize(new Dimension(80, 50));
+        eventTicketCountPanel.setMaximumSize(new Dimension(100, 50));
         eventTicketCountPanel.add(new JLabel("Anzahl"), BorderLayout.NORTH);
         eventTicketCountPanel.add(eventTicketCount);
 
         JPanel rowOne = new JPanel();
         rowOne.setLayout(new BoxLayout(rowOne, BoxLayout.X_AXIS));
         rowOne.setBackground(null);
+        rowOne.setAlignmentX(Component.LEFT_ALIGNMENT);
         rowOne.add(eventNameTextFieldPanel);
         rowOne.add(eventTicketCountPanel);
+
+
+        JTextField locationTextField = new JTextField();
+        locationTextField.setFont(new Font("Arial", Font.PLAIN, 14));
+        locationTextField.setBackground(Colors.backgorundColorDarker);
+
+        JPanel locationFieldPanel = new JPanel(new BorderLayout());
+        locationFieldPanel.setBackground(null);
+        locationFieldPanel.setMaximumSize(new Dimension(200, 50));
+        locationFieldPanel.add(new JLabel("Ort"), BorderLayout.NORTH);
+        locationFieldPanel.add(locationTextField);
+
+        SpinnerModel spinnerPriceModel = new SpinnerNumberModel(0.0, 0.0,99999.0, 0.5);
+        JSpinner eventTicketPrice = new JSpinner(spinnerPriceModel);
+        eventTicketPrice.setFont(new Font("Arial", Font.PLAIN, 14));
+        JSpinner.NumberEditor editor = new JSpinner.NumberEditor(eventTicketPrice, "0.00' €'");
+        eventTicketPrice.setEditor(editor);
+        editor.getTextField().setOpaque(true);
+        editor.getTextField().setBackground(Colors.backgorundColorDarker);
+
+        JPanel priceFieldPanel = new JPanel(new BorderLayout());
+        priceFieldPanel.setBackground(null);
+        priceFieldPanel.setMaximumSize(new Dimension(100, 50));
+        priceFieldPanel.add(new JLabel("Preis"), BorderLayout.NORTH);
+        priceFieldPanel.add(eventTicketPrice);
+
+        JPanel rowTwo = new JPanel();
+        rowTwo.setLayout(new BoxLayout(rowTwo, BoxLayout.X_AXIS));
+        rowTwo.setBackground(null);
+        rowTwo.setAlignmentX(Component.LEFT_ALIGNMENT);
+        rowTwo.add(locationFieldPanel);
+        rowTwo.add(priceFieldPanel);
+
+
+        SpinnerDateModel dateModel = new SpinnerDateModel();
+        JSpinner eventDateSpinner = new JSpinner(dateModel);
+        JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(eventDateSpinner, "dd.MM.yyyy");
+        eventDateSpinner.setEditor(dateEditor);
+        eventDateSpinner.setFont(new Font("Arial", Font.PLAIN, 14));
+        dateEditor.setOpaque(true);
+        dateEditor.setBackground(Colors.backgorundColorDarker);
+
+        JPanel dateFieldPanel = new JPanel(new BorderLayout());
+        dateFieldPanel.setBackground(null);
+        dateFieldPanel.setMaximumSize(new Dimension(150, 50));
+        dateFieldPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        dateFieldPanel.add(new JLabel("Datum"), BorderLayout.NORTH);
+        dateFieldPanel.add(eventDateSpinner);
+
+        JButton submitButton = new JButton("Erstellen");
+        submitButton.setBackground(Colors.greenButtonColor);
+        submitButton.setForeground(Colors.lighterFontColor);
+        submitButton.setFont(new Font("Arial", Font.PLAIN, 14));
+
+        JPanel submitButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        submitButtonPanel.setBackground(null);
+        submitButtonPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        submitButtonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        submitButtonPanel.add(submitButton);
 
         JPanel settingsPanel = new JPanel();
         settingsPanel.setLayout(new BoxLayout(settingsPanel, BoxLayout.Y_AXIS));
@@ -59,6 +123,9 @@ public class AddTicketPanel extends JPanel {
         settingsPanel.setBorder(BorderFactory.createEmptyBorder(20, 35, 55, 35));
         settingsPanel.add(titleLabel);
         settingsPanel.add(rowOne);
+        settingsPanel.add(rowTwo);
+        settingsPanel.add(dateFieldPanel);
+        settingsPanel.add(submitButtonPanel);
 
         JScrollPane settingsScrollPane = new JScrollPane(settingsPanel);
         settingsScrollPane.setHorizontalScrollBar(null);
