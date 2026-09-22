@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -31,11 +32,19 @@ public class JSONConfigurations {
     }
 
     public static Path getChatsPath() {
-        return Paths.get(Main.serverPath + "/chats/chats.json");
+        return Paths.get(getChatsDir() + "chats.json");
     }
 
     public static String getChatsDir() {
         return Main.serverPath + "/chats/";
+    }
+
+    public static String getEventsDir() {
+        return Main.serverPath + "/events/";
+    }
+
+    public static String getTicketsDir() {
+        return getEventsDir() + "tickets/";
     }
 
     public static void addAccount(String username, String passwordHash) throws IOException {
@@ -401,6 +410,7 @@ public class JSONConfigurations {
         }
     }
 
+
     /** All messages of a chat, oldest first. */
     public static List<Message> readMessages(String chatsID) throws IOException {
         Path messagesDir = Path.of(getChatsDir() + chatsID + "/messages");
@@ -564,5 +574,81 @@ public class JSONConfigurations {
         String relativePath = "/chats/" + chatId + "/pfp/" + fileName;
         updateChatField(chatId, "pfpPath", relativePath);
         return relativePath;
+    }
+
+
+    // ---------------------------------------------------------
+    //                        TICKETS
+    // ---------------------------------------------------------
+    /**
+     * The method creates a seperate JSON File for a new Ticket
+     * @param eventName
+     * @param count
+     * @param location
+     * @param price
+     * @param date
+     * @throws IOException
+     */
+    public static void addTicket(String eventName, int count, String location, double price, long date) throws IOException {
+
+        if (Paths.get(getTicketsDir()) != null) {
+            Files.createDirectories(Paths.get(getTicketsDir()));
+        }
+
+        String id = generateUniqueTicketId(Paths.get(getTicketsDir()));
+
+        Path dirPath = Path.of(getTicketsDir() + eventName + "/");
+        Files.createDirectories(dirPath);
+        Path thisTicket = Path.of(getTicketsDir() + eventName + "/" + id + ".json");
+        try {
+            Files.createFile(thisTicket);
+        } catch (IOException e) {}
+
+        JSONArray tickets = new JSONArray();
+
+        JSONObject newTicket = new JSONObject();
+        newTicket.put("id", id);
+        newTicket.put("owner", "None");
+        newTicket.put("eventName", eventName);
+        newTicket.put("count", count);
+        newTicket.put("location", location);
+        newTicket.put("price", price);
+        newTicket.put("date", date);
+        newTicket.put("available", true);
+        newTicket.put("registered", false);
+
+        tickets.put(newTicket);
+
+        Files.writeString(thisTicket, tickets.toString(4));
+    }
+
+    // Variables for creating a secure ticket id
+    private static final SecureRandom RANDOM = new SecureRandom();
+    private static final String TICKET_ID_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // ohne 0,O,1,I,L
+    private static final int TICKET_ID_LENGTH = 8;
+
+    /**
+     * Generates a secure Ticket id
+     * @param ticketsDir
+     * @return
+     * @throws IOException
+     */
+    private static String generateUniqueTicketId(Path ticketsDir) throws IOException {
+        while (true) {
+            String candidate = generateTicketIdCandidate();
+            if (!Files.exists(ticketsDir.resolve(candidate + ".json"))) {
+                return candidate;
+            }
+        }
+    }
+
+    // Generates a possible candidate for the ticket id. If not needed, discarded.
+    private static String generateTicketIdCandidate() {
+    StringBuilder sb = new StringBuilder(TICKET_ID_LENGTH + 1);
+        for (int i = 0; i < TICKET_ID_LENGTH; i++) {
+            if (i > 0 && i % 4 == 0) sb.append('-');
+            sb.append(TICKET_ID_CHARS.charAt(RANDOM.nextInt(TICKET_ID_CHARS.length())));
+        }
+        return sb.toString();
     }
 }

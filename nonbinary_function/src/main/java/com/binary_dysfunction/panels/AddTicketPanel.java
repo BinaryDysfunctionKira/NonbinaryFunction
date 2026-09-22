@@ -5,6 +5,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.io.IOException;
+import java.util.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -19,6 +21,8 @@ import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 
 import com.binary_dysfunction.components.Colors;
+import com.binary_dysfunction.components.Toast;
+import com.binary_dysfunction.config.JSONConfigurations;
 import com.binary_dysfunction.frames.HomeFrame;
 
 public class AddTicketPanel extends JPanel {
@@ -106,10 +110,33 @@ public class AddTicketPanel extends JPanel {
         dateFieldPanel.add(new JLabel("Datum"), BorderLayout.NORTH);
         dateFieldPanel.add(eventDateSpinner);
 
+        JLabel errorLabel = new JLabel("Ungültige Angaben.");
+        errorLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        errorLabel.setForeground(Colors.redFontColor);
+        errorLabel.setVisible(false);
+
         JButton submitButton = new JButton("Erstellen");
         submitButton.setBackground(Colors.greenButtonColor);
         submitButton.setForeground(Colors.lighterFontColor);
         submitButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        submitButton.addActionListener(e -> {
+            if ((Integer) eventTicketCount.getValue() <= 0 || eventNameTextField.getText().equals("") || locationTextField.getText().equals("") || (Long) ((Date) eventDateSpinner.getValue()).getTime() < System.currentTimeMillis()) {
+                errorLabel.setVisible(true);
+            } else {
+                boolean errorFree = true;
+                for (int i = 0; i < (Integer) eventTicketCount.getValue(); i++) {
+                    try {
+                        JSONConfigurations.addTicket(eventNameTextField.getText(), i + 1, locationTextField.getText(), (Double) eventTicketPrice.getValue(), ((Date) eventDateSpinner.getValue()).getTime());
+                    } catch (IOException ex) {
+                        errorLabel.setVisible(true);
+                        errorFree = false;
+                        System.out.println(ex);
+                    }
+                }
+                if (errorFree) Toast.show(null, "Tickets created", "Created: " + (Integer) eventTicketCount.getValue() + " Tickets.", 3000, Toast.Position.BOTTOM_RIGHT, false);
+                currentFrame.setAddTicketPanel();
+            }
+        });
 
         JPanel submitButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         submitButtonPanel.setBackground(null);
@@ -126,6 +153,7 @@ public class AddTicketPanel extends JPanel {
         settingsPanel.add(rowTwo);
         settingsPanel.add(dateFieldPanel);
         settingsPanel.add(submitButtonPanel);
+        settingsPanel.add(errorLabel);
 
         JScrollPane settingsScrollPane = new JScrollPane(settingsPanel);
         settingsScrollPane.setHorizontalScrollBar(null);
