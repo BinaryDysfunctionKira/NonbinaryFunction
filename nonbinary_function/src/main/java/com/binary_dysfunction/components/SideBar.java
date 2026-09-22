@@ -103,7 +103,7 @@ public class SideBar extends JPanel {
             System.out.println("Admin-Panel loaded");
         });
         adminButton.setVisible(false);
-        if (Main.loggedInAccount.assemblies.contains("Admin") || Main.loggedInAccount.assemblies.contains("Event")) adminButton.setVisible(true);
+        if (Main.loggedInAccount.assemblies.contains("Admin")) adminButton.setVisible(true);
 
         JPanel bottomButtons = new JPanel(new GridLayout(0, 1, 0, 10));
         bottomButtons.setBackground(Colors.greenishBackground);
