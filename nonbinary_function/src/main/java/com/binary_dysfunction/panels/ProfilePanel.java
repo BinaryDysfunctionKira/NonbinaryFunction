@@ -63,10 +63,6 @@ public class ProfilePanel extends JScrollPane {
             filechooser.setDialogTitle("Profilbild auswählen");
             
             FileNameExtensionFilter imageFilter = new FileNameExtensionFilter("Bilder (*.png, *.jpg, *.jpeg, *.gif)", "png", "jpg", "jpeg", "gif");
-            // filechooser.addChoosableFileFilter(new FileNameExtensionFilter("Bilder (*.png)", "png"));
-            // filechooser.addChoosableFileFilter(new FileNameExtensionFilter("Bilder (*.jpg)", "jpg"));
-            // filechooser.addChoosableFileFilter(new FileNameExtensionFilter("Bilder (*.jpeg)", "jpeg"));
-            // filechooser.addChoosableFileFilter(new FileNameExtensionFilter("Bilder (*.gif)", "gif"));
             filechooser.setFileFilter(imageFilter);
             filechooser.setAcceptAllFileFilterUsed(false);
 
@@ -473,5 +469,6 @@ public class ProfilePanel extends JScrollPane {
 
         this.setViewportView(mainPanel);
         this.setHorizontalScrollBar(null);
+        this.getVerticalScrollBar().setUnitIncrement(8);
     }
 }

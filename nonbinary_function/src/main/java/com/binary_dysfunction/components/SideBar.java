@@ -91,6 +91,8 @@ public class SideBar extends JPanel {
             currentFrame.setEventPanel();
             System.out.println("Event-Panel loaded");
         });
+        eventButton.setVisible(false);
+        if (Main.loggedInAccount.assemblies.contains("Admin") || Main.loggedInAccount.assemblies.contains("Event")) eventButton.setVisible(true);
 
         JButton adminButton = new JButton(Component.geticon("/admin.png"));
         adminButton.setToolTipText("Admin Zone");
@@ -100,12 +102,14 @@ public class SideBar extends JPanel {
             currentFrame.setAdminPanel();
             System.out.println("Admin-Panel loaded");
         });
+        adminButton.setVisible(false);
+        if (Main.loggedInAccount.assemblies.contains("Admin")) adminButton.setVisible(true);
 
         JPanel bottomButtons = new JPanel(new GridLayout(0, 1, 0, 10));
         bottomButtons.setBackground(Colors.greenishBackground);
         bottomButtons.setBorder(BorderFactory.createEmptyBorder(50, 0, 0, 0));
         bottomButtons.add(eventButton);
-        if (Main.loggedInAccount.assemblies.contains("Admin") || Main.loggedInAccount.assemblies.contains("Owner")) bottomButtons.add(adminButton);
+        bottomButtons.add(adminButton);
 
         JPanel fillPanel = new JPanel();
         fillPanel.setBackground(Colors.greenishBackground);

@@ -13,6 +13,7 @@ import javax.swing.SwingConstants;
 
 import com.binary_dysfunction.components.Colors;
 import com.binary_dysfunction.components.Component;
+import com.binary_dysfunction.config.JSONConfigurations;
 import com.binary_dysfunction.frames.HomeFrame;
 
 public class EventPanel extends JPanel {
@@ -37,6 +38,7 @@ public class EventPanel extends JPanel {
         configureTicketsButton.setBorder(BorderFactory.createEmptyBorder(15, 15, 20,15));
         configureTicketsButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         configureTicketsButton.setHorizontalTextPosition(SwingConstants.CENTER);
+        if (!JSONConfigurations.eventTicketsExist()) configureTicketsButton.setEnabled(false);
         configureTicketsButton.addActionListener(e -> {
             currentFrame.setConfigureTicketPanel();
         });

@@ -24,6 +24,7 @@ public class HomePanel extends JPanel {
         JLabel headerTitle = new JLabel(Main.serverName);
         headerTitle.setFont(new Font("Arial", Font.BOLD, 32));
         headerTitle.setAlignmentX(CENTER_ALIGNMENT);
+        headerTitle.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
         JLabel headerSubtitle = new JLabel("Guten Tag, " + Main.loggedInAccount.fullName + "!");
         headerSubtitle.setFont(new Font("Arial", Font.BOLD, 16));
         headerSubtitle.setForeground(Colors.lighterFontColor);

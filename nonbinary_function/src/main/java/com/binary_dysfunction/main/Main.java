@@ -72,7 +72,7 @@ public class Main {
         try {
             String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
             String classpath = System.getProperty("java.class.path");
-            String mainClass = "com.binary_dysfunction.Main";
+            String mainClass = "com.binary_dysfunction.main.Main";
 
             List<String> command = new ArrayList<>();
             command.add(javaBin);
@@ -81,7 +81,7 @@ public class Main {
             command.add(mainClass);
 
             ProcessBuilder builder = new ProcessBuilder(command);
-            builder.inheritIO(); // optional — lets the new instance's System.out show in your console
+            builder.inheritIO(); // lets the new instance's System.out show in your console
             builder.start();
         } catch (IOException e) {
             System.getLogger(Main.class.getName()).log(System.Logger.Level.ERROR, "Failed to launch new instance", e);
