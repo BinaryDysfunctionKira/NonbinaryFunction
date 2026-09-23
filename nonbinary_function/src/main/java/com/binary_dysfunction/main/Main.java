@@ -81,7 +81,7 @@ public class Main {
             command.add(mainClass);
 
             ProcessBuilder builder = new ProcessBuilder(command);
-            builder.inheritIO(); // optional — lets the new instance's System.out show in your console
+            builder.inheritIO(); // lets the new instance's System.out show in your console
             builder.start();
         } catch (IOException e) {
             System.getLogger(Main.class.getName()).log(System.Logger.Level.ERROR, "Failed to launch new instance", e);

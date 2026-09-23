@@ -17,6 +17,7 @@ import java.util.Set;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,6 +25,7 @@ import org.json.JSONObject;
 import com.binary_dysfunction.main.Main;
 import com.binary_dysfunction.types.Account;
 import com.binary_dysfunction.types.Message;
+import com.binary_dysfunction.types.Ticket;
 
 public class JSONConfigurations {
 
@@ -608,7 +610,7 @@ public class JSONConfigurations {
 
         JSONObject newTicket = new JSONObject();
         newTicket.put("id", id);
-        newTicket.put("owner", "None");
+        newTicket.put("owner", "");
         newTicket.put("eventName", eventName);
         newTicket.put("count", count);
         newTicket.put("location", location);
@@ -650,5 +652,66 @@ public class JSONConfigurations {
             sb.append(TICKET_ID_CHARS.charAt(RANDOM.nextInt(TICKET_ID_CHARS.length())));
         }
         return sb.toString();
+    }
+
+    public static List<Object> getEvents() {
+        File folder = new File(getTicketsDir());
+        List<Object> folderNames = new ArrayList<>();
+        for (File fileEntry : folder.listFiles()) {
+            if (fileEntry.isDirectory()) folderNames.add(fileEntry.getName());
+        }
+        return folderNames;
+    }
+    public static List<Object> getTickets(Object dirName) {
+        File dirPath = new File(getTicketsDir() + dirName.toString() + "/");
+        List <Object> tickets = new ArrayList<>();
+        for (File fileEntry : dirPath.listFiles()) {
+            if (fileEntry.isFile() && FilenameUtils.getExtension(fileEntry.getName()).equals("json")) tickets.add(FilenameUtils.removeExtension(fileEntry.getName()));
+        }
+        return tickets;
+    }
+    public static Ticket getTicket(Object eventName, Object ticketId) throws IOException {
+        File file = new File(getTicketsDir() + eventName.toString() + "/" + ticketId.toString() + ".json");
+        Path filePath = Path.of(file.getPath());
+
+        if (!file.exists()) return null;
+
+        String content = Files.readString(filePath);
+        JSONArray ticketArray = new JSONArray(content);
+        JSONObject ticketObject = ticketArray.getJSONObject(0);
+
+        String id = ticketObject.getString("id");
+        String owner = ticketObject.getString("owner");
+        String eventNamee = ticketObject.getString("eventName");
+        int count = ticketObject.getInt("count");
+        String location = ticketObject.getString("location");
+        double price = ticketObject.getDouble("price");
+        long date = ticketObject.getLong("date");
+        boolean available = ticketObject.getBoolean("available");
+        boolean registered = ticketObject.getBoolean("registered");
+
+        return new Ticket(id, owner, eventNamee, count, location, price, date, available, registered);
+    }
+    public static void changeTicketValue(Object eventName, Object ticketId, String field, Object value) throws IOException {
+        File file = new File(getTicketsDir() + eventName.toString() + "/" + ticketId.toString() + ".json");
+        Path filePath = Path.of(file.getPath());
+
+        if (!file.exists()) return;
+
+        String content = Files.readString(filePath);
+        JSONArray ticketArray = new JSONArray(content);
+        JSONObject ticketObject = ticketArray.getJSONObject(0);
+
+        ticketObject.put(field, value);
+
+        Files.writeString(filePath, ticketArray.toString(4));
+    }
+    public static boolean eventTicketsExist() {
+        File file = new File(getTicketsDir());
+        boolean hasTickets = false;
+        for (File fileEntry : file.listFiles()) {
+            if (fileEntry.isDirectory()) hasTickets = true;
+        }
+        return hasTickets;
     }
 }

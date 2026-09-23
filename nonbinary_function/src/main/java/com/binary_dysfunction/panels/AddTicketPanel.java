@@ -1,6 +1,7 @@
 package com.binary_dysfunction.panels;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -117,7 +118,7 @@ public class AddTicketPanel extends JPanel {
 
         JButton submitButton = new JButton("Erstellen");
         submitButton.setBackground(Colors.greenButtonColor);
-        submitButton.setForeground(Colors.lighterFontColor);
+        submitButton.setForeground(Color.WHITE);
         submitButton.setFont(new Font("Arial", Font.PLAIN, 14));
         submitButton.addActionListener(e -> {
             if ((Integer) eventTicketCount.getValue() <= 0 || eventNameTextField.getText().equals("") || locationTextField.getText().equals("") || (Long) ((Date) eventDateSpinner.getValue()).getTime() < System.currentTimeMillis()) {
