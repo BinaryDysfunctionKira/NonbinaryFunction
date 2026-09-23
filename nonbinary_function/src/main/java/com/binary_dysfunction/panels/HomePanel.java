@@ -2,17 +2,14 @@ package com.binary_dysfunction.panels;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
-import java.awt.GridLayout;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 import com.binary_dysfunction.components.Colors;
-import com.binary_dysfunction.components.HomeAnnouncements;
-import com.binary_dysfunction.components.HomeAssemblies;
-import com.binary_dysfunction.components.HomeLastChats;
 import com.binary_dysfunction.components.UserCard;
 import com.binary_dysfunction.frames.HomeFrame;
 import com.binary_dysfunction.main.Main;
@@ -39,11 +36,20 @@ public class HomePanel extends JPanel {
         headerPanel.add(headerTextPanel);
         headerPanel.add(new UserCard(hp), BorderLayout.EAST);
 
-        JPanel mainContentPanel = new JPanel(new GridLayout(1, 3, 25, 0));
+        
+        
+
+        JPanel mainContentContentPanel = new JPanel();
+        mainContentContentPanel.setLayout(new BoxLayout(mainContentContentPanel, BoxLayout.Y_AXIS));
+        // mainContentContentPanel.setBackground(Colors.backgorundColorDarker);
+        
+        JScrollPane mainContentContentScrollPane = new JScrollPane(mainContentContentPanel);
+        mainContentContentScrollPane.setBorder(null);
+        mainContentContentScrollPane.setBackground(null);
+
+        JPanel mainContentPanel = new JPanel(new BorderLayout());
         mainContentPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
-        mainContentPanel.add(new HomeAnnouncements());
-        mainContentPanel.add(new HomeLastChats());
-        mainContentPanel.add(new HomeAssemblies());
+        mainContentPanel.add(mainContentContentScrollPane);
 
         JPanel contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
