@@ -47,6 +47,7 @@ public class EventPanel extends JPanel {
         registerTicketsButton.setBorder(BorderFactory.createEmptyBorder(15, 15, 20,15));
         registerTicketsButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         registerTicketsButton.setHorizontalTextPosition(SwingConstants.CENTER);
+        if (!JSONConfigurations.eventTicketsExist()) registerTicketsButton.setEnabled(false);
         registerTicketsButton.addActionListener(e -> {
             currentFrame.setRegisterTicketPanel();
         });
@@ -55,6 +56,7 @@ public class EventPanel extends JPanel {
         statisticsButton.setBorder(BorderFactory.createEmptyBorder(15, 15, 20,15));
         statisticsButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         statisticsButton.setHorizontalTextPosition(SwingConstants.CENTER);
+        if (!JSONConfigurations.eventTicketsExist()) statisticsButton.setEnabled(false);
         statisticsButton.addActionListener(e -> {
             currentFrame.setStatisticsPanel();
         });
