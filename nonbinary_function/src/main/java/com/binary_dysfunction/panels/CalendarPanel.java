@@ -5,112 +5,331 @@ import java.awt.Color;
 import java.awt.GridLayout;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+
 public class CalendarPanel extends JPanel {
 
+    // Der aktuell angezeigte Monat
     private YearMonth aktuellerMonat = YearMonth.now();
+
+    // Das ausgewählte Datum
     private LocalDate ausgewaehltesDatum;
+
+    // Zeigt z.B. "September 2026"
     private JLabel monatsLabel;
-    private JPanel kalenderGrid;
+
+    // Hier kommen NUR die Zahlen hinein
+    private JPanel tageGrid;
+
+
+    // Farben
+    private final Color HINTERGRUND = new Color(30, 30, 30);
+    private final Color TEXT = new Color(235, 235, 235);
+    private final Color RAHMEN = new Color(100, 100, 100);
+    private final Color AUSGEWAEHLT = new Color(70, 90, 120);
+
 
     public CalendarPanel() {
 
+        // Hintergrund des gesamten Kalenders
+        setBackground(HINTERGRUND);
+
+        // Hauptaufteilung
         setLayout(new BorderLayout());
 
 
-        //Monatsbereich
-         JPanel navigationPanel = new JPanel(new BorderLayout()
+        // =====================================================
+        // NAVIGATION OBEN
+        // =====================================================
+
+        JPanel navigationPanel =
+                new JPanel(new BorderLayout());
+
+        navigationPanel.setBackground(HINTERGRUND);
+
+
+        // Linker Pfeil
+        JButton vorherigerButton =
+                new JButton("◀");
+
+        // Rechter Pfeil
+        JButton naechsterButton =
+                new JButton("▶");
+
+
+        // Monatsname
+        monatsLabel =
+                new JLabel("", JLabel.CENTER);
+
+        monatsLabel.setForeground(TEXT);
+
+        monatsLabel.setFont(
+                monatsLabel.getFont().deriveFont(22f)
         );
-        JButton vorherigerButton = new JButton("<");
-        JButton naechsterButton = new JButton(">");
-        monatsLabel = new JLabel("", JLabel.CENTER);
+
+
+        // Pfeile dunkel machen
+        styleButton(vorherigerButton);
+        styleButton(naechsterButton);
+
+
         navigationPanel.add(
-            vorherigerButton,
-            BorderLayout.WEST
+                vorherigerButton,
+                BorderLayout.WEST
         );
 
-        navigationPanel.add(monatsLabel,BorderLayout.CENTER
+        navigationPanel.add(
+                monatsLabel,
+                BorderLayout.CENTER
         );
 
-        navigationPanel.add(naechsterButton,BorderLayout.EAST
+        navigationPanel.add(
+                naechsterButton,
+                BorderLayout.EAST
         );
-        add(navigationPanel, BorderLayout.NORTH);
-        
-        
-        // 0 = beliebig viele Zeilen
-        JPanel kalenderGrid = new JPanel(new GridLayout(0, 7));
+
+
+        add(
+                navigationPanel,
+                BorderLayout.NORTH
+        );
+
+
+        // =====================================================
+        // KALENDER-BEREICH
+        // =====================================================
+
+        JPanel kalenderBereich =
+                new JPanel(new BorderLayout());
+
+        kalenderBereich.setBackground(HINTERGRUND);
+
+        JPanel wochentageGrid =
+                new JPanel(new GridLayout(1, 7));
+
+        wochentageGrid.setBackground(HINTERGRUND);
+
 
         String[] wochentage = {
-            "Mo",
-            "Di",
-            "Mi",
-            "Do",
-            "Fr",
-            "Sa",
-            "So"
+                "Mo",
+                "Di",
+                "Mi",
+                "Do",
+                "Fr",
+                "Sa",
+                "So"
         };
-        
-        // Jeden Wochentag als JLabel hinzufügen
-        for (int i = 0; i < wochentage.length; i++) {
 
-            JLabel label = new JLabel(
-                wochentage[i],
-                JLabel.CENTER
-            );
-            // Rahmen um das Feld
+
+        for (String wochentag : wochentage) {
+
+            JLabel label =
+                    new JLabel(
+                            wochentag,
+                            JLabel.CENTER
+                    );
+
+            label.setForeground(TEXT);
+
+            label.setBackground(HINTERGRUND);
+
+            label.setOpaque(true);
+
             label.setBorder(
-                BorderFactory.createLineBorder(Color.GRAY)
+                    BorderFactory.createLineBorder(RAHMEN)
             );
 
-            kalenderGrid.add(label);
+            wochentageGrid.add(label);
         }
-        // Das heutige Datum holen
-        LocalDate heute = LocalDate.now();
-
-        // Erster Tag des aktuellen Monats
-        LocalDate ersterTag = heute.withDayOfMonth(1);
 
 
-        //-1 um Montag auf 0 zu setzen
+        // Wochentage ganz oben
+        kalenderBereich.add(
+                wochentageGrid,
+                BorderLayout.NORTH
+        );
+
+        // NUR die Zahlen kommen hier hinein
+        tageGrid =
+                new JPanel(new GridLayout(5, 7));
+
+        tageGrid.setBackground(HINTERGRUND);
+
+
+        kalenderBereich.add(
+                tageGrid,
+                BorderLayout.CENTER
+        );
+
+
+        // Kalenderbereich hinzufügen
+        add(
+                kalenderBereich,
+                BorderLayout.CENTER
+        );
+
+        vorherigerButton.addActionListener(e -> {
+
+            aktuellerMonat =
+                    aktuellerMonat.minusMonths(1);
+
+            kalenderAktualisieren();
+        });
+
+
+        naechsterButton.addActionListener(e -> {
+
+            aktuellerMonat =
+                    aktuellerMonat.plusMonths(1);
+
+            kalenderAktualisieren();
+        });
+
+
+        // Kalender beim Start erstellen
+        kalenderAktualisieren();
+    }
+
+    private void kalenderAktualisieren() {
+
+        // Alte Tage entfernen
+        tageGrid.removeAll();
+
+        DateTimeFormatter formatter =
+                DateTimeFormatter.ofPattern(
+                        "MMMM yyyy",
+                        Locale.GERMAN
+                );
+
+        monatsLabel.setText(
+                aktuellerMonat.format(formatter)
+        );
+
+        LocalDate ersterTag =
+                aktuellerMonat.atDay(1);
+
         int startPosition =
-            ersterTag.getDayOfWeek().getValue() - 1;
+                ersterTag.getDayOfWeek().getValue() - 1;
 
-        // Leere Felder machen, wenn der Monat z.B. an einem Mittwoch beginnt
         for (int i = 0; i < startPosition; i++) {
 
-            JLabel leer = new JLabel("");
+            JPanel leer =
+                    new JPanel();
+
+            leer.setBackground(HINTERGRUND);
 
             leer.setBorder(
-                BorderFactory.createLineBorder(Color.GRAY)
+                    BorderFactory.createLineBorder(RAHMEN)
             );
 
-            kalenderGrid.add(leer);
+            tageGrid.add(leer);
         }
-        // Das ist der Tag des Monats, Java weiß automatisch, ob der Monat 28, 29, 30 oder 31 Tage hat.
 
-        int tageImMonat = heute.lengthOfMonth();
+        int tageImMonat =
+                aktuellerMonat.lengthOfMonth();
 
-        // Jeden Tag des Monats hinzufügen
+
         for (int tag = 1; tag <= tageImMonat; tag++) {
 
-            JLabel label = new JLabel(
-                String.valueOf(tag),
-                JLabel.CENTER
-            );
+            // Vollständiges Datum
+            LocalDate datum =
+                    aktuellerMonat.atDay(tag);
 
-            // Rahmen um jedes Tagesfeld
-            label.setBorder(
-                BorderFactory.createLineBorder(Color.GRAY)
-            );
 
-            kalenderGrid.add(label);
+            // Button für den Tag
+            JButton tagButton =
+                    new JButton(
+                            String.valueOf(tag)
+                    );
+
+            // Button dunkel machen
+            styleButton(tagButton);
+
+            tagButton.addActionListener(e -> {
+
+                // Datum speichern
+                ausgewaehltesDatum = datum;
+
+                System.out.println(
+                        "Ausgewählt: "
+                        + ausgewaehltesDatum
+                );
+                // Alle Buttons zurücksetzen
+                for (
+                        java.awt.Component component
+                        : tageGrid.getComponents()
+                ) {
+
+                    if (component instanceof JButton) {
+
+                        component.setBackground(
+                                HINTERGRUND
+                        );
+                    }
+                }
+                // Ausgewählten Tag markieren
+                tagButton.setBackground(
+                        AUSGEWAEHLT
+                );
+            });
+
+
+            tageGrid.add(tagButton);
         }
-        // Kalender einsetzen
-        add(kalenderGrid, BorderLayout.CENTER);
+
+        int benutzteFelder =
+                startPosition + tageImMonat;
+
+
+        for (
+                int i = benutzteFelder;
+                i < 42;
+                i++
+        ) {
+
+            JPanel leer =
+                    new JPanel();
+
+            leer.setBackground(HINTERGRUND);
+
+            leer.setBorder(
+                    BorderFactory.createLineBorder(RAHMEN)
+            );
+
+            tageGrid.add(leer);
+        }
+
+
+        // GUI aktualisieren
+        tageGrid.revalidate();
+        tageGrid.repaint();
+    }
+
+    private void styleButton(JButton button) {
+
+        // Hintergrund dunkel
+        button.setBackground(HINTERGRUND);
+
+        // Schrift hell
+        button.setForeground(TEXT);
+
+        // Keine Standard-Fokus-Markierung
+        button.setFocusPainted(false);
+
+        // Keine Standard-Innenabstände
+        button.setBorder(
+                BorderFactory.createLineBorder(RAHMEN)
+        );
+    }
+    public LocalDate getAusgewaehltesDatum() {
+
+        return ausgewaehltesDatum;
     }
 }
