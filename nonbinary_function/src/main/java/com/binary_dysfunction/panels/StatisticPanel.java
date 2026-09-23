@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -49,9 +51,6 @@ public class StatisticPanel extends JPanel {
         eventNameSelectBox.setFont(new Font("Arial", Font.PLAIN, 14));
         eventNameSelectBox.setBackground(Colors.backgorundColorDarker);
         if (currentEventName != null) eventNameSelectBox.setSelectedItem(currentEventName);
-        eventNameSelectBox.addActionListener(e -> {
-            currentEventName = eventNameSelectBox.getSelectedItem();
-        });
         currentEventName = eventNameSelectBox.getSelectedItem();
 
         JPanel eventNameSearchTextFieldPanel = new JPanel(new BorderLayout());
@@ -62,20 +61,95 @@ public class StatisticPanel extends JPanel {
 
         try {
             ticketsList = JSONConfigurations.getTicketsAsList(currentEventName);
+            currentTicket = ticketsList.get(0);
         } catch (IOException ex) {}
 
-        JLabel eventNameLabel = new JLabel();
+        JLabel eventNameLabel = new JLabel("Event Name: " + currentEventName);
+        eventNameLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        eventNameLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        JLabel dateLabel = new JLabel("Date: " + dateFormat.format(new Date(currentTicket.date)));
+        dateLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        dateLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
+
+        JLabel locationLabel = new JLabel("Ort: " + currentTicket.location);
+        locationLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        locationLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
+
+        JLabel ticketCountLabel = new JLabel();
+        try {
+            ticketCountLabel.setText("Ticket-Anzahl: " + JSONConfigurations.getTicketsCount(currentEventName));
+        } catch (IOException ex) {}
+        ticketCountLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        ticketCountLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
+
+        JLabel priceLabel = new JLabel("Preis: " + currentTicket.price + "€");
+        priceLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        priceLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
+
+        JLabel nonavailableTicketsLabel = new JLabel();
+        try {
+            nonavailableTicketsLabel.setText("Verkaufte Tickets: " + JSONConfigurations.getNonAvailableTicketsCount(currentEventName));
+        } catch (IOException ex) {}
+        nonavailableTicketsLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        nonavailableTicketsLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
+
+        JLabel registeredTicketsLabel = new JLabel();
+        try {
+            registeredTicketsLabel.setText("Registrierte Tickets: " + JSONConfigurations.getRegisteredTicketsCount(currentEventName));
+        } catch (IOException ex) {}
+        registeredTicketsLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        registeredTicketsLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+
+        JLabel revenueLabel = new JLabel();
+        try {
+            revenueLabel.setText("Umsatz: " + JSONConfigurations.getNonAvailableTicketsCount(currentEventName) * currentTicket.price + "€");
+        } catch (IOException ex) {}
+        revenueLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        revenueLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
 
         JPanel informationPanel = new JPanel();
         informationPanel.setLayout(new BoxLayout(informationPanel, BoxLayout.Y_AXIS));
         informationPanel.setBackground(null);
         informationPanel.add(eventNameLabel);
+        informationPanel.add(dateLabel);
+        informationPanel.add(locationLabel);
+        informationPanel.add(ticketCountLabel);
+        informationPanel.add(priceLabel);
+        informationPanel.add(nonavailableTicketsLabel);
+        informationPanel.add(registeredTicketsLabel);
+        informationPanel.add(revenueLabel);
 
         JPanel rowOne = new JPanel();
         rowOne.setLayout(new BoxLayout(rowOne, BoxLayout.X_AXIS));
         rowOne.setBackground(null);
         rowOne.setAlignmentX(Component.LEFT_ALIGNMENT);
         rowOne.add(eventNameSearchTextFieldPanel);
+
+        eventNameSelectBox.addActionListener(e -> {
+            currentEventName = eventNameSelectBox.getSelectedItem();
+            try {
+                ticketsList = JSONConfigurations.getTicketsAsList(currentEventName);
+                currentTicket = ticketsList.get(0);
+            } catch (IOException ex) {}
+            eventNameLabel.setText("Event Name: " + currentEventName);
+            dateLabel.setText("Date: " + dateFormat.format(new Date(currentTicket.date)));
+            locationLabel.setText("Ort: " + currentTicket.location);
+            try {
+                ticketCountLabel.setText("Ticket-Anzahl: " + JSONConfigurations.getTicketsCount(currentEventName));
+            } catch (IOException ex) {}
+            priceLabel.setText("Preis: " + currentTicket.price + "€");
+            try {
+                nonavailableTicketsLabel.setText("Verkaufte Tickets: " + JSONConfigurations.getNonAvailableTicketsCount(currentEventName));
+            } catch (IOException ex) {}
+            try {
+                registeredTicketsLabel.setText("Registrierte Tickets: " + JSONConfigurations.getRegisteredTicketsCount(currentEventName));
+            } catch (IOException ex) {}
+            try {
+                revenueLabel.setText("Umsatz: " + JSONConfigurations.getNonAvailableTicketsCount(currentEventName) * currentTicket.price + "€");
+            } catch (IOException ex) {}
+        });
 
         JPanel settingsPanel = new JPanel();
         settingsPanel.setLayout(new BoxLayout(settingsPanel, BoxLayout.Y_AXIS));
@@ -85,6 +159,7 @@ public class StatisticPanel extends JPanel {
         settingsPanel.add(searchTitleLabel);
         settingsPanel.add(rowOne);
         settingsPanel.add(informationTitleLabel);
+        settingsPanel.add(informationPanel);
 
 
         JScrollPane settingsScrollPane = new JScrollPane(settingsPanel);
