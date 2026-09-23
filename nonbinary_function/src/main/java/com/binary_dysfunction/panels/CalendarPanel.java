@@ -111,6 +111,11 @@ public class CalendarPanel extends JPanel {
 
         kalenderBereich.setBackground(HINTERGRUND);
 
+
+        // =====================================================
+        // WOCHENTAGE
+        // =====================================================
+
         JPanel wochentageGrid =
                 new JPanel(new GridLayout(1, 7));
 
@@ -156,9 +161,14 @@ public class CalendarPanel extends JPanel {
                 BorderLayout.NORTH
         );
 
+
+        // =====================================================
+        // TAGE-GRID
+        // =====================================================
+
         // NUR die Zahlen kommen hier hinein
         tageGrid =
-                new JPanel(new GridLayout(5, 7));
+                new JPanel(new GridLayout(6, 7));
 
         tageGrid.setBackground(HINTERGRUND);
 
@@ -175,6 +185,11 @@ public class CalendarPanel extends JPanel {
                 BorderLayout.CENTER
         );
 
+
+        // =====================================================
+        // PFEIL LINKS
+        // =====================================================
+
         vorherigerButton.addActionListener(e -> {
 
             aktuellerMonat =
@@ -183,6 +198,10 @@ public class CalendarPanel extends JPanel {
             kalenderAktualisieren();
         });
 
+
+        // =====================================================
+        // PFEIL RECHTS
+        // =====================================================
 
         naechsterButton.addActionListener(e -> {
 
@@ -197,10 +216,20 @@ public class CalendarPanel extends JPanel {
         kalenderAktualisieren();
     }
 
+
+    // =========================================================
+    // KALENDER AKTUALISIEREN
+    // =========================================================
+
     private void kalenderAktualisieren() {
 
         // Alte Tage entfernen
         tageGrid.removeAll();
+
+
+        // -----------------------------------------------------
+        // MONATSNAME
+        // -----------------------------------------------------
 
         DateTimeFormatter formatter =
                 DateTimeFormatter.ofPattern(
@@ -212,11 +241,27 @@ public class CalendarPanel extends JPanel {
                 aktuellerMonat.format(formatter)
         );
 
+
+        // -----------------------------------------------------
+        // ERSTER TAG DES MONATS
+        // -----------------------------------------------------
+
         LocalDate ersterTag =
                 aktuellerMonat.atDay(1);
 
+
+        // Montag = 0
+        // Dienstag = 1
+        // ...
+        // Sonntag = 6
+
         int startPosition =
                 ersterTag.getDayOfWeek().getValue() - 1;
+
+
+        // -----------------------------------------------------
+        // LEERE FELDER VOR DEM 1.
+        // -----------------------------------------------------
 
         for (int i = 0; i < startPosition; i++) {
 
@@ -231,6 +276,11 @@ public class CalendarPanel extends JPanel {
 
             tageGrid.add(leer);
         }
+
+
+        // -----------------------------------------------------
+        // TAGE DES MONATS
+        // -----------------------------------------------------
 
         int tageImMonat =
                 aktuellerMonat.lengthOfMonth();
@@ -249,8 +299,14 @@ public class CalendarPanel extends JPanel {
                             String.valueOf(tag)
                     );
 
+
             // Button dunkel machen
             styleButton(tagButton);
+
+
+            // -------------------------------------------------
+            // TAG ANKLICKEN
+            // -------------------------------------------------
 
             tagButton.addActionListener(e -> {
 
@@ -261,6 +317,8 @@ public class CalendarPanel extends JPanel {
                         "Ausgewählt: "
                         + ausgewaehltesDatum
                 );
+
+
                 // Alle Buttons zurücksetzen
                 for (
                         java.awt.Component component
@@ -274,6 +332,8 @@ public class CalendarPanel extends JPanel {
                         );
                     }
                 }
+
+
                 // Ausgewählten Tag markieren
                 tagButton.setBackground(
                         AUSGEWAEHLT
@@ -283,6 +343,11 @@ public class CalendarPanel extends JPanel {
 
             tageGrid.add(tagButton);
         }
+
+
+        // -----------------------------------------------------
+        // RESTLICHE FELDER
+        // -----------------------------------------------------
 
         int benutzteFelder =
                 startPosition + tageImMonat;
@@ -312,6 +377,11 @@ public class CalendarPanel extends JPanel {
         tageGrid.repaint();
     }
 
+
+    // =========================================================
+    // BUTTON-DESIGN
+    // =========================================================
+
     private void styleButton(JButton button) {
 
         // Hintergrund dunkel
@@ -328,6 +398,12 @@ public class CalendarPanel extends JPanel {
                 BorderFactory.createLineBorder(RAHMEN)
         );
     }
+
+
+    // =========================================================
+    // AUSGEWÄHLTES DATUM
+    // =========================================================
+
     public LocalDate getAusgewaehltesDatum() {
 
         return ausgewaehltesDatum;
