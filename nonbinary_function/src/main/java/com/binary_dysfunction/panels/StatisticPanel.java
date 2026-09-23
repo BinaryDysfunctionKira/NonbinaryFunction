@@ -21,6 +21,7 @@ import javax.swing.JScrollPane;
 import com.binary_dysfunction.components.Colors;
 import com.binary_dysfunction.config.JSONConfigurations;
 import com.binary_dysfunction.frames.HomeFrame;
+import com.binary_dysfunction.printing.TicketPreviewFrame;
 import com.binary_dysfunction.types.Ticket;
 
 public class StatisticPanel extends JPanel {
@@ -151,6 +152,12 @@ public class StatisticPanel extends JPanel {
             } catch (IOException ex) {}
         });
 
+        JButton printTicketsButton = new JButton("Tickets drucken");
+        printTicketsButton.setBackground(Colors.greenButtonColor);
+        printTicketsButton.addActionListener(e -> {
+            new TicketPreviewFrame(ticketsList).setVisible(true);
+        });
+
         JPanel settingsPanel = new JPanel();
         settingsPanel.setLayout(new BoxLayout(settingsPanel, BoxLayout.Y_AXIS));
         settingsPanel.setBackground(Colors.backgroundColor);
@@ -160,6 +167,7 @@ public class StatisticPanel extends JPanel {
         settingsPanel.add(rowOne);
         settingsPanel.add(informationTitleLabel);
         settingsPanel.add(informationPanel);
+        settingsPanel.add(printTicketsButton);
 
 
         JScrollPane settingsScrollPane = new JScrollPane(settingsPanel);

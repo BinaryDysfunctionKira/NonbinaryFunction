@@ -16,7 +16,7 @@ import com.binary_dysfunction.main.Main;
 
 public class HomePanel extends JPanel {
 
-    public HomePanel(HomeFrame hp) {
+    public HomePanel(HomeFrame hp) {     
 
         JLabel headerTitle = new JLabel(Main.serverName);
         headerTitle.setFont(new Font("Arial", Font.BOLD, 32));
