@@ -71,6 +71,7 @@ public class AdminPanel extends JPanel {
 
         JScrollPane userListScrollPane = new JScrollPane(userListPanel);
         userListScrollPane.setBackground(backgroundColor);
+        userListScrollPane.getVerticalScrollBar().setUnitIncrement(8);
 
         JButton addUserButton = new JButton("+ Neuer Nutzer");
         addUserButton.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -474,6 +475,7 @@ public class AdminPanel extends JPanel {
         JScrollPane usrConfigScrollPane = new JScrollPane(usrConfigPanel);
         usrConfigScrollPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
         usrConfigScrollPane.setHorizontalScrollBar(null);
+        usrConfigScrollPane.getVerticalScrollBar().setUnitIncrement(8);
 
         JPanel fullConfigPanel = new JPanel(new BorderLayout());
         fullConfigPanel.setAlignmentX(LEFT_ALIGNMENT);
