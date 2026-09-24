@@ -1,5 +1,6 @@
 package com.binary_dysfunction.components;
 
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -74,5 +75,43 @@ public class Component {
 
         Image scaledImage = cropped.getScaledInstance(size, size, Image.SCALE_SMOOTH);
         return new ImageIcon(scaledImage);
+    }
+
+    public static Icon resizeImageProportional(ImageIcon imageIcon, int width, int height) {
+        BufferedImage original = toBufferedImage(imageIcon.getImage());
+
+        if (original == null || original.getWidth() <= 0 || original.getHeight() <= 0) {
+            try {
+                original = ImageIO.read(Component.class.getResource("/BinaryDysfunctionLogo.png"));
+            } catch (IOException e1) {
+                original = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            }
+        }
+
+        int w = original.getWidth();
+        int h = original.getHeight();
+
+        double scale = Math.min((double) width / w, (double) height / h);
+        int targetWidth = (int) Math.round(w * scale);
+        int targetHeight = (int) Math.round(h * scale);
+
+        Image scaledImage = original.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
+        return new ImageIcon(scaledImage);
+    }
+
+    private static BufferedImage toBufferedImage(Image image) {
+        if (image instanceof BufferedImage bufferedImage) {
+            return bufferedImage;
+        }
+
+        BufferedImage buffered = new BufferedImage(
+                image.getWidth(null) > 0 ? image.getWidth(null) : 1,
+                image.getHeight(null) > 0 ? image.getHeight(null) : 1,
+                BufferedImage.TYPE_INT_ARGB
+        );
+        Graphics2D g2d = buffered.createGraphics();
+        g2d.drawImage(image, 0, 0, null);
+        g2d.dispose();
+        return buffered;
     }
 }

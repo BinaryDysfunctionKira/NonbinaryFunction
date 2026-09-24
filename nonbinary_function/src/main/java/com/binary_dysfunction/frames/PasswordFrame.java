@@ -1,6 +1,7 @@
 package com.binary_dysfunction.frames;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Font;
 import java.awt.GridBagLayout;
@@ -61,6 +62,7 @@ public class PasswordFrame {
     public void startup() {
 
         start();
+        if (Main.serverPath.equals("")) SwingUtilities.invokeLater(new SetupTutorialFrame()::startup);
 
         JLabel title = new JLabel("Herzlich Willkommen!", JLabel.CENTER);
         title.setAlignmentX(Container.CENTER_ALIGNMENT);
@@ -328,6 +330,9 @@ public class PasswordFrame {
             }
         });
 
+        JButton helpButton = new JButton("Hilfe");
+        helpButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        helpButton.addActionListener(e -> SwingUtilities.invokeLater(new SetupTutorialFrame()::startup));
         
         contentPanel.add(title);
         contentPanel.add(subtitle);
@@ -341,8 +346,7 @@ public class PasswordFrame {
         contentPanel.add(searchPathHeader);
         contentPanel.add(searchPathButton);
         contentPanel.add(currentServer);
-
-        
+        contentPanel.add(helpButton);
     }
 
     private boolean areAccountDetailsCorrect(String usrName, char[] pswd) throws IOException {
