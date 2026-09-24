@@ -28,22 +28,6 @@ Dependencies:
 		- Direct connection to Google Drive via Application
 
 
-Abbreviations for Assemblies/LogIn:
-(Full Admin)
-- FA_KS
-- FA_KDS
-(Assembly Admin)
-- AA_LB
-- AA_BA
-(Band Member)
-- BM_TS
-- BM_JF
-- BM_LW
-- BM_EW
-(Band Crew)
-- BC_EH
-(Security Group)
-
 Tickets require full name
 
 Server-Structure:
