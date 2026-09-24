@@ -705,13 +705,18 @@ public class JSONConfigurations {
         return tickets;
     }
     /**
-     * Returns the ticket by Event Name and Ticket ID
+     * Returns the ticket by Event Name and Ticket ID.
+     * Returns null (instead of throwing) if eventName or ticketId is null -
+     * e.g. when a "search" combo box happens to be empty because there are
+     * currently no matching tickets for the selected event.
      * @param eventName
      * @param ticketId
      * @return
      * @throws IOException
      */
     public static Ticket getTicket(Object eventName, Object ticketId) throws IOException {
+        if (eventName == null || ticketId == null) return null;
+
         File file = new File(getTicketsDir() + eventName.toString() + "/" + ticketId.toString() + ".json");
         Path filePath = Path.of(file.getPath());
 
@@ -734,7 +739,8 @@ public class JSONConfigurations {
         return new Ticket(id, owner, eventNamee, count, location, price, date, available, registered);
     }
     /**
-     * Changes the value of the JSON-Object, depending by the field, Event Name and Ticket ID
+     * Changes the value of the JSON-Object, depending by the field, Event Name and Ticket ID.
+     * Does nothing if eventName or ticketId is null.
      * @param eventName
      * @param ticketId
      * @param field
@@ -742,6 +748,8 @@ public class JSONConfigurations {
      * @throws IOException
      */
     public static void changeTicketValue(Object eventName, Object ticketId, String field, Object value) throws IOException {
+        if (eventName == null || ticketId == null) return;
+
         File file = new File(getTicketsDir() + eventName.toString() + "/" + ticketId.toString() + ".json");
         Path filePath = Path.of(file.getPath());
 

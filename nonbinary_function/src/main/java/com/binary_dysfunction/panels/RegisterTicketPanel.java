@@ -146,7 +146,7 @@ public class RegisterTicketPanel extends JPanel {
         rowThree.add(availableCheckBoxPanel);
         rowThree.add(registeredCheckBoxPanel);
 
-        JLabel errorLabel = new JLabel("Ungültige Angaben.");
+        JLabel errorLabel = new JLabel("Für dieses Event gibt es aktuell keine Tickets mit Inhaber*in zum Registrieren.");
         errorLabel.setFont(new Font("Arial", Font.BOLD, 14));
         errorLabel.setForeground(Colors.redFontColor);
         errorLabel.setVisible(false);
@@ -154,6 +154,43 @@ public class RegisterTicketPanel extends JPanel {
 
         JComboBox<Object> searchTicketIDBox = new JComboBox<>();
         JButton submitButton = new JButton();
+        submitButton.setForeground(Color.WHITE);
+        submitButton.setFont(new Font("Arial", Font.PLAIN, 14));
+
+        // Zentrale Stelle: befüllt die Felder passend zu currentTicket, oder leert/deaktiviert sie,
+        // falls für das gewählte Event kein Ticket zum Registrieren verfügbar ist (currentTicket == null).
+        Runnable refreshFields = () -> {
+            boolean hasTicket = currentTicket != null;
+
+            errorLabel.setVisible(!hasTicket);
+            submitButton.setEnabled(hasTicket);
+
+            if (hasTicket) {
+                ownerTextField.setText(currentTicket.owner);
+                locationTextField.setText(currentTicket.location);
+                spinnerPriceModel.setValue(currentTicket.price);
+                eventDateSpinner.setValue(new Date(currentTicket.date));
+                availableCheckBox.setSelected(currentTicket.available);
+                registeredCheckBox.setSelected(currentTicket.registered);
+
+                if (!currentTicket.registered) {
+                    submitButton.setBackground(Colors.greenButtonColor);
+                    submitButton.setText("Registrieren");
+                } else {
+                    submitButton.setBackground(Colors.redButtonColor);
+                    submitButton.setText("Abmelden");
+                }
+            } else {
+                ownerTextField.setText("");
+                locationTextField.setText("");
+                spinnerPriceModel.setValue(0.0);
+                eventDateSpinner.setValue(new Date());
+                availableCheckBox.setSelected(false);
+                registeredCheckBox.setSelected(false);
+                submitButton.setBackground(Colors.greenButtonColor);
+                submitButton.setText("Registrieren");
+            }
+        };
 
         JComboBox<Object> eventNameSelectBox = new JComboBox<>(JSONConfigurations.getEvents().toArray());
         eventNameSelectBox.setFont(new Font("Arial", Font.PLAIN, 14));
@@ -167,20 +204,7 @@ public class RegisterTicketPanel extends JPanel {
             try {
                 currentTicket = JSONConfigurations.getTicket(currentEventName, searchTicketIDBox.getSelectedItem());
             } catch (IOException ex) {}
-            ownerTextField.setText(currentTicket.owner);
-            locationTextField.setText(currentTicket.location);
-            spinnerPriceModel.setValue(currentTicket.price);
-            eventDateSpinner.setValue(new Date(currentTicket.date));
-            availableCheckBox.setSelected(currentTicket.available);
-            registeredCheckBox.setSelected(currentTicket.registered);
-            if (!currentTicket.registered) {
-                submitButton.setBackground(Colors.greenButtonColor);
-                submitButton.setText("Registrieren");
-            }
-            else {
-                submitButton.setBackground(Colors.redButtonColor);
-                submitButton.setText("Abmelden");
-            }
+            refreshFields.run();
         });
 
         JPanel eventNameSearchTextFieldPanel = new JPanel(new BorderLayout());
@@ -198,20 +222,7 @@ public class RegisterTicketPanel extends JPanel {
             try {
                 currentTicket = JSONConfigurations.getTicket(currentEventName, searchTicketIDBox.getSelectedItem());
             } catch (IOException ex) {}
-            ownerTextField.setText(currentTicket.owner);
-            locationTextField.setText(currentTicket.location);
-            spinnerPriceModel.setValue(currentTicket.price);
-            eventDateSpinner.setValue(new Date(currentTicket.date));
-            availableCheckBox.setSelected(currentTicket.available);
-            registeredCheckBox.setSelected(currentTicket.registered);
-            if (!currentTicket.registered) {
-                submitButton.setBackground(Colors.greenButtonColor);
-                submitButton.setText("Registrieren");
-            }
-            else {
-                submitButton.setBackground(Colors.redButtonColor);
-                submitButton.setText("Abmelden");
-            }
+            refreshFields.run();
         });
 
         JPanel ticketIdSearchTextFieldPanel = new JPanel(new BorderLayout());
@@ -232,25 +243,11 @@ public class RegisterTicketPanel extends JPanel {
         rowOne.add(eventNameSearchTextFieldPanel);
         rowOne.add(ticketIdSearchTextFieldPanel);
 
-        if (currentTicket != null) ownerTextField.setText(currentTicket.owner);
-        if (currentTicket != null) locationTextField.setText(currentTicket.location);
-        if (currentTicket != null) spinnerPriceModel.setValue(currentTicket.price);
-        if (currentTicket != null) eventDateSpinner.setValue(new Date(currentTicket.date));
-        if (currentTicket != null) availableCheckBox.setSelected(currentTicket.available);
-        if (currentTicket != null) registeredCheckBox.setSelected(currentTicket.registered);
+        refreshFields.run();
 
-
-        if (!currentTicket.registered) {
-            submitButton.setBackground(Colors.greenButtonColor);
-            submitButton.setText("Registrieren");
-        }
-        else {
-            submitButton.setBackground(Colors.redButtonColor);
-            submitButton.setText("Abmelden");
-        }
-        submitButton.setForeground(Color.WHITE);
-        submitButton.setFont(new Font("Arial", Font.PLAIN, 14));
         submitButton.addActionListener((ActionEvent e) -> {
+            if (currentTicket == null) return; // sollte durch das Deaktivieren des Buttons ohnehin nicht vorkommen
+
             try {
                 if (currentTicket.registered) {
                     JSONConfigurations.changeTicketValue(currentEventName, searchTicketIDBox.getSelectedItem(), "registered", false);
