@@ -20,6 +20,8 @@ import com.binary_dysfunction.panels.ChatPanel;
 
 public class SideBar extends JPanel {
 
+    public static JButton chatButton = new JButton(Component.geticon("/chat-bubble.png"));
+
     public SideBar(HomeFrame currentFrame) {
 
         JButton notificationsButton = new JButton(Component.geticon("/notifications.png"));
@@ -34,7 +36,6 @@ public class SideBar extends JPanel {
         assembliesButton.setBackground(null);
         assembliesButton.setBorder(null);
 
-        JButton chatButton = new JButton(Component.geticon("/chat-bubble.png"));
         chatButton.setToolTipText("Chats");
         chatButton.setPreferredSize(new Dimension(40, 40));
         chatButton.setBackground(null);

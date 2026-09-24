@@ -17,6 +17,8 @@ import javax.swing.SwingUtilities;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.binary_dysfunction.components.Colors;
+import com.binary_dysfunction.components.SideBar;
 import com.binary_dysfunction.components.Toast;
 import com.binary_dysfunction.config.JSONConfigurations;
 import com.binary_dysfunction.frames.HomeFrame;
@@ -92,6 +94,8 @@ public final class Updater {
                     Thread.currentThread().interrupt();
                     break;
                 }
+
+                if (ChatPanel.currentTargetUser != null) SideBar.chatButton.setBackground(null);
             }
         }, "updater");
 
@@ -290,6 +294,7 @@ public final class Updater {
         }
 
         flashTaskbar(HomeFrame.frame);
+        SideBar.chatButton.setBackground(Colors.greenButtonColor);
 
         setUnread(chat.id, true);
 
