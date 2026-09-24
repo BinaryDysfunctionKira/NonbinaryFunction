@@ -61,7 +61,6 @@ public class HomeFrame {
             @Override
             public void windowClosing(WindowEvent e) {
                 
-                setHomePanel();
                 frame.setVisible(false); // Fenster unsichtbar machen
             }
         });
