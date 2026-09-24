@@ -90,7 +90,7 @@ public class JSONConfigurations {
             assembliesArray.put("Admin");
         }
         newAccount.put("assemblies", assembliesArray);
-        newAccount.put("cloudActivated", false);
+        newAccount.put("cloudActivated", true);
         newAccount.put("email", "");
         JSONArray chatsArray = new JSONArray();
         newAccount.put("chats", chatsArray);
