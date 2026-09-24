@@ -5,13 +5,18 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
+
+import com.google.zxing.WriterException;
 
 public class TicketSheetRenderer {
 
     public static final int DPI = 300;
     private static final int GAP_PX = (int) (0.15 * DPI);
+
+    /** Liefert das fertige Ticketbild (300 DPI) für einen Ticket-Index - wird erst beim Zeichnen der Seite aufgerufen. */
+    public interface TicketImageProvider {
+        BufferedImage getTicketImage(int ticketIndex) throws WriterException;
+    }
 
     public static class Layout {
         public final int columns, rows, itemsPerPage;
@@ -73,59 +78,66 @@ public class TicketSheetRenderer {
                 printableWidthPx, printableHeightPx, shrinkScale);
     }
 
-    public static List<BufferedImage> renderSheets(List<BufferedImage> tickets, double widthCm, double heightCm,
-                                                     int printableWidthPx, int printableHeightPx) {
-        Layout layout = computeLayout(widthCm, heightCm, printableWidthPx, printableHeightPx);
-        List<BufferedImage> sheets = new ArrayList<>();
-        int pageCount = (int) Math.ceil((double) tickets.size() / layout.itemsPerPage);
-        for (int page = 0; page < pageCount; page++) {
-            sheets.add(renderSheet(tickets, layout, page));
-        }
-        return sheets;
+    public static int pageCount(Layout layout, int ticketCount) {
+        return (int) Math.ceil((double) ticketCount / layout.itemsPerPage);
     }
 
-    private static BufferedImage renderSheet(List<BufferedImage> tickets, Layout layout, int pageIndex) {
-        BufferedImage sheet = new BufferedImage(layout.sheetWidthPx, layout.sheetHeightPx, BufferedImage.TYPE_INT_RGB);
+    /**
+     * Rendert genau eine Seite. scale 1.0 = 300 DPI (Druck); kleinere Werte erzeugen ein kleineres Bild (Vorschau).
+     * Die Ticketbilder werden einzeln erzeugt und nach dem Zeichnen sofort wieder freigegeben.
+     */
+    public static BufferedImage renderSheet(Layout layout, int pageIndex, int ticketCount,
+                                            TicketImageProvider provider, double scale) throws WriterException {
+        int sheetW = Math.max(1, (int) Math.round(layout.sheetWidthPx * scale));
+        int sheetH = Math.max(1, (int) Math.round(layout.sheetHeightPx * scale));
+
+        BufferedImage sheet = new BufferedImage(sheetW, sheetH, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = sheet.createGraphics();
-        g2d.setColor(Color.WHITE);
-        g2d.fillRect(0, 0, layout.sheetWidthPx, layout.sheetHeightPx);
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        try {
+            g2d.setColor(Color.WHITE);
+            g2d.fillRect(0, 0, sheetW, sheetH);
+            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
-        int startIndex = pageIndex * layout.itemsPerPage;
-        for (int i = 0; i < layout.itemsPerPage; i++) {
-            int ticketIndex = startIndex + i;
-            if (ticketIndex >= tickets.size()) break;
+            int startIndex = pageIndex * layout.itemsPerPage;
+            for (int i = 0; i < layout.itemsPerPage; i++) {
+                int ticketIndex = startIndex + i;
+                if (ticketIndex >= ticketCount) break;
 
-            int col = i % layout.columns;
-            int row = i / layout.columns;
-            int x = col * (layout.cellWidthPx + GAP_PX);
-            int y = row * (layout.cellHeightPx + GAP_PX);
+                int col = i % layout.columns;
+                int row = i / layout.columns;
+                int x = (int) Math.round(col * (layout.cellWidthPx + GAP_PX) * scale);
+                int y = (int) Math.round(row * (layout.cellHeightPx + GAP_PX) * scale);
+                int cellW = (int) Math.round(layout.cellWidthPx * scale);
+                int cellH = (int) Math.round(layout.cellHeightPx * scale);
 
-            BufferedImage ticketImg = tickets.get(ticketIndex);
-            if (layout.rotated) {
-                ticketImg = rotateImage90(ticketImg);
+                BufferedImage ticketImg = provider.getTicketImage(ticketIndex);
+                if (layout.rotated) {
+                    drawRotated90(g2d, ticketImg, x, y, cellW, cellH);
+                } else {
+                    g2d.drawImage(ticketImg, x, y, cellW, cellH, null);
+                }
             }
-            g2d.drawImage(ticketImg, x, y, layout.cellWidthPx, layout.cellHeightPx, null);
+        } finally {
+            g2d.dispose();
         }
-        g2d.dispose();
         return sheet;
     }
 
-    /** Dreht ein Bild um 90° im Uhrzeigersinn (Breite/Höhe werden vertauscht). */
-    private static BufferedImage rotateImage90(BufferedImage src) {
-        int w = src.getWidth();
-        int h = src.getHeight();
-        BufferedImage dest = new BufferedImage(h, w, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = dest.createGraphics();
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    /**
+     * Zeichnet das Bild um 90° im Uhrzeigersinn gedreht in die Zelle (x, y, cellW, cellH),
+     * ohne vorher eine gedrehte Kopie des Bildes im Speicher anzulegen.
+     */
+    private static void drawRotated90(Graphics2D g2d, BufferedImage src, int x, int y, int cellW, int cellH) {
+        double srcW = src.getWidth();
+        double srcH = src.getHeight();
 
         AffineTransform transform = new AffineTransform();
-        transform.translate(h / 2.0, w / 2.0);
+        transform.translate(x + cellW / 2.0, y + cellH / 2.0);
         transform.rotate(Math.PI / 2);
-        transform.translate(-w / 2.0, -h / 2.0);
+        transform.scale(cellH / srcW, cellW / srcH); // nach der Drehung liegt die Bildbreite auf der Zellhöhe
+        transform.translate(-srcW / 2.0, -srcH / 2.0);
 
         g2d.drawImage(src, transform, null);
-        g2d.dispose();
-        return dest;
     }
 }
