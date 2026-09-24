@@ -137,6 +137,7 @@ public class HomeFrame {
 
     public void setChatPanel() {
         openFrame();
+        SideBar.chatButton.setBackground(null);
         contentPanel.removeAll();
         contentPanel.add(new ChatPanel(this));
         frame.setTitle(programName + " - Chat");

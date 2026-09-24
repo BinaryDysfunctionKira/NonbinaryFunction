@@ -38,7 +38,7 @@ public class SideBar extends JPanel {
 
         chatButton.setToolTipText("Chats");
         chatButton.setPreferredSize(new Dimension(40, 40));
-        chatButton.setBackground(null);
+        chatButton.setBackground(Colors.greenButtonColor);
         chatButton.setBorder(null);
         chatButton.addActionListener(e -> {
             ChatPanel.currentTargetUser = null;

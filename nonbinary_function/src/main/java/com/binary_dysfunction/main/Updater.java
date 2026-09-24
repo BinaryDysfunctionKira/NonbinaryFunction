@@ -94,8 +94,6 @@ public final class Updater {
                     Thread.currentThread().interrupt();
                     break;
                 }
-
-                if (ChatPanel.currentTargetUser != null) SideBar.chatButton.setBackground(null);
             }
         }, "updater");
 
