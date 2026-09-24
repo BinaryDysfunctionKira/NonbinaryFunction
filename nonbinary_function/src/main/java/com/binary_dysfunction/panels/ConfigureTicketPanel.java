@@ -60,7 +60,8 @@ public class ConfigureTicketPanel extends JPanel {
 
         JPanel ownerFieldPanel = new JPanel(new BorderLayout());
         ownerFieldPanel.setBackground(null);
-        ownerFieldPanel.setMaximumSize(new Dimension(200, 50));
+        ownerFieldPanel.setMinimumSize(new Dimension(250, 50));
+        ownerFieldPanel.setMaximumSize(new Dimension(250, 50));
         ownerFieldPanel.add(new JLabel("Ticketinhaber*in"), BorderLayout.NORTH);
         ownerFieldPanel.add(ownerTextField);
 
@@ -71,6 +72,7 @@ public class ConfigureTicketPanel extends JPanel {
 
         JPanel locationFieldPanel = new JPanel(new BorderLayout());
         locationFieldPanel.setBackground(null);
+        locationFieldPanel.setMinimumSize(new Dimension(200, 50));
         locationFieldPanel.setMaximumSize(new Dimension(200, 50));
         locationFieldPanel.add(new JLabel("Ort"), BorderLayout.NORTH);
         locationFieldPanel.add(locationTextField);
@@ -86,6 +88,7 @@ public class ConfigureTicketPanel extends JPanel {
 
         JPanel priceFieldPanel = new JPanel(new BorderLayout());
         priceFieldPanel.setBackground(null);
+        priceFieldPanel.setMinimumSize(new Dimension(100, 50));
         priceFieldPanel.setMaximumSize(new Dimension(100, 50));
         priceFieldPanel.add(new JLabel("Preis"), BorderLayout.NORTH);
         priceFieldPanel.add(eventTicketPrice);
