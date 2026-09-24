@@ -53,7 +53,7 @@ public class HomePanel extends JPanel {
             // hp.setNotificationsPanel();
         });
 
-        JButton assembliesButton = new JButton("Benachrichtigungen", Component.geticon("/groups.png"));
+        JButton assembliesButton = new JButton("Assemblies", Component.geticon("/groups.png"));
         assembliesButton.setBorder(BorderFactory.createEmptyBorder(15, 15, 20,15));
         assembliesButton.setVerticalTextPosition(SwingConstants.BOTTOM);
         assembliesButton.setHorizontalTextPosition(SwingConstants.CENTER);
