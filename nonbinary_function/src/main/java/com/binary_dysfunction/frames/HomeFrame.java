@@ -10,6 +10,7 @@ import java.awt.TrayIcon;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowFocusListener;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -30,6 +31,7 @@ import com.binary_dysfunction.panels.ProfilePanel;
 import com.binary_dysfunction.panels.RegisterTicketPanel;
 import com.binary_dysfunction.panels.StatisticPanel;
 import com.binary_dysfunction.types.Account;
+import com.binary_dysfunction.types.Chat;
 
 public class HomeFrame {
 
@@ -41,6 +43,8 @@ public class HomeFrame {
     private static String programName = "Nonbinary Function";
 
     public static TrayIcon trayIcon;
+
+    private Chat lastUserTexted = null;
 
     public void startup() {
 
@@ -60,6 +64,19 @@ public class HomeFrame {
                 setHomePanel();
                 frame.setVisible(false); // Fenster unsichtbar machen
             }
+        });
+        frame.addWindowFocusListener(new WindowFocusListener() {
+            @Override
+            public void windowGainedFocus(WindowEvent e) {
+                ChatPanel.currentTargetUser = lastUserTexted;
+            }
+
+            @Override
+            public void windowLostFocus(WindowEvent e) {
+                lastUserTexted = ChatPanel.currentTargetUser;
+                ChatPanel.currentTargetUser = null;
+            }
+            
         });
         if (SystemTray.isSupported()) {
             setupTrayIcon();
