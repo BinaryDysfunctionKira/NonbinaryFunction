@@ -1,5 +1,6 @@
 package com.binary_dysfunction.main;
 
+import java.awt.Taskbar;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import org.json.JSONArray;
@@ -17,6 +19,7 @@ import org.json.JSONObject;
 
 import com.binary_dysfunction.components.Toast;
 import com.binary_dysfunction.config.JSONConfigurations;
+import com.binary_dysfunction.frames.HomeFrame;
 import com.binary_dysfunction.panels.ChatPanel;
 import com.binary_dysfunction.types.Account;
 import com.binary_dysfunction.types.Chat;
@@ -286,6 +289,8 @@ public final class Updater {
             return true;
         }
 
+        flashTaskbar(HomeFrame.frame);
+
         setUnread(chat.id, true);
 
         Account sender = getAccountByUID(msg.senderUID);
@@ -399,5 +404,16 @@ public final class Updater {
             if (!x.senderUID.equals(y.senderUID)) return false;
         }
         return true;
+    }
+
+    public static void flashTaskbar(JFrame frame) {
+        if (frame.isActive() || !Taskbar.isTaskbarSupported()) return; // only flash if not in focus
+
+        Taskbar taskbar = Taskbar.getTaskbar();
+        if (taskbar.isSupported(Taskbar.Feature.USER_ATTENTION_WINDOW)) {
+            taskbar.requestWindowUserAttention(frame);   // Windows: flashes the taskbar button
+        } else if (taskbar.isSupported(Taskbar.Feature.USER_ATTENTION)) {
+            taskbar.requestUserAttention(true, false);   // macOS: bounces the Dock icon
+        }
     }
 }

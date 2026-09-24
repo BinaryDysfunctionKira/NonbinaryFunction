@@ -15,6 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.binary_dysfunction.components.SideBar;
+import com.binary_dysfunction.components.Toast;
 import com.binary_dysfunction.components.TopBar;
 import com.binary_dysfunction.main.Main;
 import com.binary_dysfunction.main.Updater;
@@ -44,6 +45,8 @@ public class HomeFrame {
     public void startup() {
 
         Main.updater = new Updater();
+
+        Toast.show(null, "Chat", "Sie könnten neue Nachrichten haben", 3000, Toast.Position.BOTTOM_RIGHT, false);
 
         frame = new JFrame(programName + " - Home");
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
