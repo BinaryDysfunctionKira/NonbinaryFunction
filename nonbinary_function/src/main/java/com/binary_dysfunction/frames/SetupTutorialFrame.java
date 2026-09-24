@@ -35,6 +35,8 @@ public class SetupTutorialFrame extends JFrame {
 
         JLabel currentPageLabel = new JLabel(pageCount + "/" + maxPages, JLabel.CENTER);
 
+        JButton previousButton = new JButton("< Zurück");
+        previousButton.setVisible(false);
         JButton nextButton = new JButton("Nächstes >");
         nextButton.addActionListener(e -> {
             if (pageCount <= maxPages) {
@@ -42,16 +44,19 @@ public class SetupTutorialFrame extends JFrame {
                 currentPageLabel.setText(pageCount + "/" + maxPages);
                 // switch-case for switching pages
                 setPage(pageCount);
+                if (pageCount > 1) previousButton.setVisible(true);
+                if (pageCount == maxPages) nextButton.setText("Fertig");
             }
         });
 
-        JButton previousButton = new JButton("< Zurück");
         previousButton.addActionListener(e -> {
             if (pageCount > 1) {
                 pageCount--;
                 currentPageLabel.setText(pageCount + "/" + maxPages);
                 // switch-case for switching pages
                 setPage(pageCount);
+                if (pageCount <= 1) previousButton.setVisible(false);
+                if (pageCount != maxPages) nextButton.setText("Nächstes >");
             }
         });
 
