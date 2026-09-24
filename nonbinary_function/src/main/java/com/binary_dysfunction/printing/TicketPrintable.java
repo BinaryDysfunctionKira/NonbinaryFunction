@@ -1,6 +1,8 @@
 package com.binary_dysfunction.printing;
 
-import java.awt.*;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
@@ -21,10 +23,9 @@ public class TicketPrintable implements Printable {
         Graphics2D g2d = (Graphics2D) graphics;
         BufferedImage sheet = sheets.get(pageIndex);
 
-        double scale = Math.min(
-                pageFormat.getImageableWidth() / sheet.getWidth(),
-                pageFormat.getImageableHeight() / sheet.getHeight()
-        );
+        // Sheet wurde bereits exakt auf den bedruckbaren Bereich (in Pixeln bei DPI) zugeschnitten -
+        // daher hier nur noch von Pixel (DPI) zu Punkt (72/Zoll) umrechnen, nicht nochmal separat verschieben.
+        double scale = pageFormat.getImageableWidth() / sheet.getWidth();
 
         g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
         g2d.scale(scale, scale);

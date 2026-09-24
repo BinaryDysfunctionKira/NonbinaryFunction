@@ -1,13 +1,11 @@
 package com.binary_dysfunction.printing;
 
-import com.binary_dysfunction.types.Ticket;
-import com.google.zxing.WriterException;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Graphics;
+import java.awt.HeadlessException;
 import java.awt.image.BufferedImage;
 import java.awt.print.Book;
 import java.awt.print.PageFormat;
@@ -16,9 +14,47 @@ import java.awt.print.PrinterJob;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+
+import javax.imageio.ImageIO;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.standard.Sides;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import com.binary_dysfunction.types.Ticket;
+import com.google.zxing.WriterException;
 
 public class TicketPreviewFrame extends JFrame {
+
+    private static class TicketSize {
+        final double widthCm, heightCm;
+        TicketSize(double widthCm, double heightCm) {
+            this.widthCm = widthCm;
+            this.heightCm = heightCm;
+        }
+    }
+
+    // Gängige Größen, u. a. klassische Konzert-/Kino-Ticket-Maße
+    private static final Map<String, TicketSize> SIZE_PRESETS = new LinkedHashMap<>();
+    static {
+        SIZE_PRESETS.put("Konzertticket (21 × 7,4 cm)", new TicketSize(21.0, 7.4));
+        SIZE_PRESETS.put("Kinoticket (16 × 5,5 cm)", new TicketSize(16.0, 5.5));
+        SIZE_PRESETS.put("Eintrittskarte klein (14 × 5,1 cm)", new TicketSize(14.0, 5.1));
+        SIZE_PRESETS.put("Eventticket groß (21 × 9,9 cm)", new TicketSize(21.0, 9.9));
+        SIZE_PRESETS.put("Benutzerdefiniert...", null);
+    }
 
     private final List<Ticket> ticketsList;
     private BufferedImage template;
@@ -26,6 +62,11 @@ public class TicketPreviewFrame extends JFrame {
     private final JPanel previewPanel;
     private final JLabel templatePathLabel;
     private final JButton printButton, savePngButton, sheetPreviewButton;
+    private final JComboBox<String> sizePresetBox;
+    private final JSpinner customWidthSpinner, customHeightSpinner;
+
+    private double currentWidthCm = 21.0;
+    private double currentHeightCm = 7.4;
 
     public TicketPreviewFrame(List<Ticket> ticketsList) {
         super("Ticket Vorschau");
@@ -53,9 +94,44 @@ public class TicketPreviewFrame extends JFrame {
 
         JButton chooseTemplateButton = new JButton("Vorlage auswählen...");
 
-        // Standardmäßig eine schlichte weiße Vorlage verwenden, damit direkt eine Vorschau da ist
-        template = TicketImageGenerator.createBlankWhiteTemplate();
+        template = TicketImageGenerator.createBlankWhiteTemplate(currentWidthCm, currentHeightCm);
         templatePathLabel = new JLabel("Standard (weiß)");
+
+        sizePresetBox = new JComboBox<>(SIZE_PRESETS.keySet().toArray(new String[0]));
+        customWidthSpinner = new JSpinner(new SpinnerNumberModel(currentWidthCm, 1.0, 100.0, 0.1));
+        customHeightSpinner = new JSpinner(new SpinnerNumberModel(currentHeightCm, 1.0, 100.0, 0.1));
+        customWidthSpinner.setEnabled(false);
+        customHeightSpinner.setEnabled(false);
+        ((JSpinner.DefaultEditor) customWidthSpinner.getEditor()).getTextField().setColumns(4);
+        ((JSpinner.DefaultEditor) customHeightSpinner.getEditor()).getTextField().setColumns(4);
+
+        sizePresetBox.addActionListener(e -> {
+            String selected = (String) sizePresetBox.getSelectedItem();
+            TicketSize size = SIZE_PRESETS.get(selected);
+            boolean isCustom = size == null;
+            customWidthSpinner.setEnabled(isCustom);
+            customHeightSpinner.setEnabled(isCustom);
+
+            if (!isCustom) {
+                currentWidthCm = size.widthCm;
+                currentHeightCm = size.heightCm;
+                customWidthSpinner.setValue(currentWidthCm);
+                customHeightSpinner.setValue(currentHeightCm);
+            } else {
+                currentWidthCm = (Double) customWidthSpinner.getValue();
+                currentHeightCm = (Double) customHeightSpinner.getValue();
+            }
+            onSizeChanged();
+        });
+
+        customWidthSpinner.addChangeListener(e -> {
+            currentWidthCm = (Double) customWidthSpinner.getValue();
+            onSizeChanged();
+        });
+        customHeightSpinner.addChangeListener(e -> {
+            currentHeightCm = (Double) customHeightSpinner.getValue();
+            onSizeChanged();
+        });
 
         printButton = new JButton("Drucken (" + ticketsList.size() + ")");
         savePngButton = new JButton("Als PNGs speichern");
@@ -74,6 +150,12 @@ public class TicketPreviewFrame extends JFrame {
         JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         controlPanel.add(chooseTemplateButton);
         controlPanel.add(templatePathLabel);
+        controlPanel.add(new JLabel("Größe:"));
+        controlPanel.add(sizePresetBox);
+        controlPanel.add(new JLabel("B (cm):"));
+        controlPanel.add(customWidthSpinner);
+        controlPanel.add(new JLabel("H (cm):"));
+        controlPanel.add(customHeightSpinner);
         controlPanel.add(printButton);
         controlPanel.add(savePngButton);
         controlPanel.add(sheetPreviewButton);
@@ -86,6 +168,15 @@ public class TicketPreviewFrame extends JFrame {
         setLocationRelativeTo(null);
     }
 
+    private void onSizeChanged() {
+        // Weiße Standardvorlage muss neu in der passenden Größe erzeugt werden,
+        // eine vom Nutzer gewählte eigene Vorlage bleibt unverändert (wird eh per "cover" eingepasst)
+        if (templatePathLabel.getText().equals("Standard (weiß)")) {
+            template = TicketImageGenerator.createBlankWhiteTemplate(currentWidthCm, currentHeightCm);
+        }
+        refreshPreview();
+    }
+
     private void chooseTemplate() {
         JFileChooser chooser = new JFileChooser();
         chooser.setFileFilter(new FileNameExtensionFilter("Bilder", "png", "jpg", "jpeg"));
@@ -94,10 +185,6 @@ public class TicketPreviewFrame extends JFrame {
             try {
                 template = ImageIO.read(chooser.getSelectedFile());
                 templatePathLabel.setText(chooser.getSelectedFile().getName());
-                boolean hasTickets = !ticketsList.isEmpty();
-                printButton.setEnabled(hasTickets);
-                savePngButton.setEnabled(hasTickets);
-                sheetPreviewButton.setEnabled(hasTickets);
                 refreshPreview();
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(this, "Vorlage konnte nicht geladen werden: " + ex.getMessage());
@@ -108,7 +195,7 @@ public class TicketPreviewFrame extends JFrame {
     private void refreshPreview() {
         if (template == null || ticketsList.isEmpty()) return;
         try {
-            previewImage = TicketImageGenerator.generateTicketOverlay(template, ticketsList.get(0));
+            previewImage = TicketImageGenerator.generateTicketOverlay(template, ticketsList.get(0), currentWidthCm, currentHeightCm);
             previewPanel.repaint();
         } catch (WriterException ex) {
             JOptionPane.showMessageDialog(this, "Fehler bei der Vorschau: " + ex.getMessage());
@@ -118,7 +205,7 @@ public class TicketPreviewFrame extends JFrame {
     private List<BufferedImage> generateAllTicketImages() throws WriterException {
         List<BufferedImage> images = new ArrayList<>();
         for (Ticket ticket : ticketsList) {
-            images.add(TicketImageGenerator.generateTicketOverlay(template, ticket));
+            images.add(TicketImageGenerator.generateTicketOverlay(template, ticket, currentWidthCm, currentHeightCm));
         }
         return images;
     }
@@ -145,12 +232,23 @@ public class TicketPreviewFrame extends JFrame {
 
     private void showSheetPreview() {
         try {
+            // Die Vorschau kennt den im Druckdialog gewählten Drucker noch nicht -> Standarddrucker
+            PageFormat pageFormat = PrinterJob.getPrinterJob().defaultPage();
+            int[] printableArea = printableAreaPx(pageFormat);
+            warnIfTicketWasShrunk(printableArea[0], printableArea[1]);
             List<BufferedImage> images = generateAllTicketImages();
-            List<BufferedImage> sheets = TicketSheetRenderer.renderSheets(images);
+            List<BufferedImage> sheets = TicketSheetRenderer.renderSheets(
+                    images, currentWidthCm, currentHeightCm, printableArea[0], printableArea[1]);
             new SheetPreviewDialog(this, sheets).setVisible(true);
-        } catch (WriterException ex) {
+        } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Fehler bei der A4-Vorschau: " + ex.getMessage());
         }
+    }
+
+    private static int[] printableAreaPx(PageFormat pageFormat) {
+        int widthPx = (int) Math.round(pageFormat.getImageableWidth() / 72.0 * TicketSheetRenderer.DPI);
+        int heightPx = (int) Math.round(pageFormat.getImageableHeight() / 72.0 * TicketSheetRenderer.DPI);
+        return new int[]{widthPx, heightPx};
     }
 
     private void printTickets() {
@@ -164,22 +262,38 @@ public class TicketPreviewFrame extends JFrame {
         }
 
         try {
-            List<BufferedImage> images = generateAllTicketImages();
-            List<BufferedImage> sheets = TicketSheetRenderer.renderSheets(images);
-
             PrinterJob job = PrinterJob.getPrinterJob();
-            PageFormat pageFormat = job.defaultPage();
+            PrintRequestAttributeSet attributes = new HashPrintRequestAttributeSet();
+            attributes.add(Sides.ONE_SIDED);
 
-            TicketPrintable printable = new TicketPrintable(sheets);
+            // Erst den Dialog, damit Drucker/Papierformat/Ausrichtung des Nutzers ins Layout einfließen
+            if (!job.printDialog(attributes)) return;
+
+            PageFormat pageFormat = job.getPageFormat(attributes);
+            int[] printableArea = printableAreaPx(pageFormat);
+            warnIfTicketWasShrunk(printableArea[0], printableArea[1]);
+
+            List<BufferedImage> images = generateAllTicketImages();
+            List<BufferedImage> sheets = TicketSheetRenderer.renderSheets(
+                    images, currentWidthCm, currentHeightCm, printableArea[0], printableArea[1]);
+
             Book book = new Book();
-            book.append(printable, pageFormat, sheets.size());
+            book.append(new TicketPrintable(sheets), pageFormat, sheets.size());
             job.setPageable(book);
-
-            if (job.printDialog()) {
-                job.print();
-            }
-        } catch (WriterException | HeadlessException | PrinterException | NullPointerException ex) {
+            job.print(attributes);
+        } catch (WriterException | HeadlessException | PrinterException ex) {
             JOptionPane.showMessageDialog(this, "Fehler beim Drucken: " + ex.getMessage());
+        }
+    }
+
+    private void warnIfTicketWasShrunk(int printableWidthPx, int printableHeightPx) {
+        TicketSheetRenderer.Layout layout = TicketSheetRenderer.computeLayout(
+                currentWidthCm, currentHeightCm, printableWidthPx, printableHeightPx);
+        if (layout.isShrunk()) {
+            JOptionPane.showMessageDialog(this, String.format(
+                    "Hinweis: Das Ticket (%.1f cm breit) passt nicht in den bedruckbaren Bereich des Druckers, "
+                    + "auch nicht gedreht. Es wird auf ca. %.1f cm Breite verkleinert gedruckt.",
+                    currentWidthCm, currentWidthCm * layout.shrinkScale));
         }
     }
 }

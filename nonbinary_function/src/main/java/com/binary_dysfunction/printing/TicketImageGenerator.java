@@ -8,6 +8,8 @@ import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,21 +28,18 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 public class TicketImageGenerator {
 
-    public static final double TICKET_WIDTH_CM = 14.0;
-    public static final double TICKET_HEIGHT_CM = 5.1;
     private static final int RENDER_DPI = 300;
 
-    public static int getRenderWidthPx() {
-        return (int) Math.round(TICKET_WIDTH_CM / 2.54 * RENDER_DPI);
+    public static int getRenderWidthPx(double widthCm) {
+        return (int) Math.round(widthCm / 2.54 * RENDER_DPI);
     }
 
-    public static int getRenderHeightPx() {
-        return (int) Math.round(TICKET_HEIGHT_CM / 2.54 * RENDER_DPI);
+    public static int getRenderHeightPx(double heightCm) {
+        return (int) Math.round(heightCm / 2.54 * RENDER_DPI);
     }
 
-    /** Einfache, weiße Standardvorlage – wird per "cover" ohnehin auf jede Zielgröße skaliert. */
-    public static BufferedImage createBlankWhiteTemplate() {
-        BufferedImage image = new BufferedImage(getRenderWidthPx(), getRenderHeightPx(), BufferedImage.TYPE_INT_RGB);
+    public static BufferedImage createBlankWhiteTemplate(double widthCm, double heightCm) {
+        BufferedImage image = new BufferedImage(getRenderWidthPx(widthCm), getRenderHeightPx(heightCm), BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = image.createGraphics();
         g2d.setColor(Color.WHITE);
         g2d.fillRect(0, 0, image.getWidth(), image.getHeight());
@@ -51,14 +50,15 @@ public class TicketImageGenerator {
     private static class TextLayout {
         Font eventFont, headerFont, infoFont, idFont;
         List<String> eventLines, infoLines;
-        int totalTextHeight; // Event + Header + Info + Name-Feld, ohne QR-Code
+        int totalTextHeight;
         int lineGap, sectionGap, nameFieldGap;
+        int belowInfoHeight; // Name-Feld + Abstände + ID-Zeile (ohne QR-Code selbst)
     }
 
-    public static BufferedImage generateTicketOverlay(BufferedImage template, Ticket ticket) throws WriterException {
+    public static BufferedImage generateTicketOverlay(BufferedImage template, Ticket ticket, double widthCm, double heightCm) throws WriterException {
 
-        int width = getRenderWidthPx();
-        int height = getRenderHeightPx();
+        int width = getRenderWidthPx(widthCm);
+        int height = getRenderHeightPx(heightCm);
 
         BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = result.createGraphics();
@@ -84,14 +84,14 @@ public class TicketImageGenerator {
         String id = ticket.id != null ? ticket.id : "";
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
-        int minQrSize = (int) (contentWidth * 0.25);
+        // Mindestgröße, damit der QR-Code noch scanbar bleibt (ca. 1,7 cm bei 21 x 7,4 cm)
+        int minQrSize = (int) (contentWidth * 0.5);
         int availableHeight = height - padding * 2;
 
-        // Skalierungsfaktor von groß nach klein durchprobieren, bis Text + Name-Feld + Mindest-QR-Code passen
         TextLayout layout = null;
         for (double scale = 1.0; scale >= 0.3; scale -= 0.03) {
             TextLayout candidate = measureLayout(g2d, ticket, eventName, location, dateFormat, contentWidth, overlayWidth, scale);
-            if (candidate.totalTextHeight + candidate.nameFieldGap + minQrSize <= availableHeight) {
+            if (candidate.totalTextHeight + candidate.belowInfoHeight + minQrSize <= availableHeight) {
                 layout = candidate;
                 break;
             }
@@ -102,7 +102,6 @@ public class TicketImageGenerator {
 
         int y = padding;
 
-        // Event-Name
         g2d.setColor(Color.WHITE);
         g2d.setFont(layout.eventFont);
         FontMetrics eventMetrics = g2d.getFontMetrics(layout.eventFont);
@@ -113,13 +112,11 @@ public class TicketImageGenerator {
         }
         y += layout.sectionGap;
 
-        // "Information"-Header
         g2d.setFont(layout.headerFont);
         y += g2d.getFontMetrics(layout.headerFont).getAscent();
         g2d.drawString("Information", textX, y);
         y += layout.sectionGap;
 
-        // Info-Zeilen
         g2d.setFont(layout.infoFont);
         g2d.setColor(new Color(210, 210, 210));
         FontMetrics infoMetrics = g2d.getFontMetrics(layout.infoFont);
@@ -128,7 +125,7 @@ public class TicketImageGenerator {
             g2d.drawString(line, textX, y);
         }
 
-        // Name-Feld: Label + graues Kästchen zum handschriftlichen Ausfüllen
+        // Name-Feld: Label + weißes Kästchen
         y += infoMetrics.getHeight() + layout.nameFieldGap;
         g2d.setColor(new Color(210, 210, 210));
         g2d.drawString("Name:", textX, y);
@@ -138,15 +135,14 @@ public class TicketImageGenerator {
         int fieldWidth = overlayWidth - padding * 2;
         int fieldX = textX;
 
-        g2d.setColor(Color.GRAY);
+        g2d.setColor(Color.WHITE);
         g2d.fillRect(fieldX, fieldTop, fieldWidth, fieldHeight);
 
         y = fieldTop + fieldHeight + layout.sectionGap;
 
-        // QR-Code + ID: nimmt den kompletten verbleibenden Platz ein (nie mehr als contentWidth)
         FontMetrics idMetrics = g2d.getFontMetrics(layout.idFont);
         int remainingHeight = height - padding - y - layout.sectionGap - idMetrics.getHeight() - layout.lineGap;
-        int maxQrSize = (int) (contentWidth * 0.85); // etwas kleiner als volle Sidebar-Breite
+        int maxQrSize = (int) (contentWidth * 0.85);
         int qrSize = Math.max(0, Math.min(remainingHeight, maxQrSize));
 
         if (qrSize > 10) {
@@ -167,7 +163,6 @@ public class TicketImageGenerator {
         return result;
     }
 
-    /** Berechnet Zeilenumbrüche + Gesamthöhe des Textblocks für einen gegebenen Skalierungsfaktor, ohne zu zeichnen. */
     private static TextLayout measureLayout(Graphics2D g2d, Ticket ticket, String eventName, String location,
                                              SimpleDateFormat dateFormat, int contentWidth, int overlayWidth, double scale) {
         TextLayout layout = new TextLayout();
@@ -189,12 +184,21 @@ public class TicketImageGenerator {
         FontMetrics eventMetrics = g2d.getFontMetrics(layout.eventFont);
         FontMetrics headerMetrics = g2d.getFontMetrics(layout.headerFont);
         FontMetrics infoMetrics = g2d.getFontMetrics(layout.infoFont);
+        FontMetrics idMetrics = g2d.getFontMetrics(layout.idFont);
 
         int eventBlockHeight = layout.eventLines.size() * (eventMetrics.getAscent() + eventMetrics.getDescent() + layout.lineGap);
         int headerBlockHeight = headerMetrics.getAscent() + layout.sectionGap;
         int infoBlockHeight = layout.infoLines.size() * infoMetrics.getHeight();
 
         layout.totalTextHeight = eventBlockHeight + layout.sectionGap + headerBlockHeight + infoBlockHeight;
+
+        // Alles, was unterhalb der Infozeilen noch Platz braucht (außer dem QR-Code selbst):
+        // Label-Zeile + Kästchen (1 + 0,35 + 1,4 Zeilenhöhen), Abstände und ID-Zeile
+        layout.belowInfoHeight = (int) Math.ceil(infoMetrics.getHeight() * 2.75)
+                + layout.nameFieldGap
+                + layout.sectionGap * 2
+                + layout.lineGap
+                + idMetrics.getHeight();
 
         return layout;
     }
@@ -235,7 +239,7 @@ public class TicketImageGenerator {
             } else {
                 if (!currentLine.isEmpty()) {
                     lines.add(currentLine.toString());
-                    // currentLine = new StringBuilder();
+                    currentLine = new StringBuilder();
                 }
                 if (metrics.stringWidth(word) > maxWidth) {
                     StringBuilder chunk = new StringBuilder();
@@ -258,7 +262,7 @@ public class TicketImageGenerator {
     }
 
     private static BufferedImage generateTicketQrCode(String ticketId, int size) throws WriterException {
-        String url = "https://www.google.de/search?q=" + ticketId;
+        String url = "https://www.google.de/search?q=" + URLEncoder.encode(ticketId, StandardCharsets.UTF_8);
         Map<EncodeHintType, Object> hints = new HashMap<>();
         hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M);
         hints.put(EncodeHintType.MARGIN, 1);
