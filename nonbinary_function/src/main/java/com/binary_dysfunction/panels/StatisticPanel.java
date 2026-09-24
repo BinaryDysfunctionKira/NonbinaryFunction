@@ -69,7 +69,7 @@ public class StatisticPanel extends JPanel {
         eventNameLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         eventNameLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
         JLabel dateLabel = new JLabel("Date: " + dateFormat.format(new Date(currentTicket.date)));
         dateLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         dateLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));

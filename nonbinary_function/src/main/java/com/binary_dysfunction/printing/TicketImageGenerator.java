@@ -82,7 +82,8 @@ public class TicketImageGenerator {
         String eventName = ticket.eventName != null ? ticket.eventName : "";
         String location = ticket.location != null ? ticket.location : "";
         String id = ticket.id != null ? ticket.id : "";
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        // Datum und Uhrzeit stehen in einem gemeinsamen Format, damit die Uhrzeit direkt neben dem Datum steht
+        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("dd.MM.yyyy, HH:mm 'Uhr'");
 
         // Mindestgröße, damit der QR-Code noch scanbar bleibt (ca. 1,7 cm bei 21 x 7,4 cm)
         int minQrSize = (int) (contentWidth * 0.5);
@@ -90,14 +91,14 @@ public class TicketImageGenerator {
 
         TextLayout layout = null;
         for (double scale = 1.0; scale >= 0.3; scale -= 0.03) {
-            TextLayout candidate = measureLayout(g2d, ticket, eventName, location, dateFormat, contentWidth, overlayWidth, scale);
+            TextLayout candidate = measureLayout(g2d, ticket, eventName, location, dateTimeFormat, contentWidth, overlayWidth, scale);
             if (candidate.totalTextHeight + candidate.belowInfoHeight + minQrSize <= availableHeight) {
                 layout = candidate;
                 break;
             }
         }
         if (layout == null) {
-            layout = measureLayout(g2d, ticket, eventName, location, dateFormat, contentWidth, overlayWidth, 0.3);
+            layout = measureLayout(g2d, ticket, eventName, location, dateTimeFormat, contentWidth, overlayWidth, 0.3);
         }
 
         int y = padding;
@@ -164,7 +165,7 @@ public class TicketImageGenerator {
     }
 
     private static TextLayout measureLayout(Graphics2D g2d, Ticket ticket, String eventName, String location,
-                                             SimpleDateFormat dateFormat, int contentWidth, int overlayWidth, double scale) {
+                                             SimpleDateFormat dateTimeFormat, int contentWidth, int overlayWidth, double scale) {
         TextLayout layout = new TextLayout();
 
         layout.eventFont = new Font("Arial", Font.BOLD, (int) (overlayWidth * 0.13 * scale));
@@ -177,7 +178,8 @@ public class TicketImageGenerator {
 
         layout.eventLines = wrapText(g2d, eventName, layout.eventFont, contentWidth);
         layout.infoLines = new ArrayList<>();
-        layout.infoLines.add("Datum: " + dateFormat.format(new Date(ticket.date)));
+        // Datum + Uhrzeit zusammen in einer Zeile ("Datum: dd.MM.yyyy, HH:mm Uhr")
+        layout.infoLines.addAll(wrapText(g2d, "Datum: " + dateTimeFormat.format(new Date(ticket.date)), layout.infoFont, contentWidth));
         layout.infoLines.addAll(wrapText(g2d, "Ort: " + location, layout.infoFont, contentWidth));
         layout.infoLines.add("Preis: " + ticket.price + " €");
 

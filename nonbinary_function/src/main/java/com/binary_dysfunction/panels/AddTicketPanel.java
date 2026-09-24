@@ -96,6 +96,7 @@ public class AddTicketPanel extends JPanel {
         rowTwo.add(priceFieldPanel);
 
 
+        // Datum: eigener Spinner für den Kalendertag
         SpinnerDateModel dateModel = new SpinnerDateModel();
         JSpinner eventDateSpinner = new JSpinner(dateModel);
         JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(eventDateSpinner, "dd.MM.yyyy");
@@ -111,6 +112,29 @@ public class AddTicketPanel extends JPanel {
         dateFieldPanel.add(new JLabel("Datum"), BorderLayout.NORTH);
         dateFieldPanel.add(eventDateSpinner);
 
+        // Uhrzeit: eigener Spinner, wird beim Erstellen mit dem Datum zu einem Zeitstempel zusammengeführt
+        SpinnerDateModel timeModel = new SpinnerDateModel();
+        JSpinner eventTimeSpinner = new JSpinner(timeModel);
+        JSpinner.DateEditor timeEditor = new JSpinner.DateEditor(eventTimeSpinner, "HH:mm");
+        eventTimeSpinner.setEditor(timeEditor);
+        eventTimeSpinner.setFont(new Font("Arial", Font.PLAIN, 14));
+        timeEditor.setOpaque(true);
+        timeEditor.setBackground(Colors.backgorundColorDarker);
+
+        JPanel timeFieldPanel = new JPanel(new BorderLayout());
+        timeFieldPanel.setBackground(null);
+        timeFieldPanel.setMaximumSize(new Dimension(100, 50));
+        timeFieldPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        timeFieldPanel.add(new JLabel("Uhrzeit"), BorderLayout.NORTH);
+        timeFieldPanel.add(eventTimeSpinner);
+
+        JPanel rowThree = new JPanel();
+        rowThree.setLayout(new BoxLayout(rowThree, BoxLayout.X_AXIS));
+        rowThree.setBackground(null);
+        rowThree.setAlignmentX(Component.LEFT_ALIGNMENT);
+        rowThree.add(dateFieldPanel);
+        rowThree.add(timeFieldPanel);
+
         JLabel errorLabel = new JLabel("Ungültige Angaben.");
         errorLabel.setFont(new Font("Arial", Font.BOLD, 14));
         errorLabel.setForeground(Colors.redFontColor);
@@ -121,13 +145,17 @@ public class AddTicketPanel extends JPanel {
         submitButton.setForeground(Color.WHITE);
         submitButton.setFont(new Font("Arial", Font.PLAIN, 14));
         submitButton.addActionListener(e -> {
-            if ((Integer) eventTicketCount.getValue() <= 0 || eventNameTextField.getText().equals("") || locationTextField.getText().equals("") || (Long) ((Date) eventDateSpinner.getValue()).getTime() < System.currentTimeMillis()) {
+            long combinedDateTime = combineDateAndTime(
+                    (Date) eventDateSpinner.getValue(),
+                    (Date) eventTimeSpinner.getValue());
+
+            if ((Integer) eventTicketCount.getValue() <= 0 || eventNameTextField.getText().equals("") || locationTextField.getText().equals("") || combinedDateTime < System.currentTimeMillis()) {
                 errorLabel.setVisible(true);
             } else {
                 boolean errorFree = true;
                 for (int i = 0; i < (Integer) eventTicketCount.getValue(); i++) {
                     try {
-                        JSONConfigurations.addTicket(eventNameTextField.getText(), i + 1, locationTextField.getText(), (Double) eventTicketPrice.getValue(), ((Date) eventDateSpinner.getValue()).getTime());
+                        JSONConfigurations.addTicket(eventNameTextField.getText(), i + 1, locationTextField.getText(), (Double) eventTicketPrice.getValue(), combinedDateTime);
                     } catch (IOException ex) {
                         errorLabel.setVisible(true);
                         errorFree = false;
@@ -152,7 +180,7 @@ public class AddTicketPanel extends JPanel {
         settingsPanel.add(titleLabel);
         settingsPanel.add(rowOne);
         settingsPanel.add(rowTwo);
-        settingsPanel.add(dateFieldPanel);
+        settingsPanel.add(rowThree);
         settingsPanel.add(submitButtonPanel);
         settingsPanel.add(errorLabel);
 
@@ -188,5 +216,25 @@ public class AddTicketPanel extends JPanel {
 
         this.setLayout(new BorderLayout());
         this.add(mainPanel);
+    }
+
+    /** Übernimmt Jahr/Monat/Tag aus {@code date} und Stunde/Minute aus {@code time} und liefert den kombinierten Zeitstempel. */
+    private static long combineDateAndTime(Date date, Date time) {
+        java.util.Calendar dateCal = java.util.Calendar.getInstance();
+        dateCal.setTime(date);
+
+        java.util.Calendar timeCal = java.util.Calendar.getInstance();
+        timeCal.setTime(time);
+
+        java.util.Calendar result = java.util.Calendar.getInstance();
+        result.set(java.util.Calendar.YEAR, dateCal.get(java.util.Calendar.YEAR));
+        result.set(java.util.Calendar.MONTH, dateCal.get(java.util.Calendar.MONTH));
+        result.set(java.util.Calendar.DAY_OF_MONTH, dateCal.get(java.util.Calendar.DAY_OF_MONTH));
+        result.set(java.util.Calendar.HOUR_OF_DAY, timeCal.get(java.util.Calendar.HOUR_OF_DAY));
+        result.set(java.util.Calendar.MINUTE, timeCal.get(java.util.Calendar.MINUTE));
+        result.set(java.util.Calendar.SECOND, 0);
+        result.set(java.util.Calendar.MILLISECOND, 0);
+
+        return result.getTimeInMillis();
     }
 }

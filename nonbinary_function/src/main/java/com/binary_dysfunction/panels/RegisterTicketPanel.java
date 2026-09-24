@@ -107,7 +107,7 @@ public class RegisterTicketPanel extends JPanel {
         SpinnerDateModel dateModel = new SpinnerDateModel();
         JSpinner eventDateSpinner = new JSpinner(dateModel);
         eventDateSpinner.setEnabled(false);
-        JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(eventDateSpinner, "dd.MM.yyyy");
+        JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(eventDateSpinner, "dd.MM.yyyy HH:mm");
         eventDateSpinner.setEditor(dateEditor);
         eventDateSpinner.setFont(new Font("Arial", Font.PLAIN, 14));
         dateEditor.setOpaque(true);
@@ -115,7 +115,7 @@ public class RegisterTicketPanel extends JPanel {
 
         JPanel dateFieldPanel = new JPanel(new BorderLayout());
         dateFieldPanel.setBackground(null);
-        dateFieldPanel.setMaximumSize(new Dimension(150, 50));
+        dateFieldPanel.setMaximumSize(new Dimension(180, 50));
         dateFieldPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         dateFieldPanel.add(new JLabel("Datum"), BorderLayout.NORTH);
         dateFieldPanel.add(eventDateSpinner);
