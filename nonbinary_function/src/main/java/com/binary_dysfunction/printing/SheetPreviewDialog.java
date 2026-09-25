@@ -19,35 +19,49 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
-/** A4-Vorschau: rendert nur die gerade angezeigte Seite (in niedriger Auflösung) und hält wenige Seiten im Cache. */
+/** A4-Vorschau: rendert nur die gerade angezeigte Seite (in niedriger Auflösung) und hält wenige Seiten im Cache.
+ *  Zeigt wahlweise die Vorder- oder die Rückseite (Umschalt-Button) für den doppelseitigen Druck. */
 public class SheetPreviewDialog extends JDialog {
 
     private static final int PREVIEW_DPI = 120;
     private static final int CACHE_PAGES = 4;
 
-    private final TicketSheets sheets;
+    private final TicketSheets frontSheets;
+    private final TicketSheets backSheets; // kann null sein, falls keine Rückseite verwendet wird
 
-    // LRU-Cache: älteste Seite fliegt raus, sobald mehr als CACHE_PAGES gespeichert sind (nur im EDT benutzt)
-    private final Map<Integer, BufferedImage> cache = new LinkedHashMap<Integer, BufferedImage>(8, 0.75f, true) {
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<Integer, BufferedImage> eldest) {
-            return size() > CACHE_PAGES;
-        }
-    };
+    // Je ein LRU-Cache pro Seite (Vorder-/Rückseite): älteste Seite fliegt raus, sobald mehr als CACHE_PAGES gespeichert sind
+    private final Map<Integer, BufferedImage> frontCache = createLruCache();
+    private final Map<Integer, BufferedImage> backCache = createLruCache();
+
+    private static Map<Integer, BufferedImage> createLruCache() {
+        return new LinkedHashMap<Integer, BufferedImage>(8, 0.75f, true) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<Integer, BufferedImage> eldest) {
+                return size() > CACHE_PAGES;
+            }
+        };
+    }
 
     private final JPanel canvas;
     private final JLabel pageLabel = new JLabel();
     private final JButton prevButton = new JButton("◀ Zurück");
     private final JButton nextButton = new JButton("Weiter ▶");
+    private final JButton sideToggleButton = new JButton();
 
+    private boolean showingBack = false;
     private int pageIndex = 0;
     private boolean loading = false;
     private BufferedImage currentImage;
     private String message = "";
 
-    public SheetPreviewDialog(Frame owner, TicketSheets sheets) {
+    public SheetPreviewDialog(Frame owner, TicketSheets frontSheets) {
+        this(owner, frontSheets, null);
+    }
+
+    public SheetPreviewDialog(Frame owner, TicketSheets frontSheets, TicketSheets backSheets) {
         super(owner, "A4-Vorschau", true);
-        this.sheets = sheets;
+        this.frontSheets = frontSheets;
+        this.backSheets = backSheets;
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         canvas = new JPanel() {
@@ -79,8 +93,15 @@ public class SheetPreviewDialog extends JDialog {
 
         prevButton.addActionListener(e -> showPage(pageIndex - 1));
         nextButton.addActionListener(e -> showPage(pageIndex + 1));
+        sideToggleButton.addActionListener(e -> {
+            showingBack = !showingBack;
+            updateSideToggleLabel();
+            showPage(Math.min(pageIndex, currentSheets().getPageCount() - 1));
+        });
+        sideToggleButton.setVisible(backSheets != null);
+        updateSideToggleLabel();
 
-        TicketSheetRenderer.Layout layout = sheets.getLayout();
+        TicketSheetRenderer.Layout layout = frontSheets.getLayout();
         JLabel infoLabel = new JLabel(layout.itemsPerPage + " Tickets pro Seite"
                 + (layout.rotated ? ", gedreht" : "")
                 + (layout.isShrunk() ? ", verkleinert" : ""));
@@ -89,6 +110,7 @@ public class SheetPreviewDialog extends JDialog {
         controls.add(prevButton);
         controls.add(pageLabel);
         controls.add(nextButton);
+        controls.add(sideToggleButton);
         controls.add(infoLabel);
 
         add(canvas, BorderLayout.CENTER);
@@ -99,7 +121,21 @@ public class SheetPreviewDialog extends JDialog {
         showPage(0);
     }
 
+    private void updateSideToggleLabel() {
+        sideToggleButton.setText(showingBack ? "Zeige: Rückseite ⇄" : "Zeige: Vorderseite ⇄");
+    }
+
+    private TicketSheets currentSheets() {
+        return showingBack && backSheets != null ? backSheets : frontSheets;
+    }
+
+    private Map<Integer, BufferedImage> currentCache() {
+        return showingBack ? backCache : frontCache;
+    }
+
     private void showPage(int index) {
+        TicketSheets sheets = currentSheets();
+
         if (sheets.getPageCount() == 0) {
             currentImage = null;
             message = "Keine Tickets vorhanden.";
@@ -111,6 +147,7 @@ public class SheetPreviewDialog extends JDialog {
 
         pageIndex = index;
 
+        Map<Integer, BufferedImage> cache = currentCache();
         BufferedImage cached = cache.get(index);
         if (cached != null) {
             currentImage = cached;
@@ -151,17 +188,19 @@ public class SheetPreviewDialog extends JDialog {
     }
 
     private void updateControls() {
-        int pageCount = sheets.getPageCount();
+        int pageCount = currentSheets().getPageCount();
         prevButton.setEnabled(!loading && pageIndex > 0);
         nextButton.setEnabled(!loading && pageIndex < pageCount - 1);
+        sideToggleButton.setEnabled(!loading);
         pageLabel.setText(pageCount == 0
                 ? "Keine Seiten"
-                : "Seite " + (pageIndex + 1) + " / " + pageCount + " (" + sheets.getTicketCount() + " Tickets)");
+                : "Seite " + (pageIndex + 1) + " / " + pageCount + " (" + currentSheets().getTicketCount() + " Tickets)");
     }
 
     @Override
     public void dispose() {
-        cache.clear();
+        frontCache.clear();
+        backCache.clear();
         currentImage = null;
         super.dispose();
     }

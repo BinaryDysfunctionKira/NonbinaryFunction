@@ -36,7 +36,9 @@ import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.standard.PageRanges;
 import javax.print.attribute.standard.Sides;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -80,15 +82,24 @@ public class TicketPreviewFrame extends JFrame {
 
     private final List<Ticket> ticketsList;
     private BufferedImage template;
+    private BufferedImage backTemplate; // null = Rückseite ist einfarbig schwarz (Standard)
     private BufferedImage previewImage;
     private final JPanel previewPanel;
     private final JLabel templatePathLabel;
+    private final JLabel backTemplatePathLabel = new JLabel("Schwarz (Standard)");
+    private final JCheckBox duplexCheckBox = new JCheckBox("Doppelseitig drucken (Rückseite)");
+    private final JCheckBox blurryCheckBox = new JCheckBox("Rückseite weichzeichnen");
+    private final JComboBox<String> edgeBox = new JComboBox<>(new String[]{"Lange Kante (Standard)", "Kurze Kante"});
+    private final JButton chooseBackTemplateButton = new JButton("Rückseiten-Vorlage wählen...");
+    private final JButton resetBackTemplateButton = new JButton("Rückseite: Schwarz");
     private final JButton printButton, savePngButton, saveSheetPngButton, sheetPreviewButton;
+    private final JButton toggleSideButton = new JButton();
     private final JComboBox<String> sizePresetBox;
     private final JSpinner customWidthSpinner, customHeightSpinner;
 
     private double currentWidthCm = 21.0;
     private double currentHeightCm = 7.4;
+    private boolean showingBackPreview = false;
 
     public TicketPreviewFrame(List<Ticket> ticketsList) {
         super("Ticket Vorschau");
@@ -167,24 +178,71 @@ public class TicketPreviewFrame extends JFrame {
         sheetPreviewButton.setEnabled(hasTickets);
 
         chooseTemplateButton.addActionListener(e -> chooseTemplate());
+        chooseBackTemplateButton.addActionListener(e -> chooseBackTemplate());
+        resetBackTemplateButton.addActionListener(e -> {
+            backTemplate = null;
+            backTemplatePathLabel.setText("Schwarz (Standard)");
+            if (showingBackPreview) refreshPreview();
+        });
+        blurryCheckBox.addActionListener(e -> {
+            if (showingBackPreview) refreshPreview();
+        });
         printButton.addActionListener(e -> printTickets());
         savePngButton.addActionListener(e -> savePngs());
         saveSheetPngButton.addActionListener(e -> saveSheetPngs());
         sheetPreviewButton.addActionListener(e -> showSheetPreview());
+        // Doppelseitig an/aus ändert, ob das Namensfeld auf der Vorderseite erscheint - Vorschau nur
+        // aktualisieren, wenn gerade die Vorderseite angezeigt wird (die Rückseite ist davon nicht betroffen).
+        duplexCheckBox.addActionListener(e -> {
+            if (!showingBackPreview) refreshPreview();
+        });
+        toggleSideButton.addActionListener(e -> {
+            showingBackPreview = !showingBackPreview;
+            updateToggleSideButtonLabel();
+            refreshPreview();
+        });
+        updateToggleSideButtonLabel();
 
-        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        controlPanel.add(chooseTemplateButton);
-        controlPanel.add(templatePathLabel);
-        controlPanel.add(new JLabel("Größe:"));
-        controlPanel.add(sizePresetBox);
-        controlPanel.add(new JLabel("B (cm):"));
-        controlPanel.add(customWidthSpinner);
-        controlPanel.add(new JLabel("H (cm):"));
-        controlPanel.add(customHeightSpinner);
-        controlPanel.add(printButton);
-        controlPanel.add(savePngButton);
-        controlPanel.add(saveSheetPngButton);
-        controlPanel.add(sheetPreviewButton);
+        edgeBox.setToolTipText("An welcher Kante das Blatt beim doppelseitigen Druck gewendet wird - bestimmt, "
+                + "wie die Rückseite gespiegelt werden muss, damit sie nach dem Wenden zur Vorderseite passt. "
+                + "\"Lange Kante\" ist bei den meisten Duplexdruckern voreingestellt.");
+
+        JPanel frontRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        frontRow.add(chooseTemplateButton);
+        frontRow.add(templatePathLabel);
+        frontRow.add(new JLabel("Größe:"));
+        frontRow.add(sizePresetBox);
+        frontRow.add(new JLabel("B (cm):"));
+        frontRow.add(customWidthSpinner);
+        frontRow.add(new JLabel("H (cm):"));
+        frontRow.add(customHeightSpinner);
+
+        JPanel backRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        backRow.add(duplexCheckBox);
+        backRow.add(chooseBackTemplateButton);
+        backRow.add(backTemplatePathLabel);
+        backRow.add(resetBackTemplateButton);
+        backRow.add(blurryCheckBox);
+        backRow.add(new JLabel("Wendekante:"));
+        backRow.add(edgeBox);
+        backRow.add(toggleSideButton);
+
+        // Die Rückseiten-Einstellungen sind nur relevant, wenn doppelseitiger Druck aktiviert ist;
+        // die Vorschau (toggleSideButton) bleibt davon unabhängig nutzbar, um die Rückseite trotzdem zu gestalten.
+        setBackSettingsEnabled(duplexCheckBox.isSelected());
+        duplexCheckBox.addActionListener(e -> setBackSettingsEnabled(duplexCheckBox.isSelected()));
+
+        JPanel actionRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        actionRow.add(printButton);
+        actionRow.add(savePngButton);
+        actionRow.add(saveSheetPngButton);
+        actionRow.add(sheetPreviewButton);
+
+        JPanel controlPanel = new JPanel();
+        controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
+        controlPanel.add(frontRow);
+        controlPanel.add(backRow);
+        controlPanel.add(actionRow);
 
         add(previewPanel, BorderLayout.CENTER);
         add(controlPanel, BorderLayout.SOUTH);
@@ -192,6 +250,30 @@ public class TicketPreviewFrame extends JFrame {
         refreshPreview();
         pack();
         setLocationRelativeTo(null);
+    }
+
+    private void setBackSettingsEnabled(boolean enabled) {
+        chooseBackTemplateButton.setEnabled(enabled);
+        backTemplatePathLabel.setEnabled(enabled);
+        resetBackTemplateButton.setEnabled(enabled);
+        blurryCheckBox.setEnabled(enabled);
+        edgeBox.setEnabled(enabled);
+    }
+
+    private void updateToggleSideButtonLabel() {
+        toggleSideButton.setText(showingBackPreview ? "Vorschau: Rückseite ⇄" : "Vorschau: Vorderseite ⇄");
+    }
+
+    private TicketSheetRenderer.DuplexEdge selectedEdge() {
+        return edgeBox.getSelectedIndex() == 1
+                ? TicketSheetRenderer.DuplexEdge.SHORT_EDGE
+                : TicketSheetRenderer.DuplexEdge.LONG_EDGE;
+    }
+
+    private Sides selectedSidesAttribute() {
+        return selectedEdge() == TicketSheetRenderer.DuplexEdge.SHORT_EDGE
+                ? Sides.TWO_SIDED_SHORT_EDGE
+                : Sides.TWO_SIDED_LONG_EDGE;
     }
 
     private void onSizeChanged() {
@@ -218,10 +300,29 @@ public class TicketPreviewFrame extends JFrame {
         }
     }
 
+    private void chooseBackTemplate() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setFileFilter(new FileNameExtensionFilter("Bilder", "png", "jpg", "jpeg"));
+
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            try {
+                backTemplate = ImageIO.read(chooser.getSelectedFile());
+                backTemplatePathLabel.setText(chooser.getSelectedFile().getName());
+                if (showingBackPreview) refreshPreview();
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Rückseiten-Vorlage konnte nicht geladen werden: " + ex.getMessage());
+            }
+        }
+    }
+
     private void refreshPreview() {
         if (template == null || ticketsList.isEmpty()) return;
         try {
-            previewImage = TicketImageGenerator.generateTicketOverlay(template, ticketsList.get(0), currentWidthCm, currentHeightCm);
+            previewImage = showingBackPreview
+                    ? TicketImageGenerator.generateTicketBack(backTemplate, blurryCheckBox.isSelected(),
+                            ticketsList.get(0), currentWidthCm, currentHeightCm)
+                    : TicketImageGenerator.generateTicketOverlay(template, ticketsList.get(0), currentWidthCm, currentHeightCm,
+                            !duplexCheckBox.isSelected());
             previewPanel.repaint();
         } catch (WriterException ex) {
             JOptionPane.showMessageDialog(this, "Fehler bei der Vorschau: " + ex.getMessage());
@@ -229,17 +330,39 @@ public class TicketPreviewFrame extends JFrame {
     }
 
     /**
-     * Erzeugt die (lazy gerenderten) Druckseiten. Vorlage, Größe und Ticketliste werden eingefroren,
-     * damit spätere Änderungen im Fenster eine laufende Vorschau bzw. einen laufenden Druck nicht beeinflussen.
+     * Erzeugt die (lazy gerenderten) Druckseiten für die Vorderseite. Vorlage, Größe und Ticketliste werden
+     * eingefroren, damit spätere Änderungen im Fenster eine laufende Vorschau bzw. einen laufenden Druck nicht
+     * beeinflussen.
      */
-    private TicketSheets createSheets(int printableWidthPx, int printableHeightPx) {
+    private TicketSheets createFrontSheets(int printableWidthPx, int printableHeightPx) {
         final BufferedImage frozenTemplate = template;
         final double widthCm = currentWidthCm;
         final double heightCm = currentHeightCm;
         final List<Ticket> tickets = new ArrayList<>(ticketsList);
+        // Bei aktivem doppelseitigem Druck steht das Namensfeld bereits auf der Rückseite -
+        // auf der Vorderseite entfällt es dann, damit es nicht doppelt erscheint.
+        final boolean includeNameField = !duplexCheckBox.isSelected();
 
         return new TicketSheets(widthCm, heightCm, printableWidthPx, printableHeightPx, tickets.size(),
-                index -> TicketImageGenerator.generateTicketOverlay(frozenTemplate, tickets.get(index), widthCm, heightCm));
+                index -> TicketImageGenerator.generateTicketOverlay(frozenTemplate, tickets.get(index), widthCm, heightCm,
+                        includeNameField));
+    }
+
+    /**
+     * Erzeugt die Druckseiten für die Rückseite. Die Zellenanordnung wird passend zur gewählten Wendekante
+     * gespiegelt, damit jede Rückseite nach dem Wenden des Blattes exakt hinter ihrer Vorderseite liegt.
+     */
+    private TicketSheets createBackSheets(int printableWidthPx, int printableHeightPx) {
+        final BufferedImage frozenBackTemplate = backTemplate;
+        final boolean blurry = blurryCheckBox.isSelected();
+        final double widthCm = currentWidthCm;
+        final double heightCm = currentHeightCm;
+        final List<Ticket> tickets = new ArrayList<>(ticketsList);
+        final TicketSheetRenderer.DuplexEdge edge = selectedEdge();
+
+        return new TicketSheets(widthCm, heightCm, printableWidthPx, printableHeightPx, tickets.size(),
+                index -> TicketImageGenerator.generateTicketBack(frozenBackTemplate, blurry, tickets.get(index), widthCm, heightCm),
+                edge);
     }
 
     private void savePngs() {
@@ -250,13 +373,22 @@ public class TicketPreviewFrame extends JFrame {
         if (chooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
         File targetDir = chooser.getSelectedFile();
 
+        boolean duplex = duplexCheckBox.isSelected();
         try {
             // Ticket für Ticket erzeugen und schreiben, statt alle Bilder gleichzeitig im Speicher zu halten
             for (Ticket ticket : ticketsList) {
-                BufferedImage image = TicketImageGenerator.generateTicketOverlay(template, ticket, currentWidthCm, currentHeightCm);
-                ImageIO.write(image, "png", new File(targetDir, ticket.id + ".png"));
+                BufferedImage front = TicketImageGenerator.generateTicketOverlay(template, ticket, currentWidthCm, currentHeightCm,
+                        !duplex);
+                ImageIO.write(front, "png", new File(targetDir, ticket.id + (duplex ? "-vorne.png" : ".png")));
+
+                if (duplex) {
+                    BufferedImage back = TicketImageGenerator.generateTicketBack(backTemplate, blurryCheckBox.isSelected(),
+                            ticket, currentWidthCm, currentHeightCm);
+                    ImageIO.write(back, "png", new File(targetDir, ticket.id + "-hinten.png"));
+                }
             }
-            JOptionPane.showMessageDialog(this, ticketsList.size() + " Tickets gespeichert.");
+            JOptionPane.showMessageDialog(this, ticketsList.size() + " Tickets"
+                    + (duplex ? " (Vorder- und Rückseite)" : "") + " gespeichert.");
         } catch (WriterException | HeadlessException | IOException ex) {
             JOptionPane.showMessageDialog(this, "Fehler beim Speichern: " + ex.getMessage());
         }
@@ -267,8 +399,8 @@ public class TicketPreviewFrame extends JFrame {
     }
 
     /**
-     * Speichert die A4-Seiten (wie beim Drucken angeordnet) als PNG-Dateien in einen Ordner.
-     * Jede Datei ist eine volle DIN-A4-Seite mit 300 DPI (2480 × 3508 px) und trägt die DPI-Angabe,
+     * Speichert die A4-Seiten (wie beim Drucken angeordnet) als PNG-Dateien in einen Ordner - für Vorder- UND
+     * Rückseite. Jede Datei ist eine volle DIN-A4-Seite mit 300 DPI (2480 × 3508 px) und trägt die DPI-Angabe,
      * sodass sie später in Originalgröße gedruckt werden kann. Läuft im Hintergrund mit Fortschrittsdialog.
      */
     private void saveSheetPngs() {
@@ -287,16 +419,20 @@ public class TicketPreviewFrame extends JFrame {
 
         warnIfTicketWasShrunk(areaWidthPx, areaHeightPx);
 
-        final TicketSheets sheets = createSheets(areaWidthPx, areaHeightPx);
-        final int pageCount = sheets.getPageCount();
+        final boolean duplex = duplexCheckBox.isSelected();
+        final TicketSheets frontSheets = createFrontSheets(areaWidthPx, areaHeightPx);
+        final TicketSheets backSheets = duplex ? createBackSheets(areaWidthPx, areaHeightPx) : null;
+        final int pageCount = frontSheets.getPageCount();
         final int digits = Math.max(3, String.valueOf(pageCount).length());
+        final int totalToWrite = pageCount * (duplex ? 2 : 1);
 
-        JProgressBar bar = new JProgressBar(0, pageCount);
+        JProgressBar bar = new JProgressBar(0, totalToWrite);
         bar.setStringPainted(true);
-        bar.setString("0 / " + pageCount);
+        bar.setString("0 / " + totalToWrite);
         JButton cancelButton = new JButton("Abbrechen");
         JDialog progressDialog = createProgressDialog("A4-Seiten werden gespeichert ...",
-                "Die A4-Seiten werden als PNG-Dateien geschrieben.", bar, cancelButton);
+                "Die A4-Seiten" + (duplex ? " (Vorder- und Rückseite)" : "") + " werden als PNG-Dateien geschrieben.",
+                bar, cancelButton);
 
         SwingWorker<Integer, Integer> worker = new SwingWorker<Integer, Integer>() {
             @Override
@@ -304,21 +440,12 @@ public class TicketPreviewFrame extends JFrame {
                 int written = 0;
                 for (int i = 0; i < pageCount; i++) {
                     if (isCancelled()) break;
+                    writeSheetPage(frontSheets, i, targetDir, duplex ? "vorne" : null, pageWidthPx, pageHeightPx, marginPx, digits);
+                    publish(++written);
 
-                    // Seite immer nur einzeln erzeugen -> konstanter Speicherbedarf
-                    BufferedImage area = sheets.renderPage(i, 1.0);
-                    BufferedImage page = new BufferedImage(pageWidthPx, pageHeightPx, BufferedImage.TYPE_INT_RGB);
-                    Graphics2D g2d = page.createGraphics();
-                    try {
-                        g2d.setColor(Color.WHITE);
-                        g2d.fillRect(0, 0, pageWidthPx, pageHeightPx);
-                        g2d.drawImage(area, marginPx, marginPx, null);
-                    } finally {
-                        g2d.dispose();
-                    }
-
-                    File out = new File(targetDir, String.format("a4-seite-%0" + digits + "d.png", i + 1));
-                    writePngWithDpi(page, out, TicketSheetRenderer.DPI);
+                    if (!duplex) continue;
+                    if (isCancelled()) break;
+                    writeSheetPage(backSheets, i, targetDir, "hinten", pageWidthPx, pageHeightPx, marginPx, digits);
                     publish(++written);
                 }
                 return written;
@@ -328,7 +455,7 @@ public class TicketPreviewFrame extends JFrame {
             protected void process(List<Integer> chunks) {
                 int done = chunks.get(chunks.size() - 1);
                 bar.setValue(done);
-                bar.setString(done + " / " + pageCount);
+                bar.setString(done + " / " + totalToWrite);
             }
 
             @Override
@@ -343,7 +470,8 @@ public class TicketPreviewFrame extends JFrame {
                 try {
                     int written = get();
                     JOptionPane.showMessageDialog(TicketPreviewFrame.this,
-                            written + " A4-Seiten gespeichert in:\n" + targetDir.getAbsolutePath());
+                            written + " A4-Seiten" + (duplex ? " (Vorder-/Rückseite)" : "")
+                                    + " gespeichert in:\n" + targetDir.getAbsolutePath());
                 } catch (Exception ex) {
                     Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
                     String hint = cause instanceof OutOfMemoryError
@@ -361,6 +489,27 @@ public class TicketPreviewFrame extends JFrame {
 
         worker.execute();
         progressDialog.setVisible(true); // blockiert (modal), bis done() den Dialog schließt
+    }
+
+    /** Rendert eine einzelne Bogenseite, bettet sie mittig mit Rand in eine volle A4-Seite ein und schreibt sie als PNG. */
+    private static void writeSheetPage(TicketSheets sheets, int pageIndex, File targetDir, String suffix,
+                                        int pageWidthPx, int pageHeightPx, int marginPx, int digits) throws Exception {
+        BufferedImage area = sheets.renderPage(pageIndex, 1.0);
+        BufferedImage page = new BufferedImage(pageWidthPx, pageHeightPx, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2d = page.createGraphics();
+        try {
+            g2d.setColor(Color.WHITE);
+            g2d.fillRect(0, 0, pageWidthPx, pageHeightPx);
+            g2d.drawImage(area, marginPx, marginPx, null);
+        } finally {
+            g2d.dispose();
+        }
+
+        String fileName = suffix == null
+                ? String.format("a4-seite-%0" + digits + "d.png", pageIndex + 1)
+                : String.format("a4-seite-%0" + digits + "d-%s.png", pageIndex + 1, suffix);
+        File out = new File(targetDir, fileName);
+        writePngWithDpi(page, out, TicketSheetRenderer.DPI);
     }
 
     /** Schreibt ein PNG inklusive DPI-Angabe (pHYs-Chunk), damit es beim Drucken in der richtigen Größe erscheint. */
@@ -417,8 +566,10 @@ public class TicketPreviewFrame extends JFrame {
             int[] printableArea = printableAreaPx(pageFormat);
             warnIfTicketWasShrunk(printableArea[0], printableArea[1]);
 
-            TicketSheets sheets = createSheets(printableArea[0], printableArea[1]);
-            new SheetPreviewDialog(this, sheets).setVisible(true);
+            boolean duplex = duplexCheckBox.isSelected();
+            TicketSheets frontSheets = createFrontSheets(printableArea[0], printableArea[1]);
+            TicketSheets backSheets = duplex ? createBackSheets(printableArea[0], printableArea[1]) : null;
+            new SheetPreviewDialog(this, frontSheets, backSheets).setVisible(true);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Fehler bei der A4-Vorschau: " + ex.getMessage());
         }
@@ -441,15 +592,20 @@ public class TicketPreviewFrame extends JFrame {
         }
 
         try {
+            boolean duplex = duplexCheckBox.isSelected();
+
             PrinterJob job = PrinterJob.getPrinterJob();
             PrintRequestAttributeSet attributes = new HashPrintRequestAttributeSet();
-            attributes.add(Sides.ONE_SIDED);
+            // Duplexdruck nur vorschlagen, wenn die Option aktiviert ist; sonst ausdrücklich einseitig
+            attributes.add(duplex ? selectedSidesAttribute() : Sides.ONE_SIDED);
 
             // Der Druckdialog liest die Seitenzahl vom Job (für "Seiten X bis Y"). Deshalb vorher ein
-            // Platzhalter-Dokument mit der geschätzten Seitenzahl (Standarddrucker) setzen.
+            // Platzhalter-Dokument mit der geschätzten Seitenzahl (Standarddrucker, Anzahl der Bögen) setzen.
+            // Die Zahl bezieht sich bewusst auf Bögen (bei Duplex zählen Vorder+Rückseite zusammen als 1),
+            // damit die Seitenauswahl im Dialog sich auf Tickets/Bögen bezieht und nicht auf einzelne Druckseiten.
             PageFormat estimateFormat = job.defaultPage();
             int[] estimateArea = printableAreaPx(estimateFormat);
-            int estimatedPages = createSheets(estimateArea[0], estimateArea[1]).getPageCount();
+            int estimatedPages = createFrontSheets(estimateArea[0], estimateArea[1]).getPageCount();
             Book placeholder = new Book();
             placeholder.append((g, pf, index) -> Printable.NO_SUCH_PAGE, estimateFormat, estimatedPages);
             job.setPageable(placeholder);
@@ -457,22 +613,33 @@ public class TicketPreviewFrame extends JFrame {
             // Dann den Dialog, damit Drucker/Papierformat/Ausrichtung des Nutzers ins Layout einfließen
             if (!job.printDialog(attributes)) return;
 
+            // Unsere Auswahl (Duplex an/aus + Wendekante) ist maßgeblich dafür, wie die Rückseite gespiegelt
+            // wurde bzw. ob es überhaupt eine gibt - falls der native Dialog eine andere Duplex-Option gesetzt
+            // hat, hier wieder auf unsere Auswahl vereinheitlichen.
+            attributes.add(duplex ? selectedSidesAttribute() : Sides.ONE_SIDED);
+
             PageFormat pageFormat = job.getPageFormat(attributes);
             int[] printableArea = printableAreaPx(pageFormat);
             warnIfTicketWasShrunk(printableArea[0], printableArea[1]);
 
-            TicketSheets sheets = createSheets(printableArea[0], printableArea[1]);
-            boolean[] selected = selectedPages(attributes, sheets.getPageCount());
+            TicketSheets frontSheets = createFrontSheets(printableArea[0], printableArea[1]);
+            TicketSheets backSheets = duplex ? createBackSheets(printableArea[0], printableArea[1]) : null;
+            boolean[] selected = selectedPages(attributes, frontSheets.getPageCount());
 
             boolean anySelected = false;
             for (boolean s : selected) anySelected |= s;
             if (!anySelected) {
                 JOptionPane.showMessageDialog(this, "Der gewählte Seitenbereich enthält keine Seiten (es gibt "
-                        + sheets.getPageCount() + " Seiten). Es wurde nichts gedruckt.");
+                        + frontSheets.getPageCount() + " Seiten). Es wurde nichts gedruckt.");
                 return;
             }
 
-            prepareSelectedSheetsThenPrint(job, attributes, pageFormat, sheets, selected);
+            // Die Auswahl wurde bereits oben (auf Bogenebene) ausgewertet; die ursprüngliche PageRanges-Angabe
+            // würde beim eigentlichen Druck sonst erneut - diesmal fälschlich auf einzelne Vorder-/Rückseiten -
+            // angewendet. Deshalb hier entfernen, das fertige (bereits gefilterte) Buch drucken wir vollständig.
+            attributes.remove(PageRanges.class);
+
+            prepareSelectedSheetsThenPrint(job, attributes, pageFormat, frontSheets, backSheets, selected);
         } catch (HeadlessException ex) {
             JOptionPane.showMessageDialog(this, "Fehler beim Drucken: " + ex.getMessage());
         }
@@ -497,16 +664,20 @@ public class TicketPreviewFrame extends JFrame {
     }
 
     /**
-     * Rendert zuerst ALLE gewählten Seiten (im Hintergrund, mit Fortschrittsdialog) in temporäre PNG-Dateien
-     * und startet erst danach den Druckauftrag. Schlägt die Vorbereitung fehl oder wird abgebrochen,
-     * wird nichts gedruckt. Die Seiten liegen auf der Platte statt im Arbeitsspeicher.
+     * Rendert zuerst ALLE gewählten Seiten - Vorder- UND Rückseite je Bogen - (im Hintergrund, mit
+     * Fortschrittsdialog) in temporäre PNG-Dateien und startet erst danach den Druckauftrag, mit Vorder- und
+     * Rückseite abwechselnd (Vorne 1, Hinten 1, Vorne 2, Hinten 2, ...), passend zum Duplexdruck. Schlägt die
+     * Vorbereitung fehl oder wird abgebrochen, wird nichts gedruckt. Die Seiten liegen auf der Platte statt im
+     * Arbeitsspeicher.
      */
     private void prepareSelectedSheetsThenPrint(PrinterJob job, PrintRequestAttributeSet attributes,
-                                                PageFormat pageFormat, TicketSheets sheets, boolean[] selected) {
-        final int pageCount = sheets.getPageCount();
+                                                PageFormat pageFormat, TicketSheets frontSheets, TicketSheets backSheets,
+                                                boolean[] selected) {
+        final boolean duplex = backSheets != null;
+        final int pageCount = frontSheets.getPageCount();
         int selectedCount = 0;
         for (boolean s : selected) if (s) selectedCount++;
-        final int totalToRender = selectedCount;
+        final int totalToRender = selectedCount * (duplex ? 2 : 1);
 
         JProgressBar bar = new JProgressBar(0, totalToRender);
         bar.setStringPainted(true);
@@ -514,7 +685,8 @@ public class TicketPreviewFrame extends JFrame {
 
         JButton cancelButton = new JButton("Abbrechen");
         JDialog progressDialog = createProgressDialog("Seiten werden vorbereitet ...",
-                "Die gewählten Seiten werden erzeugt, danach startet der Druck.", bar, cancelButton);
+                "Die gewählten Seiten werden erzeugt" + (duplex ? " (Vorder- und Rückseite)" : "")
+                        + ", danach startet der Druck.", bar, cancelButton);
 
         SwingWorker<List<File>, Integer> worker = new SwingWorker<List<File>, Integer>() {
             private Path tempDir;
@@ -522,18 +694,28 @@ public class TicketPreviewFrame extends JFrame {
             @Override
             protected List<File> doInBackground() throws Exception {
                 tempDir = Files.createTempDirectory("tickets-print");
-                File[] files = new File[pageCount]; // Seiten außerhalb des Bereichs bleiben null
+                List<File> files = new ArrayList<>(totalToRender);
                 int done = 0;
                 for (int i = 0; i < pageCount; i++) {
                     if (!selected[i]) continue;
                     if (isCancelled()) break;
-                    BufferedImage sheet = sheets.renderPage(i, 1.0);
-                    File file = tempDir.resolve("sheet-" + i + ".png").toFile();
-                    ImageIO.write(sheet, "png", file);
-                    files[i] = file;
+
+                    BufferedImage front = frontSheets.renderPage(i, 1.0);
+                    File frontFile = tempDir.resolve("front-" + i + ".png").toFile();
+                    ImageIO.write(front, "png", frontFile);
+                    files.add(frontFile);
+                    publish(++done);
+
+                    if (!duplex) continue;
+                    if (isCancelled()) break;
+
+                    BufferedImage back = backSheets.renderPage(i, 1.0);
+                    File backFile = tempDir.resolve("back-" + i + ".png").toFile();
+                    ImageIO.write(back, "png", backFile);
+                    files.add(backFile);
                     publish(++done);
                 }
-                return Arrays.asList(files);
+                return files;
             }
 
             @Override
@@ -560,7 +742,7 @@ public class TicketPreviewFrame extends JFrame {
                     }
                 }
 
-                if (files != null) {
+                if (files != null && !files.isEmpty()) {
                     try {
                         Book book = new Book();
                         book.append(new TicketPrintable(files), pageFormat, files.size());

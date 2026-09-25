@@ -18,6 +18,12 @@ public class TicketSheetRenderer {
         BufferedImage getTicketImage(int ticketIndex) throws WriterException;
     }
 
+    /** Um welche Kante beim doppelseitigen Druck gewendet wird - bestimmt, wie die Rückseite gespiegelt werden muss. */
+    public enum DuplexEdge {
+        LONG_EDGE,  // Bei Hochformat die übliche Wendung: Rückseite muss spaltenweise (horizontal) gespiegelt werden
+        SHORT_EDGE  // Rückseite muss zeilenweise (vertikal) gespiegelt werden
+    }
+
     public static class Layout {
         public final int columns, rows, itemsPerPage;
         public final int cellWidthPx, cellHeightPx; // Platz, den ein Ticket auf dem Blatt einnimmt (nach Drehung/Skalierung)
@@ -88,6 +94,16 @@ public class TicketSheetRenderer {
      */
     public static BufferedImage renderSheet(Layout layout, int pageIndex, int ticketCount,
                                             TicketImageProvider provider, double scale) throws WriterException {
+        return renderSheet(layout, pageIndex, ticketCount, provider, scale, null);
+    }
+
+    /**
+     * Wie {@link #renderSheet(Layout, int, int, TicketImageProvider, double)}, aber für die Rückseite beim
+     * doppelseitigen Druck: die Zellenreihenfolge wird passend zur Wendekante gespiegelt, damit Vorder- und
+     * Rückseite nach dem Wenden des Blattes deckungsgleich übereinanderliegen.
+     */
+    public static BufferedImage renderSheet(Layout layout, int pageIndex, int ticketCount,
+                                            TicketImageProvider provider, double scale, DuplexEdge mirrorForEdge) throws WriterException {
         int sheetW = Math.max(1, (int) Math.round(layout.sheetWidthPx * scale));
         int sheetH = Math.max(1, (int) Math.round(layout.sheetHeightPx * scale));
 
@@ -106,8 +122,17 @@ public class TicketSheetRenderer {
 
                 int col = i % layout.columns;
                 int row = i / layout.columns;
-                int x = (int) Math.round(col * (layout.cellWidthPx + GAP_PX) * scale);
-                int y = (int) Math.round(row * (layout.cellHeightPx + GAP_PX) * scale);
+
+                int placeCol = col;
+                int placeRow = row;
+                if (mirrorForEdge == DuplexEdge.LONG_EDGE) {
+                    placeCol = layout.columns - 1 - col;
+                } else if (mirrorForEdge == DuplexEdge.SHORT_EDGE) {
+                    placeRow = layout.rows - 1 - row;
+                }
+
+                int x = (int) Math.round(placeCol * (layout.cellWidthPx + GAP_PX) * scale);
+                int y = (int) Math.round(placeRow * (layout.cellHeightPx + GAP_PX) * scale);
                 int cellW = (int) Math.round(layout.cellWidthPx * scale);
                 int cellH = (int) Math.round(layout.cellHeightPx * scale);
 

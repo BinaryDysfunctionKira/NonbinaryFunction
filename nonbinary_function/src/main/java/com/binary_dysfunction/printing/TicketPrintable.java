@@ -16,6 +16,9 @@ import javax.imageio.ImageIO;
 /**
  * Druckt bereits fertig erzeugte Seiten (als Bilddateien) - pro Seite wird nur eine Datei in den Speicher geladen.
  * Einträge mit null sind Seiten außerhalb des gewählten Druckbereichs; sie werden nicht gerendert.
+ * Für den doppelseitigen Druck enthält die Dateiliste Vorder- und Rückseiten abwechselnd
+ * (Vorne 1, Hinten 1, Vorne 2, Hinten 2, ...) - diese Klasse selbst kennt den Unterschied nicht,
+ * sie spielt einfach die übergebenen Seiten in Reihenfolge ab.
  */
 public class TicketPrintable implements Printable {
 
