@@ -5,10 +5,10 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -16,10 +16,13 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
+import javax.swing.SwingWorker;
 
 import com.binary_dysfunction.components.Colors;
 import com.binary_dysfunction.config.JSONConfigurations;
+import com.binary_dysfunction.config.JSONConfigurations.EventStats;
 import com.binary_dysfunction.frames.HomeFrame;
 import com.binary_dysfunction.printing.TicketPreviewFrame;
 import com.binary_dysfunction.types.Ticket;
@@ -47,11 +50,9 @@ public class StatisticPanel extends JPanel {
         informationTitleLabel.setBorder(BorderFactory.createEmptyBorder(30, 0, 8, 0));
         informationTitleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-
         JComboBox<Object> eventNameSelectBox = new JComboBox<>(JSONConfigurations.getEvents().toArray());
         eventNameSelectBox.setFont(new Font("Arial", Font.PLAIN, 14));
         eventNameSelectBox.setBackground(Colors.backgorundColorDarker);
-        if (currentEventName != null) eventNameSelectBox.setSelectedItem(currentEventName);
         currentEventName = eventNameSelectBox.getSelectedItem();
 
         JPanel eventNameSearchTextFieldPanel = new JPanel(new BorderLayout());
@@ -60,53 +61,43 @@ public class StatisticPanel extends JPanel {
         eventNameSearchTextFieldPanel.add(new JLabel("Event Name"), BorderLayout.NORTH);
         eventNameSearchTextFieldPanel.add(eventNameSelectBox);
 
-        try {
-            ticketsList = JSONConfigurations.getTicketsAsList(currentEventName);
-            currentTicket = ticketsList.get(0);
-        } catch (IOException ex) {}
+        JProgressBar loadingBar = new JProgressBar(0, 100);
+        loadingBar.setStringPainted(true);
+        loadingBar.setAlignmentX(Component.LEFT_ALIGNMENT);
+        loadingBar.setMaximumSize(new Dimension(300, 20));
+        loadingBar.setVisible(false);
 
-        JLabel eventNameLabel = new JLabel("Event Name: " + currentEventName);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+
+        JLabel eventNameLabel = new JLabel("Event Name: ");
         eventNameLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         eventNameLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-        JLabel dateLabel = new JLabel("Date: " + dateFormat.format(new Date(currentTicket.date)));
+        JLabel dateLabel = new JLabel("Date: ");
         dateLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         dateLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
 
-        JLabel locationLabel = new JLabel("Ort: " + currentTicket.location);
+        JLabel locationLabel = new JLabel("Ort: ");
         locationLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         locationLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
 
-        JLabel ticketCountLabel = new JLabel();
-        try {
-            ticketCountLabel.setText("Ticket-Anzahl: " + JSONConfigurations.getTicketsCount(currentEventName));
-        } catch (IOException ex) {}
+        JLabel ticketCountLabel = new JLabel("Ticket-Anzahl: ");
         ticketCountLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         ticketCountLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
 
-        JLabel priceLabel = new JLabel("Preis: " + currentTicket.price + "€");
+        JLabel priceLabel = new JLabel("Preis: ");
         priceLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         priceLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
 
-        JLabel nonavailableTicketsLabel = new JLabel();
-        try {
-            nonavailableTicketsLabel.setText("Verkaufte Tickets: " + JSONConfigurations.getNonAvailableTicketsCount(currentEventName));
-        } catch (IOException ex) {}
+        JLabel nonavailableTicketsLabel = new JLabel("Verkaufte Tickets: ");
         nonavailableTicketsLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         nonavailableTicketsLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
 
-        JLabel registeredTicketsLabel = new JLabel();
-        try {
-            registeredTicketsLabel.setText("Registrierte Tickets: " + JSONConfigurations.getRegisteredTicketsCount(currentEventName));
-        } catch (IOException ex) {}
+        JLabel registeredTicketsLabel = new JLabel("Registrierte Tickets: ");
         registeredTicketsLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         registeredTicketsLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
 
-        JLabel revenueLabel = new JLabel();
-        try {
-            revenueLabel.setText("Umsatz: " + JSONConfigurations.getNonAvailableTicketsCount(currentEventName) * currentTicket.price + "€");
-        } catch (IOException ex) {}
+        JLabel revenueLabel = new JLabel("Umsatz: ");
         revenueLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         revenueLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
 
@@ -128,35 +119,71 @@ public class StatisticPanel extends JPanel {
         rowOne.setAlignmentX(Component.LEFT_ALIGNMENT);
         rowOne.add(eventNameSearchTextFieldPanel);
 
-        eventNameSelectBox.addActionListener(e -> {
-            currentEventName = eventNameSelectBox.getSelectedItem();
-            try {
-                ticketsList = JSONConfigurations.getTicketsAsList(currentEventName);
-                currentTicket = ticketsList.get(0);
-            } catch (IOException ex) {}
-            eventNameLabel.setText("Event Name: " + currentEventName);
-            dateLabel.setText("Date: " + dateFormat.format(new Date(currentTicket.date)));
-            locationLabel.setText("Ort: " + currentTicket.location);
-            try {
-                ticketCountLabel.setText("Ticket-Anzahl: " + JSONConfigurations.getTicketsCount(currentEventName));
-            } catch (IOException ex) {}
-            priceLabel.setText("Preis: " + currentTicket.price + "€");
-            try {
-                nonavailableTicketsLabel.setText("Verkaufte Tickets: " + JSONConfigurations.getNonAvailableTicketsCount(currentEventName));
-            } catch (IOException ex) {}
-            try {
-                registeredTicketsLabel.setText("Registrierte Tickets: " + JSONConfigurations.getRegisteredTicketsCount(currentEventName));
-            } catch (IOException ex) {}
-            try {
-                revenueLabel.setText("Umsatz: " + JSONConfigurations.getNonAvailableTicketsCount(currentEventName) * currentTicket.price + "€");
-            } catch (IOException ex) {}
-        });
-
         JButton printTicketsButton = new JButton("Tickets drucken");
         printTicketsButton.setBackground(Colors.greenButtonColor);
         printTicketsButton.addActionListener(e -> {
             new TicketPreviewFrame(ticketsList).setVisible(true);
         });
+
+        // Lädt alle Ticket-Dateien eines Events in einem Hintergrund-Thread
+        // (statt bis zu 3x auf dem EDT) und meldet den Fortschritt an die Progress Bar.
+        Runnable[] loadEventHolder = new Runnable[1];
+        loadEventHolder[0] = () -> {
+            Object eventName = eventNameSelectBox.getSelectedItem();
+            if (eventName == null) return;
+            currentEventName = eventName;
+
+            eventNameSelectBox.setEnabled(false);
+            printTicketsButton.setEnabled(false);
+            loadingBar.setValue(0);
+            loadingBar.setVisible(true);
+
+            SwingWorker<EventStats, Integer> worker = new SwingWorker<>() {
+                @Override
+                protected EventStats doInBackground() throws Exception {
+                    return JSONConfigurations.loadEventStats(eventName, (doneCount, total) -> {
+                        int percent = total == 0 ? 100 : (int) ((doneCount * 100L) / total);
+                        publish(percent);
+                    });
+                }
+
+                @Override
+                protected void process(List<Integer> chunks) {
+                    loadingBar.setValue(chunks.get(chunks.size() - 1));
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        EventStats stats = get();
+                        ticketsList = stats.tickets;
+                        currentTicket = ticketsList.isEmpty() ? null : ticketsList.get(0);
+
+                        eventNameLabel.setText("Event Name: " + eventName);
+                        if (currentTicket != null) {
+                            dateLabel.setText("Date: " + dateFormat.format(new Date(currentTicket.date)));
+                            locationLabel.setText("Ort: " + currentTicket.location);
+                            priceLabel.setText("Preis: " + currentTicket.price + "€");
+                        }
+                        ticketCountLabel.setText("Ticket-Anzahl: " + stats.totalCount);
+                        nonavailableTicketsLabel.setText("Verkaufte Tickets: " + stats.nonAvailableCount);
+                        registeredTicketsLabel.setText("Registrierte Tickets: " + stats.registeredCount);
+                        double price = currentTicket != null ? currentTicket.price : 0;
+                        revenueLabel.setText("Umsatz: " + (stats.nonAvailableCount * price) + "€");
+                    } catch (InterruptedException | ExecutionException ex) {
+                        ex.printStackTrace();
+                    } finally {
+                        loadingBar.setVisible(false);
+                        eventNameSelectBox.setEnabled(true);
+                        printTicketsButton.setEnabled(true);
+                    }
+                }
+            };
+            worker.execute();
+        };
+
+        eventNameSelectBox.addActionListener(e -> loadEventHolder[0].run());
+        if (currentEventName != null) loadEventHolder[0].run();
 
         JPanel settingsPanel = new JPanel();
         settingsPanel.setLayout(new BoxLayout(settingsPanel, BoxLayout.Y_AXIS));
@@ -165,10 +192,10 @@ public class StatisticPanel extends JPanel {
         settingsPanel.add(titleLabel);
         settingsPanel.add(searchTitleLabel);
         settingsPanel.add(rowOne);
+        settingsPanel.add(loadingBar);
         settingsPanel.add(informationTitleLabel);
         settingsPanel.add(informationPanel);
         settingsPanel.add(printTicketsButton);
-
 
         JScrollPane settingsScrollPane = new JScrollPane(settingsPanel);
         settingsScrollPane.setHorizontalScrollBar(null);

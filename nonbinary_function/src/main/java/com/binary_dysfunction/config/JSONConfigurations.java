@@ -873,4 +873,67 @@ public class JSONConfigurations {
         }
         return tickets;
     }
+
+
+    public static class EventStats {
+        public final List<Ticket> tickets;
+        public final int totalCount;
+        public final int availableCount;
+        public final int nonAvailableCount;
+        public final int registeredCount;
+
+        public EventStats(List<Ticket> tickets, int availableCount, int nonAvailableCount, int registeredCount) {
+            this.tickets = tickets;
+            this.totalCount = tickets.size();
+            this.availableCount = availableCount;
+            this.nonAvailableCount = nonAvailableCount;
+            this.registeredCount = registeredCount;
+        }
+    }
+
+    public interface ProgressListener {
+        void onProgress(int done, int total);
+    }
+
+    /**
+     * Liest jede Ticket-Datei genau einmal und berechnet Liste + alle Zähler
+     * in einem Durchgang, statt wie bisher bis zu 3x separat zu parsen.
+     */
+    public static EventStats loadEventStats(Object dirName, ProgressListener progressListener) throws IOException {
+        File dirPath = new File(getTicketsDir() + dirName.toString() + "/");
+        File[] files = dirPath.listFiles((d, name) -> name.endsWith(".json"));
+        if (files == null) files = new File[0];
+
+        int total = files.length;
+        int done = 0;
+
+        List<Ticket> tickets = new ArrayList<>(total);
+        int available = 0, nonAvailable = 0, registered = 0;
+
+        for (File fileEntry : files) {
+            String content = Files.readString(fileEntry.toPath());
+            JSONArray ticketsArray = new JSONArray(content);
+            JSONObject ticketObject = ticketsArray.getJSONObject(0);
+
+            String id = ticketObject.getString("id");
+            String owner = ticketObject.getString("owner");
+            String eventName = ticketObject.getString("eventName");
+            int count = ticketObject.getInt("count");
+            String location = ticketObject.getString("location");
+            double price = ticketObject.getDouble("price");
+            long date = ticketObject.getLong("date");
+            boolean isAvailable = ticketObject.getBoolean("available");
+            boolean isRegistered = ticketObject.getBoolean("registered");
+
+            tickets.add(new Ticket(id, owner, eventName, count, location, price, date, isAvailable, isRegistered));
+
+            if (isAvailable) available++; else nonAvailable++;
+            if (isRegistered) registered++;
+
+            done++;
+            if (progressListener != null) progressListener.onProgress(done, total);
+        }
+
+        return new EventStats(tickets, available, nonAvailable, registered);
+    }
 }
