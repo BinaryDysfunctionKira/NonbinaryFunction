@@ -123,24 +123,40 @@ public class TicketSheetRenderer {
                 int col = i % layout.columns;
                 int row = i / layout.columns;
 
-                int placeCol = col;
-                int placeRow = row;
-                if (mirrorForEdge == DuplexEdge.LONG_EDGE) {
-                    placeCol = layout.columns - 1 - col;
-                } else if (mirrorForEdge == DuplexEdge.SHORT_EDGE) {
-                    placeRow = layout.rows - 1 - row;
-                }
-
-                int x = (int) Math.round(placeCol * (layout.cellWidthPx + GAP_PX) * scale);
-                int y = (int) Math.round(placeRow * (layout.cellHeightPx + GAP_PX) * scale);
                 int cellW = (int) Math.round(layout.cellWidthPx * scale);
                 int cellH = (int) Math.round(layout.cellHeightPx * scale);
 
+                int x = (int) Math.round(col * (layout.cellWidthPx + GAP_PX) * scale);
+                int y = (int) Math.round(row * (layout.cellHeightPx + GAP_PX) * scale);
+
+                // Beim Spiegeln für die Rückseite wird die Zelle an der tatsächlichen Bogenkante (sheetW/sheetH)
+                // gespiegelt - NICHT nur innerhalb des vom Raster belegten Bereichs (layout.columns/rows Zellen).
+                // Da die Zellen den Bogen meist nicht bis exakt zum Rand ausfüllen (Rest durch die Ganzzahl-
+                // Aufteilung in buildLayoutForOrientation), bliebe sonst auf der Vorderseite der Rand-Rest immer
+                // rechts/unten, auf der gespiegelten Rückseite aber weiterhin am Ende des Rasters statt am Rand
+                // des Bogens - ein konstanter Versatz über die ganze Seite, der genau das Ausschneide-Problem
+                // verursacht. Durch die Spiegelung an sheetW/sheetH landet der Rand-Rest auf der Rückseite
+                // automatisch korrekt auf der jeweils anderen Seite.
+                if (mirrorForEdge == DuplexEdge.LONG_EDGE) {
+                    x = sheetW - x - cellW;
+                } else if (mirrorForEdge == DuplexEdge.SHORT_EDGE) {
+                    y = sheetH - y - cellH;
+                }
+
                 BufferedImage ticketImg = provider.getTicketImage(ticketIndex);
-                if (layout.rotated) {
-                    drawRotated90(g2d, ticketImg, x, y, cellW, cellH);
-                } else {
+
+                // Bei "lange Kante" dreht der Duplexdrucker die Rückseite bei den meisten Treibern zusätzlich
+                // um 180° (Standardverhalten für Buch-artige Bindung). Die Zellposition (s.o.) stimmt dadurch
+                // schon, aber das Ticketmotiv selbst steht auf dem Kopf - deshalb hier zusätzlich drehen.
+                int rotationDegrees = layout.rotated ? 90 : 0;
+                if (mirrorForEdge == DuplexEdge.LONG_EDGE) {
+                    rotationDegrees = (rotationDegrees + 180) % 360;
+                }
+
+                if (rotationDegrees == 0) {
                     g2d.drawImage(ticketImg, x, y, cellW, cellH, null);
+                } else {
+                    drawRotated(g2d, ticketImg, x, y, cellW, cellH, rotationDegrees);
                 }
             }
         } finally {
@@ -153,14 +169,19 @@ public class TicketSheetRenderer {
      * Zeichnet das Bild um 90° im Uhrzeigersinn gedreht in die Zelle (x, y, cellW, cellH),
      * ohne vorher eine gedrehte Kopie des Bildes im Speicher anzulegen.
      */
-    private static void drawRotated90(Graphics2D g2d, BufferedImage src, int x, int y, int cellW, int cellH) {
+    private static void drawRotated(Graphics2D g2d, BufferedImage src, int x, int y, int cellW, int cellH, int angleDegrees) {
         double srcW = src.getWidth();
         double srcH = src.getHeight();
+        boolean swapDimensions = (angleDegrees % 180) != 0; // 90°/270° tauschen Breite und Höhe
 
         AffineTransform transform = new AffineTransform();
         transform.translate(x + cellW / 2.0, y + cellH / 2.0);
-        transform.rotate(Math.PI / 2);
-        transform.scale(cellH / srcW, cellW / srcH); // nach der Drehung liegt die Bildbreite auf der Zellhöhe
+        transform.rotate(Math.toRadians(angleDegrees));
+        if (swapDimensions) {
+            transform.scale(cellH / srcW, cellW / srcH);
+        } else {
+            transform.scale(cellW / srcW, cellH / srcH);
+        }
         transform.translate(-srcW / 2.0, -srcH / 2.0);
 
         g2d.drawImage(src, transform, null);

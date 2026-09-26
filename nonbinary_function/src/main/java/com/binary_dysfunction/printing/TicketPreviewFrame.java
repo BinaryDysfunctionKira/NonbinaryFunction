@@ -52,6 +52,13 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+
 import com.binary_dysfunction.types.Ticket;
 import com.google.zxing.WriterException;
 
@@ -405,11 +412,16 @@ public class TicketPreviewFrame extends JFrame {
      */
     private void saveSheetPngs() {
         JFileChooser chooser = new JFileChooser();
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        chooser.setDialogTitle("Ordner zum Speichern der A4-Seiten wählen");
+        chooser.setDialogTitle("PDF-Datei für die A4-Seiten wählen");
+        chooser.setFileFilter(new FileNameExtensionFilter("PDF-Datei", "pdf"));
+        chooser.setSelectedFile(new File("tickets-a4.pdf"));
 
         if (chooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
-        final File targetDir = chooser.getSelectedFile();
+        File targetFile = chooser.getSelectedFile();
+        if (!targetFile.getName().toLowerCase().endsWith(".pdf")) {
+            targetFile = new File(targetFile.getParentFile(), targetFile.getName() + ".pdf");
+        }
+        final File pdfFile = targetFile;
 
         final int pageWidthPx = cmToPx(A4_WIDTH_CM);
         final int pageHeightPx = cmToPx(A4_HEIGHT_CM);
@@ -423,30 +435,34 @@ public class TicketPreviewFrame extends JFrame {
         final TicketSheets frontSheets = createFrontSheets(areaWidthPx, areaHeightPx);
         final TicketSheets backSheets = duplex ? createBackSheets(areaWidthPx, areaHeightPx) : null;
         final int pageCount = frontSheets.getPageCount();
-        final int digits = Math.max(3, String.valueOf(pageCount).length());
         final int totalToWrite = pageCount * (duplex ? 2 : 1);
 
         JProgressBar bar = new JProgressBar(0, totalToWrite);
         bar.setStringPainted(true);
         bar.setString("0 / " + totalToWrite);
         JButton cancelButton = new JButton("Abbrechen");
-        JDialog progressDialog = createProgressDialog("A4-Seiten werden gespeichert ...",
-                "Die A4-Seiten" + (duplex ? " (Vorder- und Rückseite)" : "") + " werden als PNG-Dateien geschrieben.",
+        JDialog progressDialog = createProgressDialog("PDF wird erzeugt ...",
+                "Die A4-Seiten" + (duplex ? " (Vorder- und Rückseite)" : "") + " werden in eine PDF-Datei geschrieben.",
                 bar, cancelButton);
 
         SwingWorker<Integer, Integer> worker = new SwingWorker<Integer, Integer>() {
             @Override
             protected Integer doInBackground() throws Exception {
                 int written = 0;
-                for (int i = 0; i < pageCount; i++) {
-                    if (isCancelled()) break;
-                    writeSheetPage(frontSheets, i, targetDir, duplex ? "vorne" : null, pageWidthPx, pageHeightPx, marginPx, digits);
-                    publish(++written);
+                try (PDDocument document = new PDDocument()) {
+                    for (int i = 0; i < pageCount; i++) {
+                        if (isCancelled()) break;
+                        addSheetPage(document, frontSheets, i, pageWidthPx, pageHeightPx, marginPx);
+                        publish(++written);
 
-                    if (!duplex) continue;
-                    if (isCancelled()) break;
-                    writeSheetPage(backSheets, i, targetDir, "hinten", pageWidthPx, pageHeightPx, marginPx, digits);
-                    publish(++written);
+                        if (!duplex) continue;
+                        if (isCancelled()) break;
+                        addSheetPage(document, backSheets, i, pageWidthPx, pageHeightPx, marginPx);
+                        publish(++written);
+                    }
+                    if (!isCancelled()) {
+                        document.save(pdfFile);
+                    }
                 }
                 return written;
             }
@@ -464,20 +480,20 @@ public class TicketPreviewFrame extends JFrame {
 
                 if (isCancelled()) {
                     JOptionPane.showMessageDialog(TicketPreviewFrame.this,
-                            "Abgebrochen. Bereits gespeicherte Seiten bleiben im Ordner liegen.");
+                            "Abgebrochen. Es wurde keine PDF-Datei gespeichert.");
                     return;
                 }
                 try {
-                    int written = get();
+                    get();
                     JOptionPane.showMessageDialog(TicketPreviewFrame.this,
-                            written + " A4-Seiten" + (duplex ? " (Vorder-/Rückseite)" : "")
-                                    + " gespeichert in:\n" + targetDir.getAbsolutePath());
+                            pageCount + " A4-Seite(n)" + (duplex ? " (Vorder-/Rückseite)" : "")
+                                    + " als PDF gespeichert:\n" + pdfFile.getAbsolutePath());
                 } catch (Exception ex) {
                     Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
                     String hint = cause instanceof OutOfMemoryError
                             ? " Starte die Anwendung ggf. mit mehr Heap (z. B. -Xmx2g)." : "";
                     JOptionPane.showMessageDialog(TicketPreviewFrame.this,
-                            "Fehler beim Speichern der A4-Seiten: " + cause + hint);
+                            "Fehler beim Erzeugen der PDF-Datei: " + cause + hint);
                 }
             }
         };
@@ -488,12 +504,12 @@ public class TicketPreviewFrame extends JFrame {
         });
 
         worker.execute();
-        progressDialog.setVisible(true); // blockiert (modal), bis done() den Dialog schließt
+        progressDialog.setVisible(true);
     }
 
-    /** Rendert eine einzelne Bogenseite, bettet sie mittig mit Rand in eine volle A4-Seite ein und schreibt sie als PNG. */
-    private static void writeSheetPage(TicketSheets sheets, int pageIndex, File targetDir, String suffix,
-                                        int pageWidthPx, int pageHeightPx, int marginPx, int digits) throws Exception {
+    /** Rendert eine Bogenseite, bettet sie mittig mit Rand in eine A4-Seite ein und fügt sie als PDF-Seite an. */
+    private static void addSheetPage(PDDocument document, TicketSheets sheets, int pageIndex,
+                                    int pageWidthPx, int pageHeightPx, int marginPx) throws Exception {
         BufferedImage area = sheets.renderPage(pageIndex, 1.0);
         BufferedImage page = new BufferedImage(pageWidthPx, pageHeightPx, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = page.createGraphics();
@@ -505,11 +521,12 @@ public class TicketPreviewFrame extends JFrame {
             g2d.dispose();
         }
 
-        String fileName = suffix == null
-                ? String.format("a4-seite-%0" + digits + "d.png", pageIndex + 1)
-                : String.format("a4-seite-%0" + digits + "d-%s.png", pageIndex + 1, suffix);
-        File out = new File(targetDir, fileName);
-        writePngWithDpi(page, out, TicketSheetRenderer.DPI);
+        PDPage pdPage = new PDPage(PDRectangle.A4);
+        document.addPage(pdPage);
+        PDImageXObject pdImage = LosslessFactory.createFromImage(document, page);
+        try (PDPageContentStream content = new PDPageContentStream(document, pdPage)) {
+            content.drawImage(pdImage, 0, 0, PDRectangle.A4.getWidth(), PDRectangle.A4.getHeight());
+        }
     }
 
     /** Schreibt ein PNG inklusive DPI-Angabe (pHYs-Chunk), damit es beim Drucken in der richtigen Größe erscheint. */
