@@ -139,6 +139,8 @@ public class Config {
         announcements.mkdirs();
         File concerts = new File(dir.getPath() + "/events");
         concerts.mkdirs();
+        File tickets = new File(dir.getPath() + "events/tickets/");
+        tickets.mkdirs();
         File users = new File(dir.getPath() + "/users");
         users.mkdirs();
 
