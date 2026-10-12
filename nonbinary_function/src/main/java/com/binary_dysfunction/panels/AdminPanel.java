@@ -453,6 +453,79 @@ public class AdminPanel extends JPanel {
         cloudPanel.add(cloudTitle);
         cloudPanel.add(cloudActivatedButton);
 
+
+        JLabel setAdminLabel = new JLabel("Admin Konfiguration");
+        setAdminLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        setAdminLabel.setForeground(new Color(180, 180, 180));
+
+        JButton setAdminButton = new JButton();
+        if (!currentAccount.assemblies.contains("Admin")) setAdminButton.setText("Set Admin");
+        else setAdminButton.setText("Remove Admin");
+        if (currentAccount == Main.loggedInAccount) setAdminButton.setEnabled(false);
+        setAdminButton.setFont(new Font("Arial", Font.PLAIN, 12));
+        setAdminButton.setBackground(backgroundColor);
+        setAdminButton.addActionListener(e -> {
+            if (!currentAccount.assemblies.contains("Admin")) {
+                List<Object> assemblies = currentAccount.assemblies;
+                assemblies.add("Admin");
+                try {
+                    JSONConfigurations.updateAccountField(currentAccount.username, "assemblies", assemblies);
+                } catch (IOException ex) {}
+                currentFrame.setAdminPanel();
+            } else {
+                List<Object> assemblies = currentAccount.assemblies;
+                assemblies.remove("Admin");
+                try {
+                    JSONConfigurations.updateAccountField(currentAccount.username, "assemblies", assemblies);
+                } catch (IOException ex) {}
+                currentFrame.setAdminPanel();
+            }
+        });
+
+        JPanel setAdminPanel = new JPanel();
+        setAdminPanel.setLayout(new BoxLayout(setAdminPanel, BoxLayout.Y_AXIS));
+        setAdminPanel.setBackground(backgroundColor2);
+        setAdminPanel.setBorder(BorderFactory.createEmptyBorder(30, 0, 0 ,0));
+        setAdminPanel.add(setAdminLabel);
+        setAdminPanel.add(setAdminButton);
+
+
+        JLabel setEventLabel = new JLabel("Event Konfiguration");
+        setEventLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        setEventLabel.setForeground(new Color(180, 180, 180));
+
+        JButton setEventButton = new JButton();
+        if (!currentAccount.assemblies.contains("Event")) setEventButton.setText("Set Event-Management");
+        else setEventButton.setText("Remove Event-Management");
+        if (currentAccount == Main.loggedInAccount) setEventButton.setEnabled(false);
+        setEventButton.setFont(new Font("Arial", Font.PLAIN, 12));
+        setEventButton.setBackground(backgroundColor);
+        setEventButton.addActionListener(e -> {
+            if (!currentAccount.assemblies.contains("Event")) {
+                List<Object> assemblies = currentAccount.assemblies;
+                assemblies.add("Event");
+                try {
+                    JSONConfigurations.updateAccountField(currentAccount.username, "assemblies", assemblies);
+                } catch (IOException ex) {}
+                currentFrame.setAdminPanel();
+            } else {
+                List<Object> assemblies = currentAccount.assemblies;
+                assemblies.remove("Event");
+                try {
+                    JSONConfigurations.updateAccountField(currentAccount.username, "assemblies", assemblies);
+                } catch (IOException ex) {}
+                currentFrame.setAdminPanel();
+            }
+        });
+
+        JPanel setEventPanel = new JPanel();
+        setEventPanel.setLayout(new BoxLayout(setEventPanel, BoxLayout.Y_AXIS));
+        setEventPanel.setBackground(backgroundColor2);
+        setEventPanel.setBorder(BorderFactory.createEmptyBorder(30, 0, 0 ,0));
+        setEventPanel.add(setEventLabel);
+        setEventPanel.add(setEventButton);
+
+
         JPanel rightSideConfig = new JPanel();
         rightSideConfig.setBackground(backgroundColor2);
         rightSideConfig.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
@@ -464,6 +537,8 @@ public class AdminPanel extends JPanel {
         rightSideConfig.add(emailPanel);
         rightSideConfig.add(newPasswordPanel);
         rightSideConfig.add(cloudPanel);
+        if (Main.loggedInAccount.assemblies.contains("Owner")) rightSideConfig.add(setAdminPanel);
+        if (Main.loggedInAccount.assemblies.contains("Owner")) rightSideConfig.add(setEventPanel);
 
 
         JPanel usrConfigPanel = new JPanel(new BorderLayout());

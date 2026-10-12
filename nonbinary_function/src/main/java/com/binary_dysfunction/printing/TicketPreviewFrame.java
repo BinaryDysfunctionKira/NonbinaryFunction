@@ -445,6 +445,8 @@ public class TicketPreviewFrame extends JFrame {
                 "Die A4-Seiten" + (duplex ? " (Vorder- und Rückseite)" : "") + " werden in eine PDF-Datei geschrieben.",
                 bar, cancelButton);
 
+        final long startNanos = System.nanoTime();
+
         SwingWorker<Integer, Integer> worker = new SwingWorker<Integer, Integer>() {
             @Override
             protected Integer doInBackground() throws Exception {
@@ -471,7 +473,7 @@ public class TicketPreviewFrame extends JFrame {
             protected void process(List<Integer> chunks) {
                 int done = chunks.get(chunks.size() - 1);
                 bar.setValue(done);
-                bar.setString(done + " / " + totalToWrite);
+                bar.setString(done + " / " + totalToWrite + formatEta(startNanos, done, totalToWrite));
             }
 
             @Override
@@ -505,6 +507,27 @@ public class TicketPreviewFrame extends JFrame {
 
         worker.execute();
         progressDialog.setVisible(true);
+    }
+
+    /**
+     * Schätzt die verbleibende Zeit anhand der bisherigen Durchschnittsgeschwindigkeit und liefert einen
+     * Anhängetext wie " – noch ca. 12 s" für die Fortschrittsanzeige. Für die ersten Elemente (zu wenig
+     * Datenbasis) oder bei "fast fertig" wird kein Wert angezeigt, um kein Rauschen zu erzeugen.
+     */
+    private static String formatEta(long startNanos, int done, int total) {
+        if (done <= 0 || done >= total) return "";
+
+        double elapsedSeconds = (System.nanoTime() - startNanos) / 1_000_000_000.0;
+        double secondsPerItem = elapsedSeconds / done;
+        int remainingItems = total - done;
+        double etaSeconds = secondsPerItem * remainingItems;
+
+        if (etaSeconds < 1) return " – gleich fertig";
+        if (etaSeconds < 60) return String.format(" – noch ca. %d s", Math.round(etaSeconds));
+
+        long minutes = Math.round(etaSeconds) / 60;
+        long seconds = Math.round(etaSeconds) % 60;
+        return String.format(" – noch ca. %d:%02d min", minutes, seconds);
     }
 
     /** Rendert eine Bogenseite, bettet sie mittig mit Rand in eine A4-Seite ein und fügt sie als PDF-Seite an. */
