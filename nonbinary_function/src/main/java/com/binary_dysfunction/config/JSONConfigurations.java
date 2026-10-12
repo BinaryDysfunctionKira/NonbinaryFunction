@@ -88,6 +88,7 @@ public class JSONConfigurations {
         if (Main.isServerNew && !Main.ownerSet) {
             assembliesArray.put("Owner");
             assembliesArray.put("Admin");
+            assembliesArray.put("Event");
         }
         newAccount.put("assemblies", assembliesArray);
         newAccount.put("cloudActivated", true);
